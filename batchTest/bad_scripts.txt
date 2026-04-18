@@ -1,0 +1,221 @@
+=== NAME: 1. Ontbrekende RETURN statement
+=== EXPECT: RETURN
+=== EXPECT_TYPE: ERROR
+/* Test script */
+String sTekst;
+sTekst := "Hallo";
+/* Fout: Geen RETURN TRUE; aan het einde. */
+
+====================
+=== NAME: 2. Vergeten puntkomma (;)
+=== EXPECT: eindigen met ';'
+=== EXPECT_TYPE: ERROR
+/* Test script */
+String sNaam;
+sNaam := "Test"
+RETURN TRUE;
+
+====================
+=== NAME: 3. IF zonder THEN
+=== EXPECT: IF zonder THEN
+=== EXPECT_TYPE: ERROR
+/* Test script */
+String sResult;
+IF 1 = 1 
+    sResult := "Waar";
+ENDIF;
+RETURN TRUE;
+
+====================
+=== NAME: 4. Onbeëindigd blok (Vergeten ENDIF)
+=== EXPECT: niet afgesloten
+=== EXPECT_TYPE: ERROR
+/* Test script */
+IF 1 = 1 THEN
+    Message("Hallo");
+/* Fout: ENDIF ontbreekt */
+RETURN TRUE;
+
+====================
+=== NAME: 5. Verkeerde aanhalingstekens (Single Quotes)
+=== EXPECT: Enkele aanhalingstekens
+=== EXPECT_TYPE: ERROR
+/* Test script */
+String sTekst;
+sTekst := 'Dit mag niet van GLIMS';
+RETURN TRUE;
+
+====================
+=== NAME: 6. Declaratie te laat in het script
+=== EXPECT: te laat
+=== EXPECT_TYPE: ERROR
+/* Test script */
+String sVoornaam;
+sVoornaam := "Jan";
+
+/* Fout: Declaratie ná een actie */
+String sAchternaam; 
+sAchternaam := "Jansen";
+RETURN TRUE;
+
+====================
+=== NAME: 7. Punt voor een lokale variabele
+=== EXPECT: voorafgegaan worden door een punt
+=== EXPECT_TYPE: ERROR
+/* Test script */
+String sPatient;
+/* Fout: Punt is alleen voor object properties */
+.sPatient := "Jansen"; 
+RETURN TRUE;
+
+====================
+=== NAME: 8. Onbekende variabele (Niet gedeclareerd)
+=== EXPECT: niet gedeclareerd
+=== EXPECT_TYPE: ERROR
+/* Test script */
+/* Fout: Nooit gedeclareerd met String/Integer */
+sOnbekend := "Geest"; 
+RETURN TRUE;
+
+====================
+=== NAME: 9. Puntkomma tussen IF en THEN
+=== EXPECT: mag niet tussen IF en THEN
+=== EXPECT_TYPE: ERROR
+/* Test script */
+IF 1 = 1; THEN
+    Message("Foutje");
+ENDIF;
+RETURN TRUE;
+
+====================
+=== NAME: 10. Variabele wel gedeclareerd, nooit gebruikt
+=== EXPECT: nooit gebruikt
+=== EXPECT_TYPE: WARNING
+/* Test script */
+String sGebruikt, sOngebruikt;
+sGebruikt := "Ja";
+Message(sGebruikt);
+RETURN TRUE;
+
+====================
+=== NAME: 11. Mogelijke Infinite Loop (Oneindige lus)
+=== EXPECT: oneindige WHILE-loop
+=== EXPECT_TYPE: WARNING
+/* Test script */
+Integer iTeller;
+iTeller := 0;
+
+WHILE iTeller < 10 DO
+    Message("Hallo");
+    /* Fout: iTeller wordt nooit verhoogd! */
+DONE;
+RETURN TRUE;
+
+====================
+=== NAME: 12. Zware database query IN een loop (N+1 Probleem)
+=== EXPECT: Prestatie-waarschuwing
+=== EXPECT_TYPE: WARNING
+/* Test script */
+Integer i;
+String sNaam;
+i := 0;
+WHILE i < 10 DO
+    i := i + 1;
+    /* Fout: Expand wordt 10x nutteloos aangeroepen met dezelfde argumenten */
+    sNaam := Expand("Person", .Object.InternalId, "Name");
+DONE;
+RETURN TRUE;
+
+====================
+=== NAME: 13. Wiskunde op een String
+=== EXPECT: operator '/' niet gebruiken op een STRING
+=== EXPECT_TYPE: WARNING
+/* Test script */
+String sGetal;
+sGetal := "10" / 2;
+RETURN TRUE;
+
+====================
+=== NAME: 14. Identieke THEN en ELSE takken
+=== EXPECT: identiek aan ELSE
+=== EXPECT_TYPE: WARNING
+/* Test script */
+String sResult;
+IF 1 = 1 THEN
+    sResult := "Hetzelfde";
+ELSE
+    sResult := "Hetzelfde";
+ENDIF;
+RETURN TRUE;
+
+====================
+=== NAME: 15. Waarde toegewezen, maar nooit meer uitgelezen
+=== EXPECT: nooit meer uitgelezen
+=== EXPECT_TYPE: INFO
+/* Test script */
+String sNaam;
+sNaam := "Test";
+/* sNaam wordt hierna nergens geprint of opgeslagen */
+RETURN TRUE;
+
+====================
+=== NAME: 16. Hongaarse Notatie (Stijl-tip)
+=== EXPECT: Conventie: 's'
+=== EXPECT_TYPE: INFO
+/* Test script */
+/* Tip: Gebruik sPatientNaam */
+String patientNaam; 
+patientNaam := "Klaassen";
+Message(patientNaam);
+RETURN TRUE;
+
+====================
+=== NAME: 17. Missende spaties bij keywords (10THEN)
+=== EXPECT: Geen spatie tussen getal en keyword
+=== EXPECT_TYPE: WARNING
+/* Test script */
+IF 10>5THEN
+    Message("Te krap");
+ENDIF;
+RETURN TRUE;
+
+====================
+=== NAME: 18. Gedupliceerde Database Query (Alias Tip)
+=== EXPECT: Optimalisatie
+=== EXPECT_TYPE: INFO
+/* Test script */
+String sId, sDubbel;
+sId := .Order.InternalId;
+/* Tip: Gebruik sId in plaats van nogmaals .Order.InternalId aan te roepen */
+sDubbel := .Order.InternalId; 
+Message(sId + sDubbel);
+RETURN TRUE;
+
+====================
+=== NAME: 19. Functie parameter mismatch
+=== EXPECT: verwacht minimaal 2
+=== EXPECT_TYPE: WARNING
+/* Test script */
+Integer iPos;
+/* Fout: Index heeft 2 argumenten nodig (tekst, zoekwoord) */
+iPos := Index("Hallo");
+RETURN TRUE;
+
+====================
+=== NAME: 20. Perfecte Code (Moet geruisloos passeren)
+=== EXPECT: NONE
+=== EXPECT_TYPE: NONE
+/* Test script */
+String sNaam, sId;
+Integer iTeller;
+
+sNaam := "Jan";
+sId := .Order.InternalId;
+iTeller := 0;
+
+WHILE iTeller < 10 DO
+    iTeller := iTeller + 1;
+    Message(sNaam + sId + IntegerToString(iTeller));
+DONE;
+
+RETURN TRUE;

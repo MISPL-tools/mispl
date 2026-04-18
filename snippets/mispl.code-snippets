@@ -1,0 +1,1818 @@
+﻿{
+	"Abs": {
+		"prefix": "Abs",
+		"body": "Abs(${1:iValue})",
+		"description": "Integer Abs(Integer Value)\nThis function computes the absolute value of the integer Value argument."
+	},
+	"Actn.ApproachActivity": {
+		"prefix": "Actn.ApproachActivity",
+		"body": "Actn.ApproachActivity()",
+		"description": "Actn.ApproachActivity()\nRetrieve the approach activity(Genetics) linked to this action."
+	},
+	"Actn.Attribute": {
+		"prefix": "Actn.Attribute",
+		"body": "Actn.Attribute(${1:sAttributeName})",
+		"description": "Actn.Attribute(String AttributeName)\nAttributes"
+	},
+	"Actn.Cancel": {
+		"prefix": "Actn.Cancel",
+		"body": "Actn.Cancel(${1:sAction}, ${2:sReason})",
+		"description": "Actn.Cancel(String Action, String Reason)\nThis method functions exactly like Result.Cancel(), but cancels all result outputs of an Action simultaneously."
+	},
+	"Actn.InputByMnemonic": {
+		"prefix": "Actn.InputByMnemonic",
+		"body": "Actn.InputByMnemonic(${1:sPropertyMnemonic})",
+		"description": "Actn.InputByMnemonic(Mnemonic PropertyMnemonic)\nInputByMnemonic"
+	},
+	"Actn.InputResult": {
+		"prefix": "Actn.InputResult",
+		"body": "Actn.InputResult(${1:sPropertyMnemonic})",
+		"description": "Actn.InputResult(Mnemonic PropertyMnemonic)\nInputResult"
+	},
+	"Actn.MicrobiologyAction": {
+		"prefix": "Actn.MicrobiologyAction",
+		"body": "Actn.MicrobiologyAction()",
+		"description": "Actn.MicrobiologyAction()\nMicrobiologyAction"
+	},
+	"Actn.Order": {
+		"prefix": "Actn.Order",
+		"body": "Actn.Order()",
+		"description": "Actn.Order()\nOrder"
+	},
+	"Actn.OutputResult": {
+		"prefix": "Actn.OutputResult",
+		"body": "Actn.OutputResult(${1:sPropertyMnemonic})",
+		"description": "Actn.OutputResult(Mnemonic PropertyMnemonic)\nThis MISPL function can for example be useful to display blood bag info on the crossmatch job list."
+	},
+	"Actn.PropertyList": {
+		"prefix": "Actn.PropertyList",
+		"body": "Actn.PropertyList(${1:sMinimalStatus}, ${2:sMaximalStatus}, ${3:sPropertyFieldName}, ${4:lAllowUnsolicitedResults})",
+		"description": "Actn.PropertyList(String MinimalStatus, String MaximalStatus, String PropertyFieldName, Logical AllowUnsolicitedResults)\nReturns a list of properties for which there are results that belong to this action and that have a status between the specified minimal and maximum status."
+	},
+	"Actn.SpecimenInput": {
+		"prefix": "Actn.SpecimenInput",
+		"body": "Actn.SpecimenInput()",
+		"description": "Actn.SpecimenInput()\nSpecimenInput"
+	},
+	"AddLogEntry": {
+		"prefix": "AddLogEntry",
+		"body": "AddLogEntry(${1:sTableName}, ${2:iRecordId}, ${3:sLogTypeName|?}, ${4:iLogSeverity|?}, ${5:lNeedsChecking|?}, ${6:sLogMessage})",
+		"description": "Logical AddLogEntry(String TableName, Record RecordId, String LogTypeName, LogSeverity LogSeverity, Logical NeedsChecking, String LogMessage)\nThis function allows creating new log entries."
+	},
+	"Appr.AddLocusRequest": {
+		"prefix": "Appr.AddLocusRequest",
+		"body": "Appr.AddLocusRequest(${1:sLocusName})",
+		"description": "Appr.AddLocusRequest(String LocusName)\nAdd a locus request to the approach."
+	},
+	"Appr.AddVariantRequest": {
+		"prefix": "Appr.AddVariantRequest",
+		"body": "Appr.AddVariantRequest(${1:sVariantId})",
+		"description": "Appr.AddVariantRequest(String VariantId)\nAdd an approach request of type variant to the approach."
+	},
+	"Appr.DiscontinueLocusResults": {
+		"prefix": "Appr.DiscontinueLocusResults",
+		"body": "Appr.DiscontinueLocusResults(${1:sValueString}, ${2:sQuestionString})",
+		"description": "Appr.DiscontinueLocusResults(String ValueString, String QuestionString)\nPerforms a discontinue of the locus results linked to the approach."
+	},
+	"Appr.GetApproachActivities": {
+		"prefix": "Appr.GetApproachActivities",
+		"body": "Appr.GetApproachActivities(${1:sActivityNameList}, ${2:sMinStatus}, ${3:sMaxStatus})",
+		"description": "Appr.GetApproachActivities(String ActivityNameList, String MinStatus, String MaxStatus)\nMethod to get to one/some/all activities of an approach."
+	},
+	"Appr.GetHLAScreeningResults": {
+		"prefix": "Appr.GetHLAScreeningResults",
+		"body": "Appr.GetHLAScreeningResults(${1:sLocusName}, ${2:fMinimalMFIValue}, ${3:sMinimalStatus}, ${4:sMaximalStatus}, ${5:iMinimalSeverity})",
+		"description": "Appr.GetHLAScreeningResults(String LocusName, Fractional MinimalMFIValue, String MinimalStatus, String MaximalStatus, Integer MinimalSeverity)\nMethod to get all HLA screening results of an approach"
+	},
+	"Appr.GetHLATypingResults": {
+		"prefix": "Appr.GetHLATypingResults",
+		"body": "Appr.GetHLATypingResults(${1:sLocusName}, ${2:sMinimalStatus}, ${3:sMaximalStatus})",
+		"description": "Appr.GetHLATypingResults(String LocusName, String MinimalStatus, String MaximalStatus)\nMethod to get all HLA typing results of an approach"
+	},
+	"Appr.GetLocusResult": {
+		"prefix": "Appr.GetLocusResult",
+		"body": "Appr.GetLocusResult(${1:sLocusName}, ${2:sMinimalStatus}, ${3:iMinimalSeverity}, ${4:iIndex})",
+		"description": "Appr.GetLocusResult(String LocusName, String MinimalStatus, Integer MinimalSeverity, Integer Index)\nReturn a reference to a specific locus results of the approach"
+	},
+	"Appr.GetVariantResult": {
+		"prefix": "Appr.GetVariantResult",
+		"body": "Appr.GetVariantResult(${1:sVariantName}, ${2:sMinimalStatus}, ${3:iMinimalSeverity}, ${4:sMinimalClassification}, ${5:sRetestStatus}, ${6:iIndex})",
+		"description": "Appr.GetVariantResult(String VariantName, String MinimalStatus, Integer MinimalSeverity, String MinimalClassification, String RetestStatus, Integer Index)\nReturns a reference to a specific variant result of the approach"
+	},
+	"ApproachActivityFromList": {
+		"prefix": "ApproachActivityFromList",
+		"body": "ApproachActivityFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "ApproachActivity ApproachActivityFromList(String IdList, Integer Position)\nget the n-th ApproachActivity from a list of ApproachActivity ids"
+	},
+	"ApproachFromList": {
+		"prefix": "ApproachFromList",
+		"body": "ApproachFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "Approach ApproachFromList(String IdList, Integer Position)\nget the n-th Approach from a list of Approach ids"
+	},
+	"AskChoice": {
+		"prefix": "AskChoice",
+		"body": "AskChoice(${1:sPrompt}, ${2:sTitle}, ${3:sChoiceList}, ${4:lMandatory}, ${5:iDefaultAnswer})",
+		"description": "Integer AskChoice(String Prompt, String Title, String ChoiceList, Logical Mandatory, Integer DefaultAnswer)\nDisplays a question in a dialog box, waits for the user to select from the list."
+	},
+	"AskString": {
+		"prefix": "AskString",
+		"body": "AskString(${1:sPrompt}, ${2:sTitle}, ${3:lMandatory}, ${4:sDefaultAnswer})",
+		"description": "String AskString(String Prompt, String Title, Logical Mandatory, String DefaultAnswer)\nDisplays a question in a dialog box, waits for the user to input text."
+	},
+	"AskYesNo": {
+		"prefix": "AskYesNo",
+		"body": "AskYesNo(${1:sPrompt}, ${2:sTitle}, ${3:lMandatory}, ${4:lDefaultAnswer})",
+		"description": "Logical AskYesNo(String Prompt, String Title, Logical Mandatory, Logical DefaultAnswer)\nDisplays a question in a dialog box, waits for the user to choose a button."
+	},
+	"Chr": {
+		"prefix": "Chr",
+		"body": "Chr(${1:iCodePoint})",
+		"description": "String Chr(Integer CodePoint)\nConverts a numerical value representing a Unicode code point to the corresponding graphic character."
+	},
+	"CompareStrings": {
+		"prefix": "CompareStrings",
+		"body": "Expand(\"gp_Site\", ?, \"{\u003cCompareStrings \\\\S1=${1:Str1} \\\\S2=${2:Str2} \\\\D=${3:Delimiter}\")",
+		"description": "CompareStrings snippet\nUses a text MISPL."
+	},
+	"CompareStringsTXT": {
+		"prefix": "CompareStringsTXT",
+		"body": "Expand(\"gp_Site\", ?, Chr(123)+\"\u003cCompareStrings \\\\S1=${1:Str1} \\\\S2=${2:Str2} \\\\D=${3:Delimiter}\"+Chr(125), ?);",
+		"description": "CompareStringsTXT snippet\nUse this in text MISPLs."
+	},
+	"CountCharacter": {
+		"prefix": "CountCharacter",
+		"body": "iCount := Len(${1:S}) - Len(Strip(${1:S}, ${2:S2}));",
+		"description": "CountCharacter snippet.\nCounts occurrences of character S2 within string S."
+	},
+	"Cpad": {
+		"prefix": "Cpad",
+		"body": "Cpad(${1:sExpression}, ${2:iLength}, ${3:sPadString})",
+		"description": "String Cpad(String Expression, Integer Length, String PadString)\nReturns a string formed from Expression(center aligned)."
+	},
+	"CreateSpecimenOrder":{
+		"prefix": "CreateSpecimenOrder",
+		"body": "CreateSpecimenOrder(${1:sSpecimenCode|?},${2:sMaterialMnemonic},${3:sObjectCode},${4:sOrderInternalId|?},${5:sOrderShortId},${6:sOrderExternalId|?},${7:sIssuerAndAgentInternalId},${8:sDepartmentMnemonic},${9:sRequestList})",
+		"description": "String CreateSpecimenOrder (String SpecimenCode, Mnemonic MaterialMnemonic, String ObjectCode, String OrderInternalId, String OrderShortId, String OrderExternalId, String IssuerAndAgentInternalId, Mnemonic DepartmentMnemonic, String RequestList)."
+	},
+	"CurrentDepartment": {
+		"prefix": "CurrentDepartment",
+		"body": "CurrentDepartment()",
+		"description": "String CurrentDepartment()\nReturns the mnemonic of the user's department."
+	},
+	"CurrentDevice": {
+		"prefix": "CurrentDevice",
+		"body": "CurrentDevice()",
+		"description": "String CurrentDevice()\nReturns the client device name."
+	},
+	"CurrentOS": {
+		"prefix": "CurrentOS",
+		"body": "CurrentOS()",
+		"description": "String CurrentOS()\nReturns UNIX or WINDOWS."
+	},
+	"CurrentRole": {
+		"prefix": "CurrentRole",
+		"body": "CurrentRole()",
+		"description": "String CurrentRole()\nReturns the mnemonic of the user's role."
+	},
+	"CurrentTerminal": {
+		"prefix": "CurrentTerminal",
+		"body": "CurrentTerminal()",
+		"description": "String CurrentTerminal()\nReturns the name of the current user's terminal."
+	},
+	"CurrentUser": {
+		"prefix": "CurrentUser",
+		"body": "CurrentUser()",
+		"description": "String CurrentUser()\nReturns the login name of the current user."
+	},
+	"DateAndTimeToDateTime": {
+		"prefix": "DateAndTimeToDateTime",
+		"body": "DateAndTimeToDateTime(${1:dDate}, ${2:tmTime})",
+		"description": "DateTime DateAndTimeToDateTime(Date Date, Time Time)\nCombines a date and a time into a datetime."
+	},
+	"DatedIdentifier": {
+		"prefix": "DatedIdentifier",
+		"body": "DatedIdentifier(${1:sSequencePrefix}, ${2:sIdentifierPrefix}, ${3:iDigitCount}, ${4:tmIncrementTime})",
+		"description": "String DatedIdentifier(String SequencePrefix, String IdentifierPrefix, Integer DigitCount, DateTime IncrementTime)\nExtension of the Identifier function."
+	},
+	"DateDiffInYears": {
+		"prefix": "DateDiffInYears",
+		"body": "DateDiffInYears(${1:dDate1}, ${2:dDate2})",
+		"description": "Fractional DateDiffInYears(Date Date1, Date Date2)\nReturns Date1-Date2 in fractional year units."
+	},
+	"DateTimeToDate": {
+		"prefix": "DateTimeToDate",
+		"body": "DateTimeToDate(${1:dDateTime})",
+		"description": "Date DateTimeToDate(DateTime DateTime)\nReturns the date part of a DateTime."
+	},
+	"DateTimeToString": {
+		"prefix": "DateTimeToString",
+		"body": "DateTimeToString(${1:dDateTime}, ${2:sFormat})",
+		"description": "String DateTimeToString(DateTime DateTime, String Format)\nConverts a DateTime to a character string."
+	},
+	"DateTimeToTime": {
+		"prefix": "DateTimeToTime",
+		"body": "DateTimeToTime(${1:dDateTime})",
+		"description": "Time DateTimeToTime(DateTime DateTime)\nReturns the time part of a DateTime."
+	},
+	"DateToString": {
+		"prefix": "DateToString",
+		"body": "DateToString(${1:dDate}, ${2:sFormat})",
+		"description": "String DateToString(Date Date, String Format)\nConverts a Date to a character string."
+	},
+	"DEBUG IF...THEN": {
+		"prefix": "DEBUG IF...THEN",
+		"body": [
+			"IF Index(${1:S}, CurrentUser()) > 0 THEN",
+			"\t$0",
+			"ENDIF;"
+		],
+		"description": "DEBUG IF...THEN snippet\nS is a list of debug users"
+	},
+	"DEBUG Message IF...THEN": {
+		"prefix": "DEBUG Message IF...THEN",
+		"body": "IF Index(${1:S}, CurrentUser()) > 0 THEN Message(${2:S}); ENDIF;",
+		"description": "DEBUG Message IF...THEN snippet"
+	},
+	"DiseaseFromList": {
+		"prefix": "DiseaseFromList",
+		"body": "DiseaseFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "Disorder DiseaseFromList(String IdList, Integer Position)\nGet the n-th disorder as disease from list."
+	},
+	"DisorderAssociationFromList": {
+		"prefix": "DisorderAssociationFromList",
+		"body": "DisorderAssociationFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "DisorderAssociation DisorderAssociationFromList(String IdList, Integer Position)\nGet the n-th disorder association."
+	},
+	"Entry": {
+		"prefix": "Entry",
+		"body": "Entry(${1:iPosition}, ${2:sList}, ${3:sDelimiter|?})",
+		"description": "String Entry(Integer Position, String List, String Delimiter)\nReturns a character string entry at the specified Position."
+	},
+	"EnumeratedToString": {
+		"prefix": "EnumeratedToString",
+		"body": "EnumeratedToString(${1:sEnumerationName}, ${2:eValue})",
+		"description": "String EnumeratedToString(String EnumerationName, Enumerated Value)\nConverts an enumerated data type to a string."
+	},
+	"EuroToLocal": {
+		"prefix": "EuroToLocal",
+		"body": "EuroToLocal(${1:fAmountInEuro}, ${2:iDecimalCount})",
+		"description": "Fractional EuroToLocal(Fractional AmountInEuro, PositiveInteger DecimalCount)\nConverts Euro to local currency."
+	},
+	"Exp": {
+		"prefix": "Exp",
+		"body": "Exp(${1:fBase}, ${2:fExponent})",
+		"description": "Fractional Exp(Fractional Base, Fractional Exponent)\nReturns Base raised to the power of Exponent."
+	},
+	"Expand": {
+		"prefix": "Expand",
+		"body": "Expand(${1:sTableName}, ${2:iRecordId}, ${3:sDynamicText}, ${4:sParameterList|?})",
+		"description": "String Expand(String TableName, Record RecordId, String DynamicText, String ParameterList)\nExpands a dynamic text on any table."
+	},
+	"Expand_WaardeMISPL": {
+		"prefix": "Expand_WaardeMISPL",
+		"body": "RETURN Expand(\"Action\", .ID, \"{\u003cPrpo-...\", ?);",
+		"description": "Expand_WaardeMISPL snippet"
+	},
+	"ExtractTag": {
+		"prefix": "ExtractTag",
+		"body": "ExtractTag(${1:sTag}, ${2:sList}, ${3:sDelimiter|?})",
+		"description": "String ExtractTag(String Tag, String List, String Delimiter)\nExtracts a tag value from a tagged value list."
+	},
+	"Fabs": {
+		"prefix": "Fabs",
+		"body": "Fabs(${1:fValue})",
+		"description": "Fractional Fabs(Fractional Value)\nComputes the absolute value of the fractional Value argument."
+	},
+	"FamilyMemberFromList": {
+		"prefix": "FamilyMemberFromList",
+		"body": "FamilyMemberFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "FamilyMember FamilyMemberFromList(String IdList, Integer Position)\nGet the n-th FamilyMember."
+	},
+	"Fill": {
+		"prefix": "Fill",
+		"body": "Fill(${1:sExpression}, ${2:iRepeats})",
+		"description": "String Fill(String Expression, Integer Repeats)\nGenerates a character string repeated a specified number of times."
+	},
+	"FitText": {
+		"prefix": "FitText",
+		"body": "FitText(${1:sInputText}, ${2:iColumnWidth}, ${3:sFirstLinePrefix}, ${4:sPrefix}, ${5:sSuffix})",
+		"description": "String FitText(String InputText, Integer ColumnWidth, String FirstLinePrefix, String Prefix, String Suffix)\nFits text into a column of a specified width."
+	},
+	"Fmod": {
+		"prefix": "Fmod",
+		"body": "Fmod(${1:fDividend}, ${2:fDivisor})",
+		"description": "Fractional Fmod(Fractional Dividend, Fractional Divisor)\nComputes the fractional remainder."
+	},
+	"FractionalToInteger": {
+		"prefix": "FractionalToInteger",
+		"body": "FractionalToInteger(${1:fFractional})",
+		"description": "Integer FractionalToInteger(Fractional Fractional)\nConverts a Fractional to an integer (truncated)."
+	},
+	"FractionalToString": {
+		"prefix": "FractionalToString",
+		"body": "FractionalToString(${1:fFractional}, ${2:sFormat})",
+		"description": "String FractionalToString(Fractional Fractional, String Format)\nConverts a Fractional to a character string."
+	},
+	"GeneFromList": {
+		"prefix": "GeneFromList",
+		"body": "GeneFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "Gene GeneFromList(String IdList, Integer Position)\nGet the n-th disorder as gene."
+	},
+	"GeneticExamFromList": {
+		"prefix": "GeneticExamFromList",
+		"body": "GeneticExamFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "GeneticExam GeneticExamFromList(String IdList, Integer Position)\nGet the n-th Genetic exam."
+	},
+	"GetCode": {
+		"prefix": "GetCode",
+		"body": "GetCode(${1:sTableName}, ${2:iRecordId}, ${3:sCodingSystemMnemonic})",
+		"description": "String GetCode(String TableName, Record RecordId, String CodingSystemMnemonic)\nReturns the code for a specific table."
+	},
+	"GetCorrespondent": {
+		"prefix": "GetCorrespondent",
+		"body": "GetCorrespondent(${1:sInternalId})",
+		"description": "Correspondent GetCorrespondent(String InternalId)\nReturns a reference to the correspondent."
+	},
+	"GetCorrespondentId": {
+		"prefix": "GetCorrespondentId",
+		"body": "GetCorrespondentId(${1:sInternalId}, ${2:tType})",
+		"description": "Correspondent GetCorrespondentId(String InternalId, CorrespondentType Type)\nReturns a reference to the correspondent."
+	},
+	"GetDepartment": {
+		"prefix": "GetDepartment",
+		"body": "GetDepartment(${1:sDepartmentMnemonic})",
+		"description": "Department GetDepartment(String DepartmentMnemonic)\nGet the department record."
+	},
+	"GetDiagnosisCode": {
+		"prefix": "GetDiagnosisCode",
+		"body": "GetDiagnosisCode(${1:sDiagnosisCodeCode}, ${2:x_CodeSystemSystem}, ${3:sSystemMnemonic})",
+		"description": "DiagnosisCode GetDiagnosisCode(String DiagnosisCodeCode, Diagnosis CodeSystemSystem, Mnemonic SystemMnemonic)\nSearches the Diagnosis Code."
+	},
+	"GetEncounter": {
+		"prefix": "GetEncounter",
+		"body": "GetEncounter(${1:sEncounterId})",
+		"description": "Encounter GetEncounter(String EncounterId)\nReturns an Encounter for a given ID."
+	},
+	"GetExecutingLab": {
+		"prefix": "GetExecutingLab",
+		"body": "GetExecutingLab(${1:iNthLab})",
+		"description": "String GetExecutingLab(Integer NthLab)\nReturns the healthcare code of the nth executing lab."
+	},
+	"GetFundId": {
+		"prefix": "GetFundId",
+		"body": "GetFundId(${1:sFundMnemonic})",
+		"description": "Fund GetFundId(Mnemonic FundMnemonic)\nReturns a reference to the fund."
+	},
+	"GetHLAAntigen": {
+		"prefix": "GetHLAAntigen",
+		"body": "GetHLAAntigen(${1:sAntigenName})",
+		"description": "HLAAntigen GetHLAAntigen(String AntigenName)\nReturns a reference to the HLA antigen object."
+	},
+	"GetInvoiceId": {
+		"prefix": "GetInvoiceId",
+		"body": "GetInvoiceId(${1:x_FirmId}, ${2:sDocNo}, ${3:iVersionNo|?})",
+		"description": "Invoice GetInvoiceId(Firm FirmId, String DocNo, PositiveInteger VersionNo)\nReturns a reference to the invoice."
+	},
+	"GetInvoiceSummaryId": {
+		"prefix": "GetInvoiceSummaryId",
+		"body": "GetInvoiceSummaryId(${1:x_FirmId}, ${2:sDocNo})",
+		"description": "InvoiceSummary GetInvoiceSummaryId(Firm FirmId, String DocNo)\nReturns a reference to the invoice summary."
+	},
+	"GetLogEntry": {
+		"prefix": "GetLogEntry",
+		"body": "GetLogEntry(${1:sTableName}, ${2:iRecordId}, ${3:tLogTypeName}, ${4:lNeedsChecking}, ${5:iLogSeverity}, ${6:dtCreatedAfter}, ${7:dtCreatedBefore}, ${8:sMessagePattern}, ${9:iSeqNo})",
+		"description": "lg_Entry GetLogEntry(...)\nSearches for a log entry record."
+	},
+	"GetNonconformity": {
+		"prefix": "GetNonconformity",
+		"body": "GetNonconformity(${1:sContextTableName}, ${2:iContextRecord}, ${3:sNCTypeMnemonic}, ${4:iNonconformity})",
+		"description": "Nonconformity GetNonconformity(...)\nCheck if there is a NC of a certain type on a record."
+	},
+	"GetObjectId": {
+		"prefix": "GetObjectId",
+		"body": "GetObjectId(${1:sInternalId}, ${2:tType})",
+		"description": "Object GetObjectId(String InternalId, ObjectType Type)\nReturns a reference to the object."
+	},
+	"GetPolicyNameId": {
+		"prefix": "GetPolicyNameId",
+		"body": "GetPolicyNameId(${1:sPolicyNameCode}, ${2:x_FundId}, ${3:lCanUseDefaultPolicyName})",
+		"description": "PolicyName GetPolicyNameId(...)\nReturns a reference to the policy name."
+	},
+	"GetPrinterId": {
+		"prefix": "GetPrinterId",
+		"body": "GetPrinterId(${1:sPrinterName})",
+		"description": "rp_Printer GetPrinterId(String PrinterName)\nReturns the Id of that printer."
+	},
+	"GetProvision": {
+		"prefix": "GetProvision",
+		"body": "GetProvision(${1:sLabMnemonic}, ${2:sDepartmentMnemonic}, ${3:sExecutingClassMnemonic}, ${4:dtTime})",
+		"description": "Provision GetProvision(...)\nProvides Provision access via mispl."
+	},
+	"GetSiteAttribute": {
+		"prefix": "GetSiteAttribute",
+		"body": "GetSiteAttribute(${1:sTableName}, ${2:iRecordId}, ${3:sAttributeName})",
+		"description": "String GetSiteAttribute(String TableName, Record RecordId, String AttributeName)\nFetches the value of a site attribute."
+	},
+	"GetSiteAttribute_TmpResultComm": {
+		"prefix": "GetSiteAttribute_TmpResultComm",
+		"body": "GetSiteAttribute(${1:sTableName}, ${2:iRecordId},\"TmpResultCommentaar\")",
+		"description": "GetSiteAttribute_TmpResultComm snippet"
+	},
+	"GetStay": {
+		"prefix": "GetStay",
+		"body": "GetStay(${1:sStayId})",
+		"description": "Stay GetStay(String StayId)\nReturns a Stay based on an ID."
+	},
+	"GetUser": {
+		"prefix": "GetUser",
+		"body": "GetUser(${1:sLoginName})",
+		"description": "sc_User GetUser(String LoginName)\nSearches for a user based on their login name."
+	},
+	"Glims": {
+		"prefix": "Glims",
+		"body": "Glims()",
+		"description": "SpecificSite Glims()\nProvides MISPL access to the GLIMS-specific site record."
+	},
+	"HLA_GLstring": {
+		"prefix": "HLA_GLstring",
+		"body": "sGLstring := Expand(\"Object\", Obj.ID, Chr(123)+\"\u003cHLA:GLstring \\\\Tech=ngs \\\\Loci=\"+Chr(125), ?);",
+		"description": "HLA_GLstring snippet"
+	},
+	"HLA_Locus": {
+		"prefix": "HLA_Locus",
+		"body": "sHLALoc := Entry(2, Entry(1, .Property.Mnemonic, \"_\"), \"-\");",
+		"description": "HLA_Locus snippet"
+	},
+	"HLAExamFromList": {
+		"prefix": "HLAExamFromList",
+		"body": "HLAExamFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "HLAExam HLAExamFromList(String IdList, Integer Position)\nGet the n-th HLA exam."
+	},
+	"HLAScreeningResultFromList": {
+		"prefix": "HLAScreeningResultFromList",
+		"body": "HLAScreeningResultFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "HLAScreeningResult HLAScreeningResultFromList(String IdList, Integer Position)\nGet the n-th HLA screening result."
+	},
+	"HLATypingResultFromList": {
+		"prefix": "HLATypingResultFromList",
+		"body": "HLATypingResultFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "HLATypingResult HLATypingResultFromList(String IdList, Integer Position)\nGet the n-th HLA typing result."
+	},
+	"Identifier": {
+		"prefix": "Identifier",
+		"body": "Identifier(${1:sSequencePrefix}, ${2:sIdentifierPrefix}, ${3:iDigitCount})",
+		"description": "String Identifier(String SequencePrefix, String IdentifierPrefix, Integer DigitCount)\nReturns a unique identifier."
+	},
+	"IF...THEN": {
+		"prefix": "IF...THEN",
+		"body": [
+			"IF ${1:TRUE} THEN",
+			"\t$0",
+			"ENDIF;"
+		],
+		"description": "IF...THEN snippet"
+	},
+	"IF...THEN...ELSE": {
+		"prefix": "IF...THEN...ELSE",
+		"body": [
+			"IF ${1:TRUE} THEN",
+			"\t$2",
+			"ELSE",
+			"\t$0",
+			"ENDIF;"
+		],
+		"description": "IF...THEN...ELSE snippet"
+	},
+	"IfKnownString": {
+		"prefix": "IfKnownString",
+		"body": "IfKnownString(${1:sString|?})",
+		"description": "String IfKnownString(String String)\nReturns its input String argument, or empty string."
+	},
+	"Index": {
+		"prefix": "Index",
+		"body": "Index(${1:sSource}, ${2:sTarget})",
+		"description": "Integer Index(String Source, String Target)\nThis function returns the character position of the first occurrence of Target within Source."
+	},
+	"IntegerToString": {
+		"prefix": "IntegerToString",
+		"body": "IntegerToString(${1:iInteger}, ${2:sFormat})",
+		"description": "String IntegerToString(Integer Integer, String Format)\nConverts an Integer to a character string."
+	},
+	"IsCorrectDate": {
+		"prefix": "IsCorrectDate",
+		"body": "Expand(\"gp_Site\", ?, \"{\u003cIsCorrectDate \\\\Dt=\" + ${1:sDate})",
+		"description": "IsCorrectDate snippet\nUses a text MISPL."
+	},
+	"IsCorrectDateTXT": {
+		"prefix": "IsCorrectDateTXT",
+		"body": "Expand(\"gp_Site\", ?, Chr(123)+\"\u003cIsCorrectDate \\\\Dt=\" + ${1:sDate} + Chr(125), ?) = Y",
+		"description": "IsCorrectDateTXT snippet"
+	},
+	"IsEven": {
+		"prefix": "IsEven",
+		"body": "Fmod(${1:I}, 2) = 0",
+		"description": "IsEven snippet"
+	},
+	"IsHoliday": {
+		"prefix": "IsHoliday",
+		"body": "IsHoliday(${1:dDate})",
+		"description": "Logical IsHoliday(Date Date)\nCheck whether the specified date is a holiday."
+	},
+	"IsTestDb": {
+		"prefix": "IsTestDb",
+		"body": "IsTestDatabase()",
+		"description": "IsTestDb snippet"
+	},
+	"ItemStorageFromList": {
+		"prefix": "ItemStorageFromList",
+		"body": "ItemStorageFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "ItemStorage ItemStorageFromList(String IdList, Integer Position)\nGet the n-th ItemStorage."
+	},
+	"LargeModulo": {
+		"prefix": "LargeModulo",
+		"body": "LargeModulo(${1:sNumerator}, ${2:iDenominator})",
+		"description": "Integer LargeModulo(String Numerator, Integer Denominator)\nPerform a remainder calculation on a large integer value."
+	},
+	"Len": {
+		"prefix": "Len",
+		"body": "Len(${1:sString})",
+		"description": "Integer Len(String String)\nReturns the number of characters in a string."
+	},
+	"LocalToEuro": {
+		"prefix": "LocalToEuro",
+		"body": "LocalToEuro(${1:fAmountInLocalCurrency}, ${2:iDecimals})",
+		"description": "Fractional LocalToEuro(Fractional AmountInLocalCurrency, PositiveInteger Decimals)\nConverts local currency to Euro."
+	},
+	"LocusMasterMixFromList": {
+		"prefix": "LocusMasterMixFromList",
+		"body": "LocusMasterMixFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "LocusMasterMix LocusMasterMixFromList(String IdList, Integer Position)\nReturns the n-th locus mastermix."
+	},
+	"LocusMasterMixItemFromList": {
+		"prefix": "LocusMasterMixItemFromList",
+		"body": "LocusMasterMixItemFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "LocusMasterMixItem LocusMasterMixItemFromList(String IdList, Integer Position)\nGet the n-th locus mastermix item."
+	},
+	"Log": {
+		"prefix": "Log",
+		"body": "Log(${1:fValue})",
+		"description": "Fractional Log(Fractional Value)\nReturns the natural logarithm(base e) of Value."
+	},
+	"Log10": {
+		"prefix": "Log10",
+		"body": "Log10(${1:fValue})",
+		"description": "Fractional Log10(Fractional Value)\nReturns the base 10 logarithm of Value."
+	},
+	"Lookup": {
+		"prefix": "Lookup",
+		"body": "Lookup(${1:sExpression}, ${2:sList}, ${3:sDelimiter|?})",
+		"description": "Integer Lookup(String Expression, String List, String Delimiter)\nReturns the position of an Expression in a Delimiter-separated List."
+	},
+	"Lpad": {
+		"prefix": "Lpad",
+		"body": "Lpad(${1:sExpression}, ${2:iLength}, ${3:sPadString})",
+		"description": "String Lpad(String Expression, Integer Length, String PadString)\nReturns a string formed from Expression(left aligned)."
+	},
+	"Ltrim": {
+		"prefix": "Ltrim",
+		"body": "Ltrim(${1:sSource}, ${2:sTrimCharacters})",
+		"description": "String Ltrim(String Source, String TrimCharacters)\nRemoves leading whitespace or other specified characters."
+	},
+	"Matches": {
+		"prefix": "Matches",
+		"body": "Matches(${1:sExpression}, ${2:sPattern}, ${3:lCaseSensitive})",
+		"description": "Logical Matches(String Expression, String Pattern, Logical CaseSensitive)\nCompares an Expression to a regular expression Pattern."
+	},
+	"Message": {
+		"prefix": "Message",
+		"body": "Message(${1:sMessage})",
+		"description": "Void Message(String Message)\nDisplays an informational message on the screen."
+	},
+	"Modulus11": {
+		"prefix": "Modulus11",
+		"body": "Modulus11(${1:sNumericString})",
+		"description": "String Modulus11(String NumericString)\nA check digit calculation (de elfproef)."
+	},
+	"NextValue": {
+		"prefix": "NextValue",
+		"body": "NextValue(${1:sSequence})",
+		"description": "Integer NextValue(String Sequence)\nReturns the integer value of the Sequence, after incrementing it by 1."
+	},
+	"Now": {
+		"prefix": "Now",
+		"body": "Now()",
+		"description": "Time Now()\nReturns the current time."
+	},
+	"NumberToStringInFull": {
+		"prefix": "NumberToStringInFull",
+		"body": "NumberToStringInFull(${1:iNumber}, ${2:sLanguageCode})",
+		"description": "String NumberToStringInFull(Integer Number, String LanguageCode)\nWrites out the specified number in full."
+	},
+	"NumEntries": {
+		"prefix": "NumEntries",
+		"body": "NumEntries(${1:sList}, ${2:sDelimiter|?})",
+		"description": "Integer NumEntries(String List, String Delimiter)\nReturns the number of entries in a Delimiter-separated List."
+	},
+	"Obj": {
+		"prefix": "Obj",
+		"body": "Object Obj;",
+		"description": "Obj snippet"
+	},
+	"Obj.Age": {
+		"prefix": "Obj.Age",
+		"body": "Obj.Age(${1:dReferenceDate})",
+		"description": "Obj.Age(Date ReferenceDate)\nReturns the objects age as a string."
+	},
+	"Obj.AgeInDays": {
+		"prefix": "Obj.AgeInDays",
+		"body": "Obj.AgeInDays(${1:dReferenceDate})",
+		"description": "Obj.AgeInDays(Date ReferenceDate)\nReturns the objects age in days."
+	},
+	"Obj.AgeInMonths": {
+		"prefix": "Obj.AgeInMonths",
+		"body": "Obj.AgeInMonths(${1:dReferenceDate})",
+		"description": "Obj.AgeInMonths(Date ReferenceDate)\nReturns the objects age in months."
+	},
+	"Obj.AgeInYears": {
+		"prefix": "Obj.AgeInYears",
+		"body": "Obj.AgeInYears(${1:dReferenceDate})",
+		"description": "Obj.AgeInYears(Date ReferenceDate)\nReturns the objects age in years."
+	},
+	"Obj.Animal": {
+		"prefix": "Obj.Animal",
+		"body": "Obj.Animal()",
+		"description": "Obj.Animal()\nAnimal"
+	},
+	"Obj.AttributeList": {
+		"prefix": "Obj.AttributeList",
+		"body": "Obj.AttributeList(${1:|?}, ${2:sFlagList}, ${3:iMinimalSeverity}, ${4:lFlagsOnly}, ${5:lUseMnemonics}, ${6:sDelimiter|?})",
+		"description": "Obj.AttributeList(DateTime ReferenceTime, String FlagList, PositiveInteger MinimalSeverity, Logical FlagsOnly, Logical UseMnemonics, String Delimiter)\nReturns a delimited list of object attributes."
+	},
+	"Obj.AttributePeriod": {
+		"prefix": "Obj.AttributePeriod",
+		"body": "Obj.AttributePeriod(${1:sAttributeMnemonic}, ${2:dReferenceDate})",
+		"description": "Obj.AttributePeriod(Mnemonic AttributeMnemonic, Date ReferenceDate)\nReturns the number of days the attribute is/was applicable."
+	},
+	"Obj.BirthDate": {
+		"prefix": "Obj.BirthDate",
+		"body": "Obj.BirthDate()",
+		"description": "Obj.BirthDate()\nReturns the objects birth date."
+	},
+	"Obj.BloodSelectionByNumber": {
+		"prefix": "Obj.BloodSelectionByNumber",
+		"body": "Obj.BloodSelectionByNumber(${1:sProductMnemonic}, ${2:sMinimalStatus|?}, ${3:sMaximalStatus}, ${4:iNumber})",
+		"description": "Obj.BloodSelectionByNumber(Mnemonic ProductMnemonic, String MinimalStatus, String MaximalStatus, PositiveInteger Number)"
+	},
+	"Obj.BuildHistoryGraph": {
+		"prefix": "Obj.BuildHistoryGraph",
+		"body": "Obj.BuildHistoryGraph(${1:sTaggedParameterList})",
+		"description": "Obj.BuildHistoryGraph(String TaggedParameterList)\nGenerates a history graph of previous results in XML format."
+	},
+	"Obj.ClearAttribute": {
+		"prefix": "Obj.ClearAttribute",
+		"body": "Obj.ClearAttribute(${1:sAttributeMnemonic}, ${2:dEndDate})",
+		"description": "Obj.ClearAttribute(Mnemonic AttributeMnemonic, Date EndDate)\nClears the object attribute but allows specifying an end date."
+	},
+	"Obj.DeclaredType": {
+		"prefix": "Obj.DeclaredType",
+		"body": "Obj.DeclaredType()",
+		"description": "Obj.DeclaredType()\nOne of: Animal, Lot, Person, Unknown, QC lot"
+	},
+	"Obj.DeleteAttribute": {
+		"prefix": "Obj.DeleteAttribute",
+		"body": "Obj.DeleteAttribute(${1:sAttributeMnemonic}, ${2:dEndDate})",
+		"description": "Obj.DeleteAttribute(Mnemonic AttributeMnemonic, Date EndDate)\nDeletes any attribute history for a given object attribute."
+	},
+	"Obj.Externalization": {
+		"prefix": "Obj.Externalization",
+		"body": "Obj.Externalization",
+		"description": "Obj.Externalization\nCopied from the sub-type externalization field."
+	},
+	"Obj.GetBloodBag": {
+		"prefix": "Obj.GetBloodBag",
+		"body": "Obj.GetBloodBag(${1:sBloodProductMnemonic}, ${2:iHistoryIndex}, ${3:dtMinimalBackwardsTime}, ${4:dtMaximalBackwardsTime})",
+		"description": "Obj.GetBloodBag(String BloodProductMnemonic, Integer HistoryIndex, DateTime MinimalBackwardsTime, DateTime MaximalBackwardsTime)\nGetBloodBag"
+	},
+	"Obj.GetCheckedOutBag": {
+		"prefix": "Obj.GetCheckedOutBag",
+		"body": "Obj.GetCheckedOutBag(${1:sBloodProductMnemonic}, ${2:iHistoryIndex}, ${3:dtMinimalBackwardsTime}, ${4:dtMaximalBackwardsTime})",
+		"description": "Obj.GetCheckedOutBag(...)\nFetches the current blood bag associated to the object."
+	},
+	"Obj.GetData": {
+		"prefix": "Obj.GetData",
+		"body": "Obj.GetData(${1:sAttributeList})",
+		"description": "Obj.GetData(String AttributeList)"
+	},
+	"Obj.GetHLAScreeningResults": {
+		"prefix": "Obj.GetHLAScreeningResults",
+		"body": "Obj.GetHLAScreeningResults(${1:sLocusName}, ${2:fMinimalMFIValue}, ${3:sMinimalStatus}, ${4:sMaximalStatus}, ${5:iMinimalSeverity})",
+		"description": "Obj.GetHLAScreeningResults(...)\nMethod to get all HLA screening results of an object."
+	},
+	"Obj.GetHLATypingResults": {
+		"prefix": "Obj.GetHLATypingResults",
+		"body": "Obj.GetHLATypingResults(${1:sLocusName}, ${2:sMinimalStatus}, ${3:sMaximalStatus})",
+		"description": "Obj.GetHLATypingResults(...)\nReturns a comma-separated list of the requested object attributes."
+	},
+	"Obj.GetLocusResult": {
+		"prefix": "Obj.GetLocusResult",
+		"body": "Obj.GetLocusResult(${1:sLocusName}, ${2:sMinimalStatus}, ${3:iMinimalSeverity}, ${4:iIndex})",
+		"description": "Obj.GetLocusResult(...)\nReturns a reference to a specific locus result of the object."
+	},
+	"Obj.GetPhoneLog": {
+		"prefix": "Obj.GetPhoneLog",
+		"body": "Obj.GetPhoneLog(${1:sPrevious|?}, ${2:lPhoned})",
+		"description": "Obj.GetPhoneLog(String Previous, Logical Phoned)\nRetrieve the phone log records of an object."
+	},
+	"Obj.GetResult": {
+		"prefix": "Obj.GetResult",
+		"body": "Obj.GetResult(${1:sPropertyMnemonic}, ${2:sImposedResult}, ${3:iIndex}, ${4:dtReferenceTime|?})",
+		"description": "Obj.GetResult(Mnemonic PropertyMnemonic, String ImposedResult, PositiveInteger Index, DateTime ReferenceTime)\nSearches a specific result of an object."
+	},
+	"Obj.GetTransplantRegistrations": {
+		"prefix": "Obj.GetTransplantRegistrations",
+		"body": "Obj.GetTransplantRegistrations(${1:sMinimalStatusMnemonic}, ${2:sMinimalStatus}, ${3:sMaximalStatus})",
+		"description": "Obj.GetTransplantRegistrations(...)\nGet a list of HLA transplant registrations for this object."
+	},
+	"Obj.GetTransplants": {
+		"prefix": "Obj.GetTransplants",
+		"body": "Obj.GetTransplants(${1:sMinimalStatus}, ${2:sTransplantProductMnemonic})",
+		"description": "Obj.GetTransplants(String MinimalStatus, Mnemonic TransplantProductMnemonic)\nGet a list of HLA transplants for this object."
+	},
+	"Obj.GetVariantResult": {
+		"prefix": "Obj.GetVariantResult",
+		"body": "Obj.GetVariantResult(${1:sVariantName}, ${2:sMinimalStatus}, ${3:iMinimalSeverity}, ${4:sMinimalClassification}, ${5:sRetestStatus}, ${6:iIndex})",
+		"description": "Obj.GetVariantResult(...)\nReturns a reference to a specific variant result of the object."
+	},
+	"Obj.HasExternalInfo": {
+		"prefix": "Obj.HasExternalInfo",
+		"body": "Obj.HasExternalInfo()",
+		"description": "Obj.HasExternalInfo()\nRetrieves wether external info is available."
+	},
+	"Obj.Lot": {
+		"prefix": "Obj.Lot",
+		"body": "Obj.Lot()",
+		"description": "Obj.Lot()\nLot"
+	},
+	"Obj.MicrobiologicHistory": {
+		"prefix": "Obj.MicrobiologicHistory",
+		"body": "Obj.MicrobiologicHistory(${1:sSpecimenLayout|?}, ${2:iMaximumDaysAgo|?}, ${3:iSkipCount|?}, ${4:iMaximumCount|?}, ${5:sMaterialMnemonic|?}, ${6:sProcedureMnemonic|?}, ${7:lPositiveOnly|?}, ${8:iMinimalSeverity|?}, ${9:dtReferenceTime|?}, ${10:sViewFormat|?})",
+		"description": "Obj.MicrobiologicHistory(...)\nReturns microbiologic history."
+	},
+	"Obj.PatientData": {
+		"prefix": "Obj.PatientData",
+		"body": "Obj.PatientData(${1:sAttributeList})",
+		"description": "Obj.PatientData(String AttributeList)\nReturns a comma-separated list of the requested patient attributes."
+	},
+	"Obj.Person": {
+		"prefix": "Obj.Person",
+		"body": "Obj.Person()",
+		"description": "Obj.Person()\nPerson"
+	},
+	"Obj.PIN": {
+		"prefix": "Obj.PIN",
+		"body": "Obj.PIN(${1:sSourceMnemonic})",
+		"description": "Obj.PIN(String SourceMnemonic)"
+	},
+	"Obj.QCLot": {
+		"prefix": "Obj.QCLot",
+		"body": "Obj.QCLot()",
+		"description": "Obj.QCLot()\nAccess the QCLot record associated with an object."
+	},
+	"Obj.Result": {
+		"prefix": "Obj.Result",
+		"body": "Obj.Result(${1:sPropertyMnemonic}, ${2:iIndex}, ${3:dtReferenceTime|?}, ${4:sMinimalStatus|?})",
+		"description": "Obj.Result(Mnemonic PropertyMnemonic, PositiveInteger Index, DateTime ReferenceTime, String MinimalStatus)\nSearches a specific result of an object."
+	},
+	"Obj.ResultAttribute": {
+		"prefix": "Obj.ResultAttribute",
+		"body": "Obj.ResultAttribute(${1:sPropertyMnemonic}, ${2:sImposedResultValue}, ${3:iIndex}, ${4:dtReferenceTime|?}, ${5:sAttributeName})",
+		"description": "Obj.ResultAttribute(...)\nA search for a result record of this object."
+	},
+	"Obj.SetAttribute": {
+		"prefix": "Obj.SetAttribute",
+		"body": "Obj.SetAttribute(${1:sAttributeMnemonic}, ${2:dStartDate})",
+		"description": "Obj.SetAttribute(Mnemonic AttributeMnemonic, Date StartDate)\nSetAttribute"
+	},
+	"Obj.Sex": {
+		"prefix": "Obj.Sex",
+		"body": "Obj.Sex()",
+		"description": "Obj.Sex()\nReturns the objects sex."
+	},
+	"Obj.UMCU_PIN": {
+		"prefix": "Obj.UMCU_PIN",
+		"body": "Obj.PIN(${1:sSourceMnemonic})",
+		"description": "Obj.PIN snippet"
+	},
+	"Ord": {
+		"prefix": "Ord",
+		"body": "Ord(${1:sExpression})",
+		"description": "Integer Ord(String Expression)\nConverts a character expression to the numeric value."
+	},
+	"Order": {
+		"prefix": "Order",
+		"body": "Order Ord;",
+		"description": "Order snippet"
+	},
+	"OrderIdMetPunten": {
+		"prefix": "OrderIdMetPunten",
+		"body": "Expand(\"gp_Site\", ?, Chr(123)+\"\u003cOrderIdMetPunten \\\\OrdrDep=\"+${1:String-Optional})",
+		"description": "OrderIdMetPunten snippet\nUses a text MISPL."
+	},
+	"Ord.AddRequest": {
+		"prefix": "Ord.AddRequest",
+		"body": "Ord.AddRequest(${1:sRequestList}, ${2:dtObjectTime|?}, ${3:lToCharge|?})",
+		"description": "Ord.AddRequest(String RequestList, DateTime ObjectTime, Logical ToCharge)\nAdd a list of requests to an existing order."
+	},
+	"Ord.AddRequestWithBillingMark": {
+		"prefix": "Ord.AddRequestWithBillingMark",
+		"body": "Ord.AddRequestWithBillingMark(${1:sRequestList}, ${2:dtObjectTime}, ${3:lToCharge}, ${4:sBillingMark})",
+		"description": "Ord.AddRequestWithBillingMark(...)\nAdd a list of requests to an existing order forseen with a billingmark."
+	},
+	"Ord.Attribute": {
+		"prefix": "Ord.Attribute",
+		"body": "Ord.Attribute(${1:sAttributeName})",
+		"description": "Ord.Attribute(String AttributeName)\nReturns order attributes."
+	},
+	"Ord.Attribute_PropertyList": {
+		"prefix": "Ord.Attribute_PropertyList",
+		"body": "Ord.Attribute(\"PropertyList\")",
+		"description": "Ord.Attribute_PropertyList snippet"
+	},
+	"Ord.Attribute_RequestList": {
+		"prefix": "Ord.Attribute_RequestList",
+		"body": "Ord.Attribute(\"RequestList\")",
+		"description": "Ord.Attribute_RequestList snippet"
+	},
+	"Ord.CancelResults": {
+		"prefix": "Ord.CancelResults",
+		"body": "Ord.CancelResults(${1:sPropertyMnemonicList}, ${2:sReason})",
+		"description": "Ord.CancelResults(String PropertyMnemonicList, String Reason)\nCancel(discontinue) results of an order."
+	},
+	"Ord.Consult": {
+		"prefix": "Ord.Consult",
+		"body": "Ord.Consult()",
+		"description": "Ord.Consult()\nGet the consult record for the current order."
+	},
+	"Ord.CreateReport": {
+		"prefix": "Ord.CreateReport",
+		"body": "Ord.CreateReport(${1:sCode})",
+		"description": "Ord.CreateReport(String Code)"
+	},
+	"Ord.GetClinicalConsultation": {
+		"prefix": "Ord.GetClinicalConsultation",
+		"body": "Ord.GetClinicalConsultation()",
+		"description": "Ord.GetClinicalConsultation()\nRetrieve the Clinical Consultation linked to this Order."
+	},
+	"Ord.GetDiagnosis": {
+		"prefix": "Ord.GetDiagnosis",
+		"body": "Ord.GetDiagnosis(${1:sPrevious|?}, ${2:sCode})",
+		"description": "Ord.GetDiagnosis(String Previous, String Code)\nGets the next Diagnosis referring to the current order."
+	},
+	"Ord.GetGeneticExams": {
+		"prefix": "Ord.GetGeneticExams",
+		"body": "Ord.GetGeneticExams(${1:sGeneticProceduresMnemonics}, ${2:sMinStatus}, ${3:sMaxStatus})",
+		"description": "Ord.GetGeneticExams(...)\nMethod to get to one/some/all genetic exams of an order."
+	},
+	"Ord.GetHLAExams": {
+		"prefix": "Ord.GetHLAExams",
+		"body": "Ord.GetHLAExams(${1:sHLAProceduresMnemonics}, ${2:sMinimalStatus}, ${3:sMaximumStatus})",
+		"description": "Ord.GetHLAExams(...)\nMethod to get to one/some/all HLA exams of an order."
+	},
+	"Ord.GetIdentifier": {
+		"prefix": "Ord.GetIdentifier",
+		"body": "Ord.GetIdentifier(${1:eIdentifierType})",
+		"description": "Ord.GetIdentifier(SiteEnumerated IdentifierType)\nGet the specified identifier of the order."
+	},
+	"Ord.GetOrderTodoItem": {
+		"prefix": "Ord.GetOrderTodoItem",
+		"body": "Ord.GetOrderTodoItem(${1:sOrderTodoItemId})",
+		"description": "Ord.GetOrderTodoItem(String OrderTodoItemId)\nRetrieve a specific order to-do item of an order."
+	},
+	"Ord.GetOrderTodoItems": {
+		"prefix": "Ord.GetOrderTodoItems",
+		"body": "Ord.GetOrderTodoItems(${1:sOrderTodoListMnemonic}, ${2:lOrderTodoItemStatus})",
+		"description": "Ord.GetOrderTodoItems(String OrderTodoListMnemonic, Logical OrderTodoItemStatus)\nReturns all linked order to-do items."
+	},
+	"Ord.GetPhoneLog": {
+		"prefix": "Ord.GetPhoneLog",
+		"body": "Ord.GetPhoneLog(${1:sPrevious}, ${2:lPhoned|?})",
+		"description": "Ord.GetPhoneLog(String Previous|?, Logical Phoned)\nGetPhoneLog"
+	},
+	"Ord.GetSpecimen": {
+		"prefix": "Ord.GetSpecimen",
+		"body": "Ord.GetSpecimen(${1:Previous|?}, ${2:sMaterial|?})",
+		"description": "Ord.GetSpecimen(String Previous, Mnemonic Material)\nAllows accessing the different specimens of an order."
+	},
+	"Ord.GetTransplantRegistrations": {
+		"prefix": "Ord.GetTransplantRegistrations",
+		"body": "Ord.GetTransplantRegistrations(${1:sMinimalStatusMnemonic}, ${2:sMinimalStatus}, ${3:sMaximalStatus})",
+		"description": "Ord.GetTransplantRegistrations(...)\nGet a list of HLA transplant registrations linked to this order."
+	},
+	"Ord.HasMissingSpecimens": {
+		"prefix": "Ord.HasMissingSpecimens",
+		"body": "Ord.HasMissingSpecimens()",
+		"description": "Ord.HasMissingSpecimens()\nChecks if an order has missing specimen."
+	},
+	"Ord.HasPreviousResults": {
+		"prefix": "Ord.HasPreviousResults",
+		"body": "Ord.HasPreviousResults(${1:sPropertyClassificationName}, ${2:sMinimalResultStatus})",
+		"description": "Ord.HasPreviousResults(String PropertyClassificationName, String MinimalResultStatus)\nChecks if results have historical predecessors."
+	},
+	"Ord.IsEmpty": {
+		"prefix": "Ord.IsEmpty",
+		"body": "Ord.IsEmpty()",
+		"description": "Ord.IsEmpty()\nChecks if an order is empty."
+	},
+	"Ord.IsRequested": {
+		"prefix": "Ord.IsRequested",
+		"body": "Ord.IsRequested(${1:sMnemonicList}, ${2:lAll})",
+		"description": "Ord.IsRequested(String MnemonicList, Logical All)\nChecks if an order contains one or all of a list of properties."
+	},
+	"Ord.Object": {
+		"prefix": "Ord.Object",
+		"body": "Ord.Object",
+		"description": "Ord.Object\nReturns object of order"
+	},
+	"Ord.PropertyList": {
+		"prefix": "Ord.PropertyList",
+		"body": "Ord.PropertyList(${1:sMinimalStatus}, ${2:sMaximalStatus}, ${3:sPropertyFieldName}, ${4:sPropertyClassification}, ${5:lAllowUnsolicitedResults})",
+		"description": "Ord.PropertyList(...)\nReturns a list of properties that belong to the specified property classification."
+	},
+	"Ord.RecalculateSpecimen": {
+		"prefix": "Ord.RecalculateSpecimen",
+		"body": "Ord.RecalculateSpecimen()",
+		"description": "Ord.RecalculateSpecimen()\nTrigger recalculation of the internal id of all specimen."
+	},
+	"Ord.ReportList": {
+		"prefix": "Ord.ReportList",
+		"body": "Ord.ReportList(${1:sScope}, ${2:sDefaultReportCode}, ${3:sTemplateMnemonic}, ${4:sTargetInternalId}, ${5:lIsCopy})",
+		"description": "Ord.ReportList(...)\nReturns a comma-separated list of reports containing results."
+	},
+	"Ord.RequestedCode": {
+		"prefix": "Ord.RequestedCode",
+		"body": "Ord.RequestedCode(${1:sCode}, ${2:iSeq|?})",
+		"description": "Ord.RequestedCode(String Code, Integer Seq)\nThe function returns the n-th requested code."
+	},
+	"Ord.Result": {
+		"prefix": "Ord.Result",
+		"body": "Ord.Result(${1:sPropertyMnemonic}, ${2:sMinimalStatus|?}, ${3:sMaximalStatus|?})",
+		"description": "Ord.Result(Mnemonic PropertyMnemonic, String MinimalStatus, String MaximalStatus)\nReturns a reference to a specific result of the order."
+	},
+	"Ord.SetDepartment": {
+		"prefix": "Ord.SetDepartment",
+		"body": "Ord.SetDepartment(${1:sDepartmentMnemonic})",
+		"description": "Ord.SetDepartment(Mnemonic DepartmentMnemonic)\nAllows updating the department for which an order was created."
+	},
+	"Ord.SetImage": {
+		"prefix": "Ord.SetImage",
+		"body": "Ord.SetImage(${1:sFileName})",
+		"description": "Ord.SetImage(String FileName)\nSets the Order.Image field for communication."
+	},
+	"Ord.SetStudyEpisode": {
+		"prefix": "Ord.SetStudyEpisode",
+		"body": "Ord.SetStudyEpisode(${1:sEpisode})",
+		"description": "Ord.SetStudyEpisode(String Episode)\nChanges the field StudyEpisode of the Order."
+	},
+	"Ord.Summary": {
+		"prefix": "Ord.Summary",
+		"body": "Ord.Summary(${1:sMinimalStatus}, ${2:sMaximalStatus}, ${3:sPropertyFieldName}, ${4:sPropertyClassification}, ${5:lAllowUnsolicitedResults}, ${6:sSeparator}, ${7:sFormat})",
+		"description": "Ord.Summary(...)\nReturns a compact order summary."
+	},
+	"Ord.TariffResult": {
+		"prefix": "Ord.TariffResult",
+		"body": "Ord.TariffResult(${1:sBillingCode}, ${2:sPropertyMnemonic})",
+		"description": "Ord.TariffResult(String BillingCode, String PropertyMnemonic)\nReturns a reference to a tariffed result of this order."
+	},
+	"Ord.ToBePhoned": {
+		"prefix": "Ord.ToBePhoned",
+		"body": "Ord.ToBePhoned()",
+		"description": "Ord.ToBePhoned()\nMarks a complete order as to be phoned."
+	},
+	"PatData": {
+		"prefix": "PatData",
+		"body": [
+			"sTmp := IfKnownString(Expand(\"Person\", Prsn.Id, \"{\u003cPatData \\\\Fm=%FL [-%SL], %FN| [%BD] | [%SX]\", ?));",
+			"sNam := Entry(1, sTmp, \"|\");",
+			"sDOB := Entry(2, sTmp, \"|\");",
+			"sSex := Entry(3, sTmp, \"|\");"
+		],
+		"description": "PatData snippet\nUse this in text MISPLs."
+	},
+	"PatDataTXT": {
+		"prefix": "PatDataTXT",
+		"body": [
+			"sTmp := IfKnownString(Expand(\"Person\", Prsn.Id, Chr(123)+\"\u003cPatData \\\\Fm=%FL [-%SL], %FN| [%BD] | [%SX]\"+Chr(125), ?));",
+			"sNam := Entry(1, sTmp, \"|\");",
+			"sDOB := Entry(2, sTmp, \"|\");",
+			"sSex := Entry(3, sTmp, \"|\");"
+		],
+		"description": "PatDataTXT snippet\nUse this in text MISPLs."
+	},
+	"PatientDisorderFromList": {
+		"prefix": "PatientDisorderFromList",
+		"body": "PatientDisorderFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "PatientDisorder PatientDisorderFromList(String IdList, Integer Position)\nGet the n-th patient disorder."
+	},
+	"PaymentAgreements": {
+		"prefix": "PaymentAgreements",
+		"body": "PaymentAgreements(${1:sPolicyNameCode}, ${2:iCorrespondentId|?}, ${3:iFundId|?}, ${4:dValidityDate|?})",
+		"description": "String PaymentAgreements(String PolicyNameCode, Correspondent CorrespondentId, Fund FundId, Date ValidityDate)\nReturns a comma-separated list of payment agreement Ids."
+	},
+	"PeekCharacter": {
+		"prefix": "PeekCharacter",
+		"body": "PeekCharacter(${1:sSharedVariableName})",
+		"description": "String PeekCharacter(String SharedVariableName)\nReturns the value of the named shared character variable."
+	},
+	"PeekDate": {
+		"prefix": "PeekDate",
+		"body": "PeekDate(${1:sSharedVariableName})",
+		"description": "Date PeekDate(String SharedVariableName)\nReturns the value of the named shared date variable."
+	},
+	"PeekDecimal": {
+		"prefix": "PeekDecimal",
+		"body": "PeekDecimal(${1:sSharedVariableName})",
+		"description": "Fractional PeekDecimal(String SharedVariableName)\nReturns the value of the named shared decimal variable."
+	},
+	"PeekInteger": {
+		"prefix": "PeekInteger",
+		"body": "PeekInteger(${1:sSharedVariableName})",
+		"description": "Integer PeekInteger(String SharedVariableName)\nReturns the value of the named shared integer variable."
+	},
+	"PeekLogical": {
+		"prefix": "PeekLogical",
+		"body": "PeekLogical(${1:sSharedVariableName})",
+		"description": "Logical PeekLogical(String SharedVariableName)\nReturns the value of the named shared logical variable."
+	},
+	"PeekRecId": {
+		"prefix": "PeekRecId",
+		"body": "PeekRecId(${1:sSharedVariableName})",
+		"description": "Integer PeekRecId(String SharedVariableName)\nReturns the value of the shared recid variable."
+	},
+	"PhenotypeFromList": {
+		"prefix": "PhenotypeFromList",
+		"body": "PhenotypeFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "Disorder PhenotypeFromList(String IdList, Integer Position)\nGet the n-th disorder of type phenotype."
+	},
+	"PlateFromList": {
+		"prefix": "PlateFromList",
+		"body": "PlateFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "Plate PlateFromList(String IdList, Integer Position)\nGet the n-th Plate."
+	},
+	"PlateItemFromList": {
+		"prefix": "PlateItemFromList",
+		"body": "PlateItemFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "PlateItem PlateItemFromList(String IdList, Integer Position)\nGet the n-th PlateItem."
+	},
+	"PokeCharacter": {
+		"prefix": "PokeCharacter",
+		"body": "PokeCharacter(${1:sSharedVariableName}, ${2:sValue})",
+		"description": "Void PokeCharacter(String SharedVariableName, String Value)\nAssigns a value to the named shared character variable."
+	},
+	"PokeDate": {
+		"prefix": "PokeDate",
+		"body": "PokeDate(${1:sSharedVariableName}, ${2:dValue})",
+		"description": "Void PokeDate(String SharedVariableName, Date Value)\nAssigns a value to the named shared date variable."
+	},
+	"PokeDecimal": {
+		"prefix": "PokeDecimal",
+		"body": "PokeDecimal(${1:sSharedVariableName}, ${2:fValue})",
+		"description": "Void PokeDecimal(String SharedVariableName, Fractional Value)\nAssigns a value to the named shared decimal variable."
+	},
+	"PokeInteger": {
+		"prefix": "PokeInteger",
+		"body": "PokeInteger(${1:sSharedVariableName}, ${2:iValue})",
+		"description": "Void PokeInteger(String SharedVariableName, Integer Value)\nAssigns a value to the named shared integer variable."
+	},
+	"PokeLogical": {
+		"prefix": "PokeLogical",
+		"body": "PokeLogical(${1:sSharedVariableName}, ${2:lValue})",
+		"description": "Void PokeLogical(String SharedVariableName, Logical Value)\nAssign a value to the named shared logical variable."
+	},
+	"PokeRecId": {
+		"prefix": "PokeRecId",
+		"body": "PokeRecId(${1:sSharedVariableName}, ${2:iValue})",
+		"description": "Void PokeRecId(String SharedVariableName, Integer Value)\nAssigns a value to the named shared recid variable."
+	},
+	"Prsn.AfterBirth": {
+		"prefix": "Prsn.AfterBirth",
+		"body": "Prsn.AfterBirth()",
+		"description": "Prsn.AfterBirth()\nIf this person is a foetus and after birth the person was also registered in GLIMS, navigates to this born person."
+	},
+	"Prsn.AntigenAntibody": {
+		"prefix": "Prsn.AntigenAntibody",
+		"body": "Prsn.AntigenAntibody(${1:sAntigenMnemonic})",
+		"description": "Prsn.AntigenAntibody(Mnemonic AntigenMnemonic)\nReturns the identifier of the record that contains the presence or absence of a specified antigen."
+	},
+	"Prsn.AntigenByNumber": {
+		"prefix": "Prsn.AntigenByNumber",
+		"body": "Prsn.AntigenByNumber(${1:iNumber})",
+		"description": "Prsn.AntigenByNumber(PositiveInteger Number)\nNavigates to the person's n-th antigen record."
+	},
+	"Prsn.AvailableBloodBagByNumber": {
+		"prefix": "Prsn.AvailableBloodBagByNumber",
+		"body": "Prsn.AvailableBloodBagByNumber(${1:sProductMnemonic}, ${2:lAutologous}, ${3:sStatus}, ${4:iNumber})",
+		"description": "Prsn.AvailableBloodBagByNumber(...)\nReturns the nth blood bag that is currently available."
+	},
+	"Prsn.BloodForPersonAvailable": {
+		"prefix": "Prsn.BloodForPersonAvailable",
+		"body": "Prsn.BloodForPersonAvailable(${1:sProductMnemonic}, ${2:lAutologous}, ${3:sDepartmentMnemonic}, ${4:sStatus})",
+		"description": "Prsn.BloodForPersonAvailable(...)\nReturns TRUE if at least one blood bag is available for this person."
+	},
+	"Prsn.CalculateMedidocCaseNumber": {
+		"prefix": "Prsn.CalculateMedidocCaseNumber",
+		"body": "Prsn.CalculateMedidocCaseNumber()",
+		"description": "Prsn.CalculateMedidocCaseNumber()\nMispl function which will calculate a patients medidoc case number."
+	},
+	"Prsn.CheckNationalNumber": {
+		"prefix": "Prsn.CheckNationalNumber",
+		"body": "Prsn.CheckNationalNumber(${1:sMatriculation}, ${2:iMatriculationType})",
+		"description": "Prsn.CheckNationalNumber(String Matriculation, Integer MatriculationType)\nChecks the validity of the national number of a person."
+	},
+	"Prsn.Encounter": {
+		"prefix": "Prsn.Encounter",
+		"body": "Prsn.Encounter(${1:sInstitution}, ${2:dtEncounterTime})",
+		"description": "Prsn.Encounter(String Institution, DateTime EncounterTime)\nReturns an encounter that matches the institution and validity time parameters."
+	},
+	"Prsn.ExtendedBirthDate": {
+		"prefix": "Prsn.ExtendedBirthDate",
+		"body": "Prsn.ExtendedBirthDate(${1:sFormat})",
+		"description": "Prsn.ExtendedBirthDate(String Format)\nGet extented birthdate of person."
+	},
+	"Prsn.GetAntibody": {
+		"prefix": "Prsn.GetAntibody",
+		"body": "Prsn.GetAntibody(${1:sAntigenMnemonic})",
+		"description": "Prsn.GetAntibody(String AntigenMnemonic)\nGetAntibody"
+	},
+	"Prsn.GetAntigen": {
+		"prefix": "Prsn.GetAntigen",
+		"body": "Prsn.GetAntigen(${1:sAntigenMnemonic})",
+		"description": "Prsn.GetAntigen(String AntigenMnemonic)\nGetAntigen"
+	},
+	"Prsn.GetEncounter": {
+		"prefix": "Prsn.GetEncounter",
+		"body": "Prsn.GetEncounter(${1:sInstitution}, ${2:sType}, ${3:sResidenceType}, ${4:dtReferenceTime|?}, ${5:iHistoryIndex})",
+		"description": "Prsn.GetEncounter(...)\nSearches for an encounter that matches the specified criteria."
+	},
+	"Prsn.GetEncountersList": {
+		"prefix": "Prsn.GetEncountersList",
+		"body": "Prsn.GetEncountersList()",
+		"description": "Prsn.GetEncountersList()\nThis returns a list of all Person Encounters."
+	},
+	"Prsn.GetMedicalRecord": {
+		"prefix": "Prsn.GetMedicalRecord",
+		"body": "Prsn.GetMedicalRecord()",
+		"description": "Prsn.GetMedicalRecord()\nGetMedicalRecord"
+	},
+	"Prsn.GetNMRInfo": {
+		"prefix": "Prsn.GetNMRInfo",
+		"body": "Prsn.GetNMRInfo()",
+		"description": "Prsn.GetNMRInfo()\nRetrieves the PersonNMRInfo record for a given person."
+	},
+	"Prsn.GetTypingAdvice": {
+		"prefix": "Prsn.GetTypingAdvice",
+		"body": "Prsn.GetTypingAdvice(${1:sBloodBagInternalId}, ${2:sAntigenMnemonic})",
+		"description": "Prsn.GetTypingAdvice(String BloodBagInternalId, String AntigenMnemonic)\nThis MISPL function can for example be used to check the manual transfusion advice."
+	},
+	"Prsn.HLAAntibody": {
+		"prefix": "Prsn.HLAAntibody",
+		"body": "Prsn.HLAAntibody(${1:sAntibodyMnemonic})",
+		"description": "Prsn.HLAAntibody(Mnemonic AntibodyMnemonic)\nNavigates to the person-HLA-antibody record."
+	},
+	"Prsn.HLAAntibodyByNumber": {
+		"prefix": "Prsn.HLAAntibodyByNumber",
+		"body": "Prsn.HLAAntibodyByNumber(${1:iNumber})",
+		"description": "Prsn.HLAAntibodyByNumber(PositiveInteger Number)\nNavigates to the persons n-th HLA-antibody record."
+	},
+	"Prsn.HLAAntigen": {
+		"prefix": "Prsn.HLAAntigen",
+		"body": "Prsn.HLAAntigen(${1:sAntigenMnemonic})",
+		"description": "Prsn.HLAAntigen(Mnemonic AntigenMnemonic)\nNavigates to the person-HLA-antigen record."
+	},
+	"Prsn.HLAAntigenByNumber": {
+		"prefix": "Prsn.HLAAntigenByNumber",
+		"body": "Prsn.HLAAntigenByNumber(${1:iNumber})",
+		"description": "Prsn.HLAAntigenByNumber(PositiveInteger Number)\nNavigates to the persons n-th HLA-antigen record."
+	},
+	"Prsn.Hospitalized": {
+		"prefix": "Prsn.Hospitalized",
+		"body": "Prsn.Hospitalized(${1:dtTargetTime})",
+		"description": "Prsn.Hospitalized(DateTime TargetTime)\nLooks if the person had an active encounter of type hospitalized."
+	},
+	"Prsn.OtherAntigens": {
+		"prefix": "Prsn.OtherAntigens",
+		"body": "Prsn.OtherAntigens()",
+		"description": "Prsn.OtherAntigens()\nTwo MISPL functions are available on the Person table : RhesusPhenoType & OtherAntigens."
+	},
+	"Prsn.Relation": {
+		"prefix": "Prsn.Relation",
+		"body": "Prsn.Relation(${1:sType}, ${2:iNumber})",
+		"description": "Prsn.Relation(String Type, PositiveInteger Number)\nReturns the n-th PersonRelation record."
+	},
+	"Prsn.RelationsOverview": {
+		"prefix": "Prsn.RelationsOverview",
+		"body": "Prsn.RelationsOverview(${1:sTextMnemonic}, ${2:sType}, ${3:lRecursive})",
+		"description": "Prsn.RelationsOverview(Mnemonic TextMnemonic, String Type, Logical Recursive)\nThis returns a text that is built from repeating the specified text module."
+	},
+	"Prsn.RhesusPhenoType": {
+		"prefix": "Prsn.RhesusPhenoType",
+		"body": "Prsn.RhesusPhenoType()",
+		"description": "Prsn.RhesusPhenoType()\nTwo MISPL functions are available on the Person table : RhesusPhenoType & OtherAntigens."
+	},
+	"Prsn.SetAntibody": {
+		"prefix": "Prsn.SetAntibody",
+		"body": "Prsn.SetAntibody(${1:sAntigenMnemonic}, ${2:lPresence})",
+		"description": "Prsn.SetAntibody(String AntigenMnemonic, Logical Presence)\nTrack the presence or absence of an antibody."
+	},
+	"Prsn.SetAntigen": {
+		"prefix": "Prsn.SetAntigen",
+		"body": "Prsn.SetAntigen(${1:sAntigenMnemonic}, ${2:lPresence})",
+		"description": "Prsn.SetAntigen(String AntigenMnemonic, Logical Presence)\nTrack the presence or absence of an antigen."
+	},
+	"Prsn.SetHLAAntibodyPresence": {
+		"prefix": "Prsn.SetHLAAntibodyPresence",
+		"body": "Prsn.SetHLAAntibodyPresence(${1:sAntibodyName}, ${2:dTheDate}, ${3:lPresence})",
+		"description": "Prsn.SetHLAAntibodyPresence(Mnemonic AntibodyName, Date TheDate, Logical Presence)\nSetHLAAntibodyPresence"
+	},
+	"Prsn.SetHLAAntibodyRValue": {
+		"prefix": "Prsn.SetHLAAntibodyRValue",
+		"body": "Prsn.SetHLAAntibodyRValue(${1:sAntibodyName}, ${2:dTheDate}, ${3:fRValue})",
+		"description": "Prsn.SetHLAAntibodyRValue(Mnemonic AntibodyName, Date TheDate, PositiveFractional RValue)\nSetHLAAntibodyRValue"
+	},
+	"Prsn.SetHLAAntigenPresence": {
+		"prefix": "Prsn.SetHLAAntigenPresence",
+		"body": "Prsn.SetHLAAntigenPresence(${1:sAntigenName}, ${2:lPresence})",
+		"description": "Prsn.SetHLAAntigenPresence(Mnemonic AntigenName, Logical Presence)\nSet the presence of the specified HLA antigen."
+	},
+	"Prsn.SetMedicalRecord": {
+		"prefix": "Prsn.SetMedicalRecord",
+		"body": "Prsn.SetMedicalRecord(${1:sFieldName}, ${2:sFieldValue})",
+		"description": "Prsn.SetMedicalRecord(String FieldName, String FieldValue)\nAllows to set or change the fields of the persons medical record."
+	},
+	"Prsn.SetTypingAdvice": {
+		"prefix": "Prsn.SetTypingAdvice",
+		"body": "Prsn.SetTypingAdvice(${1:sAntigenMnemonic}, ${2:lValue})",
+		"description": "Prsn.SetTypingAdvice(Mnemonic AntigenMnemonic, Logical Value)\nSets the field TypingAdvice in table PersonAntigen."
+	},
+	"Prsn.Stay": {
+		"prefix": "Prsn.Stay",
+		"body": "Prsn.Stay(${1:dtTargetTime})",
+		"description": "Prsn.Stay(DateTime TargetTime)\nReturns the stay in which the person is currently staying."
+	},
+	"Prsn.Stays": {
+		"prefix": "Prsn.Stays",
+		"body": "Prsn.Stays()",
+		"description": "Prsn.Stays()\nThis returns a String list of all Stays of a Person."
+	},
+	"PutTag": {
+		"prefix": "PutTag",
+		"body": "PutTag(${1:sTag}, ${2:sStringValue}, ${3:sList}, ${4:sDelimiter|?})",
+		"description": "String PutTag(String Tag, String StringValue, String List, String Delimiter)\nPuts or replaces an entry in a tagged value list."
+	},
+	"RangeLabel": {
+		"prefix": "RangeLabel",
+		"body": "RangeLabel(${1:fTestValue}, ${2:sRangeList})",
+		"description": "String RangeLabel(Fractional TestValue, String RangeList)\nFinds out in which numeric range a TestValue is located and returns the label."
+	},
+	"RegisterNonconformity": {
+		"prefix": "RegisterNonconformity",
+		"body": "RegisterNonconformity(${1:sContextTableName}, ${2:iContextRecordId}, ${3:sNCTypeMnemonic})",
+		"description": "Nonconformity RegisterNonconformity(Mnemonic ContextTableName, INT64 ContextRecordId, Mnemonic NCTypeMnemonic)\nThis will create a Nonconformity record."
+	},
+	"RemoveEntry": {
+		"prefix": "RemoveEntry",
+		"body": "RemoveEntry(${1:sList}, ${2:sDelimiter|?}, ${3:iPosition}, ${4:iCount})",
+		"description": "String RemoveEntry(String List, String Delimiter, Integer Position, Integer Count)\nRemoves Count character string entries from the List."
+	},
+	"REPEAT UNTIL": {
+		"prefix": "REPEAT UNTIL",
+		"body": [
+			"I := 0;",
+			"REPEAT",
+			"\tI := I + 1;",
+			"\t$0",
+			"UNTIL TRUE;"
+		],
+		"description": "REPEAT UNTIL snippet"
+	},
+	"Replace": {
+		"prefix": "Replace",
+		"body": "Replace(${1:sSource}, ${2:sFromString}, ${3:sToString})",
+		"description": "String Replace(String Source, String FromString, String ToString)\nReturns a string with specified substring replacements."
+	},
+	"RETURN_L": {
+		"prefix": "RETURN_L",
+		"body": "RETURN TRUE;",
+		"description": "RETURN_L snippet"
+	},
+	"RETURN_S": {
+		"prefix": "RETURN_S",
+		"body": "RETURN \"\";",
+		"description": "RETURN_S snippet"
+	},
+	"Round": {
+		"prefix": "Round",
+		"body": "Round(${1:fValue}, ${2:iDecimalPlaces})",
+		"description": "Fractional Round(Fractional Value, Integer DecimalPlaces)\nRounds a fractional Value to a specified number of DecimalPlaces."
+	},
+	"Rpad": {
+		"prefix": "Rpad",
+		"body": "Rpad(${1:sExpression}, ${2:iLength}, ${3:sPadString})",
+		"description": "String Rpad(String Expression, Integer Length, String PadString)\nReturns a string formed from Expression(right aligned)."
+	},
+	"Rslt.Action": {
+		"prefix": "Rslt.Action",
+		"body": "Rslt.Action()",
+		"description": "Rslt.Action()\nAction"
+	},
+	"Rslt.AddExternalComment": {
+		"prefix": "Rslt.AddExternalComment",
+		"body": "Rslt.AddExternalComment(${1:sText}, ${2:lAppend})",
+		"description": "Rslt.AddExternalComment(String Text, Logical Append)\nAddExternalComment"
+	},
+	"Rslt.AddInternalComment": {
+		"prefix": "Rslt.AddInternalComment",
+		"body": "Rslt.AddInternalComment(${1:sText}, ${2:lAppend})",
+		"description": "Rslt.AddInternalComment(String Text, Logical Append)\nAddInternalComment"
+	},
+	"Rslt.Attribute": {
+		"prefix": "Rslt.Attribute",
+		"body": "Rslt.Attribute(${1:sAttributeName})",
+		"description": "Rslt.Attribute(String AttributeName)\nFetches an attribute of the current result in string format."
+	},
+	"Rslt.BloodSelectionDiscontinuation": {
+		"prefix": "Rslt.BloodSelectionDiscontinuation",
+		"body": "Rslt.BloodSelectionDiscontinuation(${1:sReason})",
+		"description": "Rslt.BloodSelectionDiscontinuation(String Reason)\nDiscontinues and repeats the blood selection."
+	},
+	"Rslt.Cancel": {
+		"prefix": "Rslt.Cancel",
+		"body": "Rslt.Cancel(${1:sAction}, ${2:sReason})",
+		"description": "Rslt.Cancel(String Action, String Reason)\nCancels the result and requires a justification."
+	},
+	"Rslt.GetBloodSelection": {
+		"prefix": "Rslt.GetBloodSelection",
+		"body": "Rslt.GetBloodSelection()",
+		"description": "Rslt.GetBloodSelection()\nGetBloodSelection"
+	},
+	"Rslt.GetCode": {
+		"prefix": "Rslt.GetCode",
+		"body": "Rslt.GetCode(${1:sCodingSystemMnemonic})",
+		"description": "Rslt.GetCode(Mnemonic CodingSystemMnemonic)\nGetCode"
+	},
+	"Rslt.GetDilutionCode": {
+		"prefix": "Rslt.GetDilutionCode",
+		"body": "Rslt.GetDilutionCode(${1:sCode})",
+		"description": "Rslt.GetDilutionCode(String Code)\nGet dilution code id given a dilution code as string."
+	},
+	"Rslt.GetPriorResult": {
+		"prefix": "Rslt.GetPriorResult",
+		"body": "Rslt.GetPriorResult(${1:iIndex}, ${2:sImposedResultValue})",
+		"description": "Rslt.GetPriorResult(PositiveInteger Index, String ImposedResultValue)\nReturns the id of the requested result record."
+	},
+	"Rslt.LastOrder": {
+		"prefix": "Rslt.LastOrder",
+		"body": "Rslt.LastOrder()",
+		"description": "Rslt.LastOrder()\nShould no longer be used. Please use Result.Order instead."
+	},
+	"Rslt.LastRequest": {
+		"prefix": "Rslt.LastRequest",
+		"body": "Rslt.LastRequest(${1:lExplicit|?})",
+		"description": "Rslt.LastRequest(Logical Explicit)\nLastRequest"
+	},
+	"Rslt.MarkAsSolicited": {
+		"prefix": "Rslt.MarkAsSolicited",
+		"body": "Rslt.MarkAsSolicited()",
+		"description": "Rslt.MarkAsSolicited()\nMarks an unsolicited result as solicited."
+	},
+	"Rslt.MicrobiologyAction": {
+		"prefix": "Rslt.MicrobiologyAction",
+		"body": "Rslt.MicrobiologyAction()",
+		"description": "Rslt.MicrobiologyAction()\nMicrobiologyAction"
+	},
+	"Rslt.NumericValue": {
+		"prefix": "Rslt.NumericValue",
+		"body": "Rslt.NumericValue()",
+		"description": "Rslt.NumericValue()\nMicrobiologyAction"
+	},
+	"Rslt.PriorAttribute": {
+		"prefix": "Rslt.PriorAttribute",
+		"body": "Rslt.PriorAttribute(${1:iIndex}, ${2:sImposedResultValue}, ${3:sAttributeName})",
+		"description": "Rslt.PriorAttribute(PositiveInteger Index, String ImposedResultValue, String AttributeName)\nPriorAttribute"
+	},
+	"Rslt.Property": {
+		"prefix": "Rslt.Property",
+		"body": "Rslt.Property",
+		"description": "Rslt.Property snippet"
+	},
+	"Rslt.Property.Description": {
+		"prefix": "Rslt.Property.Description",
+		"body": "Rslt.Property.Description()",
+		"description": "Rslt.Property.Description snippet"
+	},
+	"Rslt.Property.Mnemonic": {
+		"prefix": "Rslt.Property.Mnemonic",
+		"body": "Rslt.Property.Mnemonic",
+		"description": "Rslt.Property.Mnemonic snippet"
+	},
+	"Rslt.ReferenceValue": {
+		"prefix": "Rslt.ReferenceValue",
+		"body": "Rslt.ReferenceValue()",
+		"description": "Rslt.ReferenceValue()\nReturns the reference values for the result."
+	},
+	"Rslt.RelatedResult": {
+		"prefix": "Rslt.RelatedResult",
+		"body": "Rslt.RelatedResult(${1:sPropertyMnemonic})",
+		"description": "Rslt.RelatedResult(String PropertyMnemonic)\nRetrieve a related result of the same object and object time."
+	},
+	"Rslt.ReportedNonconformity": {
+		"prefix": "Rslt.ReportedNonconformity",
+		"body": "Rslt.ReportedNonconformity()",
+		"description": "Rslt.ReportedNonconformity()\nNavigates from the report result to the NC record."
+	},
+	"Rslt.SetAutomaticConfirmation": {
+		"prefix": "Rslt.SetAutomaticConfirmation",
+		"body": "Rslt.SetAutomaticConfirmation(${1:lAutomaticConfirmation})",
+		"description": "Rslt.SetAutomaticConfirmation(Logical AutomaticConfirmation)\nSetAutomaticConfirmation"
+	},
+	"Rslt.SetAutomaticValidation": {
+		"prefix": "Rslt.SetAutomaticValidation",
+		"body": "Rslt.SetAutomaticValidation(${1:lAutomaticValidation})",
+		"description": "Rslt.SetAutomaticValidation(Logical AutomaticValidation)\nSetAutomaticValidation"
+	},
+	"Rslt.SetManualSeverity": {
+		"prefix": "Rslt.SetManualSeverity",
+		"body": "Rslt.SetManualSeverity(${1:iManualSeverity})",
+		"description": "Rslt.SetManualSeverity(Integer ManualSeverity)\nSetManualSeverity"
+	},
+	"Rslt.StatisticalWeight": {
+		"prefix": "Rslt.StatisticalWeight",
+		"body": "Rslt.StatisticalWeight()",
+		"description": "Rslt.StatisticalWeight()\nReturns the statistical weight applicable at the availability time."
+	},
+	"Rslt.Successor": {
+		"prefix": "Rslt.Successor",
+		"body": "Rslt.Successor()",
+		"description": "Rslt.Successor()\nSuccessor"
+	},
+	"Rslt.TransplantSelectionDiscontinuation": {
+		"prefix": "Rslt.TransplantSelectionDiscontinuation",
+		"body": "Rslt.TransplantSelectionDiscontinuation(${1:sReason})",
+		"description": "Rslt.TransplantSelectionDiscontinuation(String Reason)\nDiscontinues and repeats the transplant selection."
+	},
+	"Rslt.TransplantSelectionPromotion": {
+		"prefix": "Rslt.TransplantSelectionPromotion",
+		"body": "Rslt.TransplantSelectionPromotion()",
+		"description": "Rslt.TransplantSelectionPromotion()\nTransplantSelectionPromotion"
+	},
+	"Rslt.WorkSpecimen": {
+		"prefix": "Rslt.WorkSpecimen",
+		"body": "Rslt.WorkSpecimen()",
+		"description": "Rslt.WorkSpecimen()\nMust return the specimen on which the result was scheduled."
+	},
+	"Rtrim": {
+		"prefix": "Rtrim",
+		"body": "Rtrim(${1:sSource}, ${2:sTrimCharacters})",
+		"description": "String Rtrim(String Source, String TrimCharacters)\nRemoves trailing whitespace or other specified characters."
+	},
+	"SendMail": {
+		"prefix": "SendMail",
+		"body": "SendMail(${1:sSender}, ${2:sRecipient}, ${3:sSubject}, ${4:sContent}, ${5:x_Priority})",
+		"description": "Logical SendMail(String Sender, String Recipient, String Subject, String Content, MailPriority Priority)\nSends an internal or external e-mail."
+	},
+	"SetSiteAttribute": {
+		"prefix": "SetSiteAttribute",
+		"body": "SetSiteAttribute(${1:sTableName}, ${2:iRecordId}, ${3:sAttributeName}, ${4:sStringValue|?})",
+		"description": "Logical SetSiteAttribute(String TableName, Record RecordId, String AttributeName, String StringValue)\nSets or updates the value of a site attribute."
+	},
+	"SetSiteAttribute_TmpResultComm": {
+		"prefix": "SetSiteAttribute_TmpResultComm",
+		"body": "SetSiteAttribute(\"Result\", Rslt.ID, \"TmpResultCommentaar\", ${1:sExtComm});",
+		"description": "SetSiteAttribute_TmpResultComm snippet"
+	},
+	"Sort": {
+		"prefix": "Sort",
+		"body": "Sort(${1:sList}, ${2:sDelimiter|?})",
+		"description": "String Sort(String List, String Delimiter)\nAlphabetically sorts a Delimiter-separated List."
+	},
+	"Specimen": {
+		"prefix": "Specimen",
+		"body": "Specimen Spmn;",
+		"description": "Specimen snippet"
+	},
+	"Spmn.AddBlocks": {
+		"prefix": "Spmn.AddBlocks",
+		"body": "Spmn.AddBlocks(${1:sMediumMnemonic}, ${2:iNumberToAdd}, ${3:iNumberToReach}, ${4:lPrintBlockLabel})",
+		"description": "Spmn.AddBlocks(Mnemonic MediumMnemonic, PositiveInteger NumberToAdd, PositiveInteger NumberToReach, Logical PrintBlockLabel)\nAddBlocks"
+	},
+	"Spmn.AddCarriers": {
+		"prefix": "Spmn.AddCarriers",
+		"body": "Spmn.AddCarriers(${1:sMicrobiologyMnemonic}, ${2:sMediumMnemonicList|?}, ${3:lPrint||?}, ${4:lMarkAsGrafted|?}, ${5:lDoubleAllowed|?}, ${6:sComment|?})",
+		"description": "Spmn.AddCarriers(...)\nAdding one or more carrier(s) to microbiology action(s)."
+	},
+	"Spmn.AddRequest": {
+		"prefix": "Spmn.AddRequest",
+		"body": "Spmn.AddRequest(${1:sRequestList}, ${2:lToCharge|?}, ${3:sBillingMark|?})",
+		"description": "Spmn.AddRequest(String RequestList, Logical ToCharge, String BillingMark)\nAddRequest"
+	},
+	"Spmn.Attribute": {
+		"prefix": "Spmn.Attribute",
+		"body": "Spmn.Attribute(${1:sAttributeName})",
+		"description": "Spmn.Attribute(String AttributeName)"
+	},
+	"Spmn.CarrierCount": {
+		"prefix": "Spmn.CarrierCount",
+		"body": "Spmn.CarrierCount(${1:sMediumMnemonicList}, ${2:sMediumTestMnemonicList})",
+		"description": "Spmn.CarrierCount(String MediumMnemonicList, String MediumTestMnemonicList)\nAttribute"
+	},
+	"Spmn.CollectionInfo": {
+		"prefix": "Spmn.CollectionInfo",
+		"body": "Spmn.CollectionInfo()",
+		"description": "Spmn.CollectionInfo()\nAccess to the SpecimenCollectionInfo-record."
+	},
+	"Spmn.DirectParent": {
+		"prefix": "Spmn.DirectParent",
+		"body": "Spmn.DirectParent()",
+		"description": "Spmn.DirectParent()\nReturn the specimen that is the direct parent."
+	},
+	"Spmn.FirstRequest": {
+		"prefix": "Spmn.FirstRequest",
+		"body": "Spmn.FirstRequest(${1:lExplicit|?})",
+		"description": "Spmn.FirstRequest(Logical Explicit)\nReturns the oldest request for a specimen."
+	},
+	"Spmn.GetItemStorageLocations": {
+		"prefix": "Spmn.GetItemStorageLocations",
+		"body": "Spmn.GetItemStorageLocations()",
+		"description": "Spmn.GetItemStorageLocations()\nMethod to get to all item storages of a Specimen."
+	},
+	"Spmn.GetLastPool": {
+		"prefix": "Spmn.GetLastPool",
+		"body": "Spmn.GetLastPool()",
+		"description": "Spmn.GetLastPool()\nReturn the most recently created SpecimenPool."
+	},
+	"Spmn.GetStorage": {
+		"prefix": "Spmn.GetStorage",
+		"body": "Spmn.GetStorage(${1:sArchiveMnemonic}, ${2:sUsage})",
+		"description": "Spmn.GetStorage(String ArchiveMnemonic, String Usage)\nReturns the most recent specimen storage record."
+	},
+	"Spmn.IsolationCount": {
+		"prefix": "Spmn.IsolationCount",
+		"body": "Spmn.IsolationCount(${1:sOrganismMnemonicList}, ${2:lAerobe}, ${3:sOrganismBillingMarkList}, ${4:lReportable}, ${5:sAppraisalList}, ${6:lAntibiogramPresent})",
+		"description": "Spmn.IsolationCount(...)\nIsolationCount"
+	},
+	"Spmn.LabSpecificSize": {
+		"prefix": "Spmn.LabSpecificSize",
+		"body": "Spmn.LabSpecificSize(${1:sLabMnemonic})",
+		"description": "Spmn.LabSpecificSize(Mnemonic LabMnemonic)\nLabSpecificSize"
+	},
+	"Spmn.LastRequest": {
+		"prefix": "Spmn.LastRequest",
+		"body": "Spmn.LastRequest(${1:lExplicit|?})",
+		"description": "Spmn.LastRequest(Logical Explicit)\nReturns the most recent request for a specimen."
+	},
+	"Spmn.Result": {
+		"prefix": "Spmn.Result",
+		"body": "Spmn.Result(${1:sPropertyMnemonic}, ${2:sMinimalStatus|?}, ${3:sMaximumStatus|?}, ${4:sOrderId})",
+		"description": "Spmn.Result(Mnemonic PropertyMnemonic, String MinimalStatus, String MaximumStatus, String OrderId)\nReturns a reference to a specific result."
+	},
+	"Spmn.SetMeasuredSize": {
+		"prefix": "Spmn.SetMeasuredSize",
+		"body": "Spmn.SetMeasuredSize(${1:fSizeValue})",
+		"description": "Spmn.SetMeasuredSize(PositiveFractional SizeValue)\nCopied to the measured size field of the specimen."
+	},
+	"Spmn.SetReplacementLevel": {
+		"prefix": "Spmn.SetReplacementLevel",
+		"body": "Spmn.SetReplacementLevel(${1:iLevel})",
+		"description": "Spmn.SetReplacementLevel(PositiveInteger Level)\nSetReplacementLevel"
+	},
+	"Spmn.SetStorage": {
+		"prefix": "Spmn.SetStorage",
+		"body": "Spmn.SetStorage(${1:lOverride}, ${2:sArchiveMnemonic}, ${3:sUsage}, ${4:sCodePattern}, ${5:sReason})",
+		"description": "Spmn.SetStorage(...)\nAllow assigning a specimen storage position."
+	},
+	"Spmn.SpecimenOutput": {
+		"prefix": "Spmn.SpecimenOutput",
+		"body": "Spmn.SpecimenOutput()",
+		"description": "Spmn.SpecimenOutput()\nSpecimenOutput"
+	},
+	"Spmn.Variable": {
+		"prefix": "Spmn.Variable",
+		"body": "Spmn.Variable(${1:sVariableName})",
+		"description": "Spmn.Variable(Mnemonic VariableName)\nVariable"
+	},
+	"SpmnIdMetPunten": {
+		"prefix": "SpmnIdMetPunten",
+		"body": "Expand(\"Specimen\", .ID, Chr(123)+\"\u003cSpmnIdMetPunten \\\\OrdrDep=\"+${1:String-Optional})",
+		"description": "SpmnIdMetPunten snippet\nUses a text MISPL."
+	},
+	"Sqrt": {
+		"prefix": "Sqrt",
+		"body": "Sqrt(${1:fValue})",
+		"description": "Fractional Sqrt(Fractional Value)\nReturns the square root of Value."
+	},
+	"Start": {
+		"prefix": "Start",
+		"body": [
+			"/*MISPLnaam",
+			"Doel",
+			"",
+			"Datum\t\tIni\tRefID\t\tAanpassing",
+			"------------------------------------------------",
+			"\t\t\t\t\t\t\tAanmaken deze MISPL",
+			"",
+			"------------------------------------------------ */"
+		],
+		"description": "Start snippet: Use RefID to log the change"
+	},
+	"StringToDate": {
+		"prefix": "StringToDate",
+		"body": "StringToDate(${1:sDateString})",
+		"description": "Date StringToDate(String DateString)\nConverts a DateString to a date."
+	},
+	"StringToEnumerated": {
+		"prefix": "StringToEnumerated",
+		"body": "StringToEnumerated(${1:sEnumerationName}, ${2:sString})",
+		"description": "Enumerated StringToEnumerated(String EnumerationName, String String)\nConverts a String to the corresponding entry number."
+	},
+	"StringToFractional": {
+		"prefix": "StringToFractional",
+		"body": "StringToFractional(${1:sString})",
+		"description": "Fractional StringToFractional(String String)\nConverts a character string to a fractional value."
+	},
+	"StringToInteger": {
+		"prefix": "StringToInteger",
+		"body": "StringToInteger(${1:sString})",
+		"description": "Integer StringToInteger(String String)\nConverts a character string to an integer value."
+	},
+	"StringToOGM": {
+		"prefix": "StringToOGM",
+		"body": "StringToOGM(${1:sIntegerAsString})",
+		"description": "String StringToOGM(String IntegerAsString)\nConverts a string representing an integer into an OGM."
+	},
+	"StringToTime": {
+		"prefix": "StringToTime",
+		"body": "StringToTime(${1:sTimeString})",
+		"description": "Time StringToTime(String TimeString)\nConverts a TimeString to a time."
+	},
+	"Strip": {
+		"prefix": "Strip",
+		"body": "Strip(${1:sSource}, ${2:sStripCharacters})",
+		"description": "String Strip(String Source, String StripCharacters)\nRemoves all characters appearing in StripCharacters."
+	},
+	"Substr": {
+		"prefix": "Substr",
+		"body": "Substr(${1:sSource}, ${2:iPosition}, ${3:iLength})",
+		"description": "String Substr(String Source, Integer Position, Integer Length)\nExtracts a substring from a character expression."
+	},
+	"TariffingData": {
+		"prefix": "TariffingData",
+		"body": "TariffingData(${1:sWhatToRetrieve})",
+		"description": "String TariffingData(String WhatToRetrieve)\nRetrieving general tarification data."
+	},
+	"TimeToString": {
+		"prefix": "TimeToString",
+		"body": "TimeToString(${1:tmTime}, ${2:sFormat})",
+		"description": "String TimeToString(Time Time, String Format)\nConverts a Time to a character string."
+	},
+	"Today": {
+		"prefix": "Today",
+		"body": "Today()",
+		"description": "Date Today()\nReturns the current date."
+	},
+	"ToEuro": {
+		"prefix": "ToEuro",
+		"body": "ToEuro(${1:fAmount}, ${2:iDecimals})",
+		"description": "Fractional ToEuro(Fractional Amount, PositiveInteger Decimals)\nConverts a money amount to euros."
+	},
+	"ToLocal": {
+		"prefix": "ToLocal",
+		"body": "ToLocal(${1:fAmount}, ${2:iDecimals})",
+		"description": "Fractional ToLocal(Fractional Amount, PositiveInteger Decimals)\nConverts a money amount to local currency."
+	},
+	"ToLower": {
+		"prefix": "ToLower",
+		"body": "ToLower(${1:sSource})",
+		"description": "String ToLower(String Source)\nConverts any uppercase letters in Source to lowercase."
+	},
+	"ToString": {
+		"prefix": "ToString",
+		"body": "ToString(${1:sString})",
+		"description": "String ToString(...)\nAutomatically determines the appropriate xxxToString function to call."
+	},
+	"ToUpper": {
+		"prefix": "ToUpper",
+		"body": "ToUpper(${1:sSource})",
+		"description": "String ToUpper(String Source)\nConverts any lowercase letters in Source to uppercase."
+	},
+	"Translate": {
+		"prefix": "Translate",
+		"body": "Translate (${1:gp_TextTextId}, ${2:StringLanguageName|?})",
+		"description": "One of the language names defined in the gp_Language table."
+	},
+	"Translate_UMC": {
+		"prefix": "Translate",
+		"body": "Expand(\"gp_Site\", ?, Chr(123)+\"\u003cTranslate \\\\Trlt=${1:Term} \\\\Abbr= \"+Chr(125), ?);",
+		"description": "Translate snippet\nUses a text MISPL."
+	},
+	"TranslateCharacters": {
+		"prefix": "TranslateCharacters",
+		"body": "TranslateCharacters(${1:sSource}, ${2:sInputList}, ${3:sOutputList})",
+		"description": "String TranslateCharacters(String Source, String InputList, String OutputList)\nTranslates Source by mapping the characters."
+	},
+	"TransplantFromList": {
+		"prefix": "TransplantFromList",
+		"body": "TransplantFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "Transplant TransplantFromList(String IdList, Integer Position)\nGet the n-th transplant."
+	},
+	"TransplantRegistrationFromList": {
+		"prefix": "TransplantRegistrationFromList",
+		"body": "TransplantRegistrationFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "TransplantRegistration TransplantRegistrationFromList(String IdList, Integer Position)\nGet the n-th transplant registration."
+	},
+	"TransplantSelectionFromList": {
+		"prefix": "TransplantSelectionFromList",
+		"body": "TransplantSelectionFromList(${1:sIdList}, ${2:iPosition})",
+		"description": "TransplantSelection TransplantSelectionFromList(String IdList, Integer Position)\nGet the n-th transplant selection."
+	},
+	"Trim": {
+		"prefix": "Trim",
+		"body": "Trim(${1:sSource}, ${2:sTrimCharacters})",
+		"description": "String Trim(String Source, String TrimCharacters)\nRemoves both leading and trailing whitespace."
+	},
+	"Truncate": {
+		"prefix": "Truncate",
+		"body": "Truncate(${1:fValue}, ${2:iDecimalPlaces})",
+		"description": "Fractional Truncate(Fractional Value, Integer DecimalPlaces)\nTruncates a fractional Value."
+	},
+	"Var_basic": {
+		"prefix": "Var_basic",
+		"body": [
+			"String\t\tsVal, slVars, stlVars;",
+			"Integer\t\tI, iNum;",
+			"Fractional\tfNum;",
+			"Logical\t\tlIsTRUE, lIsFALSE;",
+			"DateTime\tdtDateTime;",
+			"Object\t\tObj;",
+			"Person\t\tPrsn;",
+			"Result\t\tRslt;",
+			"Order\t\tOrdr;",
+			"Obj  := .Object;",
+			"Prsn := .Person;",
+			"Rslt := .Result;",
+			"Ord := .Order;"
+		],
+		"description": "Var_basic snippet"
+	},
+	"Var_Extra": {
+		"prefix": "Var_Extra",
+		"body": [
+			"String\t\tsB, sK, sS, sT, sTmp;",
+			"Correspondent\t\tcrspIssuer;",
+			"CorrespondentType\tenumCrspType;",
+			"sc_User\t\t\tusrCurr;",
+			"sB := Chr(10);",
+			"sK := \",\";",
+			"sS := \" \";",
+			"sT := Chr(9);"
+		],
+		"description": "Var_Extra snippet"
+	},
+	"WeighedModulus": {
+		"prefix": "WeighedModulus",
+		"body": "WeighedModulus(${1:sStringToCheck}, ${2:sWeightList}, ${3:iDivisor}, ${4:lReturnComplement})",
+		"description": "String WeighedModulus(String StringToCheck, String WeightList, Integer Divisor, Logical ReturnComplement)\nA remainder or complement(check digit) calculation."
+	},
+	"WeighedModulus11": {
+		"prefix": "WeighedModulus11",
+		"body": "WeighedModulus11(${1:tModulusType}, ${2:sStringToCheck})",
+		"description": "String WeighedModulus11(String ModulusType, String StringToCheck)\nA remainder or complement(check digit) calculation."
+	},
+	"WHILE DO DONE": {
+		"prefix": "WHILE DO DONE",
+		"body": [
+			"I := 0;",
+			"WHILE I < iNum DO",
+			"\tI := I + 1;",
+			"\t$0",
+			"DONE;"
+		],
+		"description": "WHILE DO DONE snippet"
+	},
+	"WHILE DO DONE iNum": {
+		"prefix": "WHILE DO DONE iNum",
+		"body": [
+			"iNum := NumEntries(${1:S1}, ${2:S2});",
+			"I := 0;",
+			"WHILE I < iNum DO",
+			"\tI := I + 1;",
+			"\tsTmp := Entry(I, ${1:S1}, ${2:S2});",
+			"\t$0",
+			"DONE;"
+		],
+		"description": "WHILE DO DONE iNum.\nS1 is the list, S2 is the delimiter."
+	},
+	"XmlEscaped": {
+		"prefix": "XmlEscaped",
+		"body": "XmlEscaped(${1:sSource})",
+		"description": "String XmlEscaped(String Source)\nEscapes the reserved XML characters."
+	}
+}

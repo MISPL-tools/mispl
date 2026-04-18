@@ -1,0 +1,16 @@
+# Systeem- en testmappen
+.vscode/**
+.vscode-test/**
+node_modules/**
+
+# Negeer alle CSV-bestanden, zowel in de hoofdmap als in ALLE submappen (zoals batchTest)
+**/*.csv
+
+# Negeer alle testrapporten, overal in het project
+**/test_rapport_*.txt
+
+# (Optioneel) Als je de héle batchTest map niet in je VSIX wilt hebben:
+# batchTest/**
+
+# Voorkom dat oude VSIX bestanden per ongeluk in de nieuwe worden gestopt
+**/*.vsix

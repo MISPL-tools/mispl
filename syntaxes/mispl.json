@@ -1,0 +1,132 @@
+{
+  "scopeName": "source.mispl",
+  "fileTypes": ["mispl"],
+  "name": "mispl",
+  "patterns": [
+    {
+      "name": "keyword.statement.mispl",
+      "match": "\\b(IF|THEN|ELSE|ENDIF|WHILE|DO|DONE|REPEAT|UNTIL|RETURN)\\b"
+    },
+    {
+      "name": "keyword.primitive-datatypes.mispl",
+      "match": "\\b(Integer|String|Fractional|Logical|Date|DateTime|Time|INTEGER|STRING|FRACTIONAL|LOGICAL)\\b"
+    },
+    {
+      "name": "keyword.patterns.mispl",
+      "match": "\\b(Abs|AskChoice|AskString|AskYesNo|Chr|Cpad|CurrentDepartment|CurrentTerminal|CurrentUser|DateAndTimeToDateTime|DatedIdentifier|DateDiffInYears|DateTimeToDate|DateTimeToString|DateTimeToTime|DateToString|Entry|EnumeratedToString|EuroToLocal|Exp|Expand|ExtractTag|Fabs|Fill|FitText|Fmod|FractionalToInteger|FractionalToString|GetCorrespondent|GetCorrespondentId|GetExecutingLab|GetFundId|GetInvoiceId|GetInvoiceSummaryId|GetLogEntry|GetObjectId|GetPolicyNameId|GetSiteAttribute|GetUser|Glims|Identifier|IfKnownString|Index|IntegerToString|IsHoliday|LargeModulo|Len|LocalToEuro|Log|Log10|Lookup|Lpad|Ltrim|Matches|Message|NextValue|Now|NumberToStringInFull|NumEntries|Ord|PaymentAgreements|PeekCharacter|PeekDate|PeekDecimal|PeekInteger|PeekLogical|PeekRecId|PokeCharacter|PokeDate|PokeDecimal|PokeInteger|PokeLogical|PokeRecId|PutTag|RangeLabel|RemoveEntry|Replace|Round|Rpad|Rtrim|SendMail|SetSiteAttribute|Sort|Sqrt|StringToDate|StringToEnumerated|StringToFractional|StringToInteger|StringToOGM|StringToTime|Strip|Substr|TariffingData|TimeToString|Today|ToEuro|ToLocal|ToLower|ToString|ToUpper|Translate|TranslateCharacters|Trim|Truncate)\\b"
+    },
+    {
+      "name": "keyword.reserved.mispl",
+      "match": "\\b(Action|Antigen|Archive|BloodBag|BloodProduct|BloodSelection|Choice|ChoiceDescription|ChoiceList|Code|CodeSet|Correspondent|Department|HCProvider|HLAAntibody|HLAAntigen|Material|Norm|Person|PersonAntigen|PersonHLAAntibody|PersonHLAAntigen|PersonMedicalRecord|PersonRelation|Procedure|QCLot|QCMaterial|QCPopulation|Rack|RackType|Reagent|Report|Request|Requestable|Station|Unit|Ward|WorkList|WorkPlace)\\b"
+    },
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#literal"
+    }
+  ],
+
+"repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.block.mispl",
+          "begin": "/\\*",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.begin.mispl"
+            }
+          },
+          "end": "\\*/",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.end.mispl"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#comment"
+            }
+          ]
+        }
+      ]
+    },
+    "literal": {
+      "patterns": [
+        { "include": "#literal-number" },
+        { "include": "#literal-string" },
+        { "include": "#literal-operatorassign" },
+        { "include": "#literal-boolean" },
+        { "include": "#literal-semincolon" },
+        { "include": "#literal-operatorcharacter" },
+        { "include": "#literal-Object" },
+        { "include": "#literal-Order" },
+        { "include": "#literal-Result" },
+        { "include": "#literal-Specimen" }
+      ]
+    },
+
+    "literal-number": {
+      "name": "number",
+      "match": "\\b[0-9]+(\\.[0-9]+)?\\b"
+    },
+
+    "literal-string": {
+      "name": "string",
+      "begin": "\"",
+      "end": "\"",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.mispl"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.mispl"
+        }
+      },
+      "patterns": []
+    },
+
+    "literal-operatorassign": {
+      "name": "operatorassign",
+      "match": ":="
+    },
+
+    "literal-boolean": {
+      "name": "boolean",
+      "match": "\\b(TRUE|YES|FALSE|NO|AND|OR|NOT)\\b"
+    },
+
+    "literal-semincolon": {
+      "name": "semincolon",
+      "match": ";"
+    },
+
+    "literal-operatorcharacter": {
+      "name": "operatorcharacter",
+      "match": "[\\/=\\-+!_*%<>&|^~.?]"
+    },
+
+    "literal-Object": {
+      "name": "Object",
+      "match": "\\b(Object|AgeInDays|AgeInYears|AttributeList|Person|PIN|Result|SetAttribute|ObjectAttribute|Obj|obj)\\b"
+    },
+
+    "literal-Order": {
+      "name": "Order",
+      "match": "\\b(Order|AddRequest|Attribute|Ordr\\.Attribute|CancelResults|GetSpecimen|HasPreviousResults|IsRequested|PropertyList|Ordr\\.Result|Ordr|ordr)\\b"
+    },
+
+    "literal-Result": {
+      "name": "Result",
+      "match": "\\b(AddExternalComment|AddInternalComment|Attibute\\(\"Value\"\\)|Cancel|GetPriorResult|NumericValue|LastRequest|RawValue|SetManualSeverity|Result|Property|Rslt|rslt)\\b"
+    },
+
+    "literal-Specimen": {
+      "name": "Specimen",
+      "match": "\\b(Specimen|TheItemStorage|AddRequest|GetStorage|LastRequest|Spec|Spmn|Spst|spst)\\b"
+    }
+  }
+}

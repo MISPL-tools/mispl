@@ -1,0 +1,2 @@
+function safeLabel(label) { return label .trim() .replace(/"/g, "&quot;") .replace(/ \[/g, "&#91;") .replace(/\] /g, "&#93;") .replace(/\{/g, "&#123;") .replace(/\}/g, "&#125;"); }
+module.exports = safeLabel;
