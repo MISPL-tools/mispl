@@ -16,21 +16,21 @@ Schrijf sneller code met slimme suggesties en directe foutdetectie.
   <summary><b>🔍 Statische Analyse (Linting)</b></summary>
   <br>
   Identificeer bugs in het VS Code <b>Problems</b> paneel <i>voordat</i> je ze naar GLIMS kopieert. Detecteert ontbrekende <code>ENDIF</code>, ongedeclareerde variabelen, oneindige lussen en handhaaft de GLIMS-naamgevingsconventies (Hongaarse Notatie).<br><br>
-  <img src="images/StaticDebug.gif" width="600" alt="Static Debug">
+  <img src="images/StaticDebug.gif" width="100%" alt="Static Debug">
 </details>
 
 <details>
   <summary><b>💡 IntelliSense (Snippets & Hover)</b></summary>
   <br>
   Beweeg je muis over GLIMS-functies (bijv. <code>AddLogEntry</code>) om direct parametervereisten en documentatie te zien. Gebruik slimme autocomplete-snippets om complexe blokken in seconden te bouwen.<br><br>
-  <img src="images/SnippetsEnHover.gif" width="600" alt="IntelliSense and Hover">
+  <img src="images/SnippetsEnHover.gif" width="100%" alt="IntelliSense and Hover">
 </details>
 
 <details>
   <summary><b>🗺️ Code-Map (Outline)</b></summary>
   <br>
   Navigeer eenvoudig door complexe scripts met het Outline-paneel. Bekijk gedeclareerde variabelen per type en spring direct naar specifieke <code>IF</code> en <code>WHILE</code> blokken.<br><br>
-  <img src="images/Outline_nieuw.gif" width="600" alt="Code Outline">
+  <img src="images/Outline_nieuw.gif" width="100%" alt="Code Outline">
 </details>
 
 ### 🛠️ Refactoring & Formattering
@@ -40,37 +40,37 @@ Houd je code schoon, leesbaar en perfect gestructureerd met geautomatiseerde too
   <summary><b>🧹 Ongebruikte Variabelen Verwijderen</b></summary>
   <br>
   Scant automatisch je declaraties en verwijdert chirurgisch de variabelen die nergens in het script worden gebruikt.<br><br>
-  <img src="images/06_RemoveUnusedVariables.gif" width="600" alt="Remove Unused Variables">
+  <img src="images/06_RemoveUnusedVariables.gif" width="100%" alt="Remove Unused Variables">
 </details>
 
 <details>
   <summary><b>📏 Toewijzingen Uitlijnen (Align)</b></summary>
   <br>
   Selecteer een blok code en lijn alle <code>:=</code> operatoren verticaal uit voor maximale leesbaarheid.<br><br>
-  <img src="images/05_Align.gif" width="600" alt="Align Assignments">
+  <img src="images/05_Align.gif" width="100%" alt="Align Assignments">
 </details>
 
 <details>
   <summary><b>📦 Inpakken in Blok (Wrap in Block)</b></summary>
   <br>
   Verpak geselecteerde regels code direct in een <code>IF</code>, <code>WHILE</code> of <code>REPEAT</code> blok met de juiste inspringing (Sneltoets: <code>Ctrl+Alt+W</code>).<br><br>
-  <img src="images/04_WrapIn.gif" width="600" alt="Wrap In Block">
+  <img src="images/04_WrapIn.gif" width="100%" alt="Wrap In Block">
 </details>
 
 <details>
   <summary><b>✂️ Variabele Extraheren</b></summary>
   <br>
   Selecteer een complexe expressie, klik met de rechtermuisknop en extraheer deze om automatisch een nieuwe variabele te declareren en toe te wijzen bovenaan je script.<br><br>
-  <img src="images/02_ExtractToVariable.gif" width="600" alt="Extract To Variable">
+  <img src="images/02_ExtractToVariable.gif" width="100%" alt="Extract To Variable">
 </details>
 
 <details>
   <summary><b>📝 Formatteren, Compacten & Minificeren</b></summary>
   <br>
   Formatteer je code perfect, verwijder overbodige witruimte of minificeer je code agressief om onder de GLIMS-limiet van 31.000 tekens te blijven.<br><br>
-  <img src="images/01_Format.gif" width="600" alt="Format Code"><br>
-  <img src="images/08_CompactCode.gif" width="600" alt="Compact Code"><br>
-  <img src="images/09_Minifier.gif" width="600" alt="Minifier">
+  <img src="images/01_Format.gif" width="100%" alt="Format Code"><br>
+  <img src="images/08_CompactCode.gif" width="100%" alt="Compact Code"><br>
+  <img src="images/09_Minifier.gif" width="100%" alt="Minifier">
 </details>
 
 ---
@@ -88,7 +88,7 @@ Het overnemen van een database met duizenden verouderde MISPL-scripts is een uit
   3. Voer in <code>Terminal</code> de Batch-tool uit via Node.js.<br>
   4. Gebruik <code>runBatchToExcel.js</code> voor een Excel overzicht van alle Fouten, Waarschuwingen en Stijl-Tips, <code>batchTest.js</code> voor alleen de Fouten, en <code>unitTest.js</code> om de Linter te testen<br>
   5. De engine parst duizenden scripts in seconden en produceert een rapport met alle fatale crashes en syntaxfouten.<br><br>
-  <img src="images/runBatchToExcel.gif" width="600" alt="Batch Testing">
+  <img src="images/runBatchToExcel.gif" width="100%" alt="Batch Testing">
 </details>
 
 ---
@@ -103,7 +103,7 @@ Het oplossen van problemen in productie is lastig. De **Validation Flow** functi
   1. <b>Injecteren:</b> De tool injecteert veilig trackingcodes (<code>_sV</code>) op elk logisch kruispunt.<br>
   2. <b>Uitvoeren:</b> Voer het script uit in GLIMS. Het spoor wordt naar het log geschreven.<br>
   3. <b>Analyseren:</b> Kopieer de log-string naar VS Code en draai de analyse. Een rapport laat precies zien welke paden zijn doorlopen.<br><br>
-  <img src="images/Kruimelspoor.gif" width="600" alt="Validation Flow Coverage">
+  <img src="images/Kruimelspoor.gif" width="100%" alt="Validation Flow Coverage">
 </details>
 
 ---
@@ -116,14 +116,14 @@ Transformeer je code in visuele logica om complexe scripts te vereenvoudigen voo
   <summary><b>🔀 Interactieve Flowcharts</b></summary>
   <br>
   Genereer interactieve Mermaid.js-stroomdiagrammen voor je script. Klik op een blok in het diagram om direct naar de bijbehorende regel code te springen.<br><br>
-  <img src="images/11_ShowFlowChart.gif" width="600" alt="Flowcharts">
+  <img src="images/11_ShowFlowChart.gif" width="100%" alt="Flowcharts">
 </details>
 
 <details>
   <summary><b>🌲 Print AST (Abstract Syntax Tree)</b></summary>
   <br>
   Converteer je MISPL-script naar een schone, hiërarchische boomstructuur die de logica van de parser laat zien.<br><br>
-  <img src="images/12_ShowAST.gif" width="600" alt="AST Generator">
+  <img src="images/12_ShowAST.gif" width="100%" alt="AST Generator">
 </details>
 
 ---

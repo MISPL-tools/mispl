@@ -6,7 +6,8 @@
             "type": "shell",
             "command": "vsce",
             "args": [
-                "package"
+                "package",
+				"--no-rewrite-relative-links"
             ],
             "group": {
                 "kind": "build",
