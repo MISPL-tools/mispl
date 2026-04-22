@@ -24,8 +24,7 @@ const getWebviewContent = require("./mermaid/webview");
 // === STATIC ANALYSIS ===
 // Let op: controleer of in jouw mapstructuur de bestanden parser.js en analyzer.js heten,
 // OF dat je 'analyzeMISPL.js' gebruikt voor beide. Ik ga er hier vanuit dat 'analyze' en 'VERSION' uit analyzer komen.
-const { parseMISPL } = require("./parser"); 
-const { analyze, VERSION } = require("./analyzer"); // <-- Nu importeren we VERSION!
+const { parseMISPL, analyze, VERSION } = require("./analyzeMISPL");
 
 // === AST PRINTER ===
 const { printAst } = require("./astPrinter");

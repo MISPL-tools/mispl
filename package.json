@@ -1,284 +1,284 @@
 {
-    "name": "mispl",
-    "displayName": "MISPL Language Support",
-    "description": "Language support, formatting, static debug, flowcharts and tools for MISPL / GLIMS",
-    "version": "2.50.1",
+	"name": "mispl",
+	"displayName": "MISPL Language Support",
+	"description": "Language support, formatting, static debug, flowcharts and tools for MISPL / GLIMS",
+	"version": "2.50.2",
 	"icon": "icon.png",
-    "publisher": "dirkoppenaal",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/dirkoppenaal/mispl"
-    },
-    "engines": {
-        "vscode": "^1.85.0"
-    },
-    "main": "./extension.js",
-    "activationEvents": [
-        "onStartupFinished"
-    ],
-    "categories": [
-        "Programming Languages"
-    ],
-    "capabilities": {
-        "webview": {
-            "oldWebview": true
-        }
-    },
-    "contributes": {
-        "languages": [
-            {
-                "id": "mispl",
-                "extensions": [
-                    ".mispl"
-                ],
-                "aliases": [
-                    "GLIMS",
-                    "MISPL"
-                ],
-                "configuration": "./language-configuration.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "mispl",
-                "scopeName": "source.mispl",
-                "path": "./syntaxes/mispl.json"
-            }
-        ],
-        "commands": [
-            {
-                "command": "mispl.alignAssignments",
-                "title": "MISPL: Align Assignments"
-            },
-            {
-                "command": "mispl.showActionMenu",
-                "title": "MISPL: Show Tools Menu (Quick-menu)"
-            },
-            {
-                "command": "mispl.removeUnusedVariables",
-                "title": "MISPL: Remove unused variables"
-            },
-            {
-                "command": "mispl.replaceWords",
-                "title": "MISPL: Replace words according list"
-            },
-            {
-                "command": "mispl.wrapInBlock",
-                "title": "MISPL: Wrap in IF / WHILE / REPEAT / COMMENT"
-            },
-            {
-                "command": "mispl.magicDebug",
-                "title": "MISPL: Insert Magic Debug (Message)"
-            },
-            {
-                "command": "mispl.compactCode",
-                "title": "MISPL: Compact Code"
-            },
-            {
-                "command": "mispl.minifier",
-                "title": "MISPL: Minifier"
-            },
-            {
-                "command": "mispl.showFlowchart",
-                "title": "MISPL: Show Flowchart"
-            },
-            {
-                "command": "mispl.showSelectedFlowchart",
-                "title": "MISPL: Show Selected Code as Diagram"
-            },
-            {
-                "command": "mispl.showStaticAnalysis",
-                "title": "MISPL: Run Static Analysis"
-            },
-            {
-                "command": "mispl.printAst",
-                "title": "MISPL: Show AST"
-            },
-            {
-                "command": "mispl.injectValidationFlow",
-                "title": "MISPL: Inject Validation Flow"
-            },
-            {
-                "command": "mispl.removeValidationFlow",
-                "title": "MISPL: Remove Validation Flow"
-            },
-            {
-                "command": "mispl.analyzeCoverage",
-                "title": "MISPL: Analyze Validation Logs (from Clipboard)"
-            },
-            {
-                "command": "mispl.extractVariable",
-                "title": "MISPL: Extract to Variable"
-            }
-        ],
-        "keybindings": [
-            {
-                "command": "mispl.alignAssignments",
-                "key": "ctrl+alt+u",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.removeUnusedVariables",
-                "key": "ctrl+alt+r",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.extractVariable",
-                "key": "ctrl+alt+e",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.showActionMenu",
-                "key": "ctrl+alt+q",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.magicDebug",
-                "key": "ctrl+alt+d",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.wrapInBlock",
-                "key": "ctrl+alt+w",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.replaceWords",
-                "key": "ctrl+alt+p",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.compactCode",
-                "key": "ctrl+alt+c",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.generateMermaid",
-                "key": "ctrl+alt+m",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            },
-            {
-                "command": "mispl.showFlowchart",
-                "key": "ctrl+alt+f",
-                "when": "editorTextFocus && editorLangId == 'mispl'"
-            }
-        ],
-        "menus": {
-            "editor/context": [
-                {
-                    "command": "mispl.extractVariable",
-                    "group": "mispl_1_coding@1",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.magicDebug",
-                    "group": "mispl_1_coding@2",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.wrapInBlock",
-                    "group": "mispl_1_coding@3",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.alignAssignments",
-                    "group": "mispl_2_cleanup@2",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.removeUnusedVariables",
-                    "group": "mispl_2_cleanup@3",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.replaceWords",
-                    "group": "mispl_2_cleanup@4",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.compactCode",
-                    "group": "mispl_3_minify@1",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.minifier",
-                    "group": "mispl_3_minify@2",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.showSelectedFlowchart",
-                    "group": "mispl_4_visualize@1",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.showFlowchart",
-                    "group": "mispl_4_visualize@2",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.printAst",
-                    "group": "mispl_4_visualize@3",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.injectValidationFlow",
-                    "group": "mispl_5_validation@1",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.analyzeCoverage",
-                    "group": "mispl_5_validation@2",
-                    "when": "editorLangId == 'mispl'"
-                },
-                {
-                    "command": "mispl.removeValidationFlow",
-                    "group": "mispl_5_validation@3",
-                    "when": "editorLangId == 'mispl'"
-                }
-            ],
-            "explorer/context": [
-                {
-                    "command": "mispl.printAst",
-                    "when": "resourceExtname == '.mispl'",
-                    "group": "navigation"
-                }
-            ]
-        },
-        "configuration": {
-            "title": "MISPL Settings",
-            "properties": {
-                "mispl.validationLogId": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Het interne GLIMS ID van de dummy gp_SiteFunction (MISPL) die gebruikt wordt om de Validation Flow logs naar weg te schrijven."
-                },
-                "mispl.glimsUsername": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Jouw persoonlijke inlognaam in GLIMS. Wordt gebruikt voor het genereren van veilige debug-meldingen."
-                }
-            }
-        },
-        "configurationDefaults": {
-            "[mispl]": {
-                "editor.formatOnSave": true
-            }
-        },
-        "snippets": [
-            {
-                "language": "mispl",
-                "path": "./snippets/mispl.code-snippets"
-            }
-        ],
-        "themes": [
-            {
-                "label": "MISPL Theme",
-                "uiTheme": "vs-dark",
-                "path": "./themes/mispl-color-theme.json"
-            }
-        ]
-    },
-    "devDependencies": {
-        "@types/vscode": "^1.75.0"
-    }
+	"publisher": "dirkoppenaal",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/dirkoppenaal/mispl"
+	},
+	"engines": {
+		"vscode": "^1.85.0"
+	},
+	"main": "./extension.js",
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"categories": [
+		"Programming Languages"
+	],
+	"capabilities": {
+		"webview": {
+			"oldWebview": true
+		}
+	},
+	"contributes": {
+		"languages": [
+			{
+				"id": "mispl",
+				"extensions": [
+					".mispl"
+				],
+				"aliases": [
+					"GLIMS",
+					"MISPL"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "mispl",
+				"scopeName": "source.mispl",
+				"path": "./syntaxes/mispl.json"
+			}
+		],
+		"commands": [
+			{
+				"command": "mispl.alignAssignments",
+				"title": "MISPL: Align Assignments"
+			},
+			{
+				"command": "mispl.showActionMenu",
+				"title": "MISPL: Show Tools Menu (Quick-menu)"
+			},
+			{
+				"command": "mispl.removeUnusedVariables",
+				"title": "MISPL: Remove unused variables"
+			},
+			{
+				"command": "mispl.replaceWords",
+				"title": "MISPL: Replace words according list"
+			},
+			{
+				"command": "mispl.wrapInBlock",
+				"title": "MISPL: Wrap in IF / WHILE / REPEAT / COMMENT"
+			},
+			{
+				"command": "mispl.magicDebug",
+				"title": "MISPL: Insert Magic Debug (Message)"
+			},
+			{
+				"command": "mispl.compactCode",
+				"title": "MISPL: Compact Code"
+			},
+			{
+				"command": "mispl.minifier",
+				"title": "MISPL: Minifier"
+			},
+			{
+				"command": "mispl.showFlowchart",
+				"title": "MISPL: Show Flowchart"
+			},
+			{
+				"command": "mispl.showSelectedFlowchart",
+				"title": "MISPL: Show Selected Code as Diagram"
+			},
+			{
+				"command": "mispl.showStaticAnalysis",
+				"title": "MISPL: Run Static Analysis"
+			},
+			{
+				"command": "mispl.printAst",
+				"title": "MISPL: Show AST"
+			},
+			{
+				"command": "mispl.injectValidationFlow",
+				"title": "MISPL: Inject Validation Flow"
+			},
+			{
+				"command": "mispl.removeValidationFlow",
+				"title": "MISPL: Remove Validation Flow"
+			},
+			{
+				"command": "mispl.analyzeCoverage",
+				"title": "MISPL: Analyze Validation Logs (from Clipboard)"
+			},
+			{
+				"command": "mispl.extractVariable",
+				"title": "MISPL: Extract to Variable"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "mispl.alignAssignments",
+				"key": "ctrl+alt+u",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.removeUnusedVariables",
+				"key": "ctrl+alt+r",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.extractVariable",
+				"key": "ctrl+alt+e",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.showActionMenu",
+				"key": "ctrl+alt+q",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.magicDebug",
+				"key": "ctrl+alt+d",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.wrapInBlock",
+				"key": "ctrl+alt+w",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.replaceWords",
+				"key": "ctrl+alt+p",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.compactCode",
+				"key": "ctrl+alt+c",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.generateMermaid",
+				"key": "ctrl+alt+m",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			},
+			{
+				"command": "mispl.showFlowchart",
+				"key": "ctrl+alt+f",
+				"when": "editorTextFocus && editorLangId == 'mispl'"
+			}
+		],
+		"menus": {
+			"editor/context": [
+				{
+					"command": "mispl.extractVariable",
+					"group": "mispl_1_coding@1",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.magicDebug",
+					"group": "mispl_1_coding@2",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.wrapInBlock",
+					"group": "mispl_1_coding@3",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.alignAssignments",
+					"group": "mispl_2_cleanup@2",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.removeUnusedVariables",
+					"group": "mispl_2_cleanup@3",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.replaceWords",
+					"group": "mispl_2_cleanup@4",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.compactCode",
+					"group": "mispl_3_minify@1",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.minifier",
+					"group": "mispl_3_minify@2",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.showSelectedFlowchart",
+					"group": "mispl_4_visualize@1",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.showFlowchart",
+					"group": "mispl_4_visualize@2",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.printAst",
+					"group": "mispl_4_visualize@3",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.injectValidationFlow",
+					"group": "mispl_5_validation@1",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.analyzeCoverage",
+					"group": "mispl_5_validation@2",
+					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.removeValidationFlow",
+					"group": "mispl_5_validation@3",
+					"when": "editorLangId == 'mispl'"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "mispl.printAst",
+					"when": "resourceExtname == '.mispl'",
+					"group": "navigation"
+				}
+			]
+		},
+		"configuration": {
+			"title": "MISPL Settings",
+			"properties": {
+				"mispl.validationLogId": {
+					"type": "string",
+					"default": "",
+					"description": "Het interne GLIMS ID van de dummy gp_SiteFunction (MISPL) die gebruikt wordt om de Validation Flow logs naar weg te schrijven."
+				},
+				"mispl.glimsUsername": {
+					"type": "string",
+					"default": "",
+					"description": "Jouw persoonlijke inlognaam in GLIMS. Wordt gebruikt voor het genereren van veilige debug-meldingen."
+				}
+			}
+		},
+		"configurationDefaults": {
+			"[mispl]": {
+				"editor.formatOnSave": true
+			}
+		},
+		"snippets": [
+			{
+				"language": "mispl",
+				"path": "./snippets/mispl.code-snippets"
+			}
+		],
+		"themes": [
+			{
+				"label": "MISPL Theme",
+				"uiTheme": "vs-dark",
+				"path": "./themes/mispl-color-theme.json"
+			}
+		]
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.75.0"
+	}
 }

@@ -25,29 +25,19 @@ async function insertMagicDebug() {
             return;
         }
 
-        // --- 🛡️ DE NIEUWE DECLARATIE SCANNER ---
-        const fullText = document.getText();
-        const declaredVars = new Set();
-        
-        // Scan het hele document op declaraties (werkt ook met meerdere vars per regel: "String sUser, sTest;")
-        const typeRegex = /^\s*(String|Integer|Logical|Fractional|DateTime|Date|Time|Object|Person|Specimen|Order|Result)\b([^;]+);/gim;
-        let match;
-        while ((match = typeRegex.exec(fullText)) !== null) {
-            // match[2] is alles na het type. Splits op komma en haal spaties weg.
-            const vars = match[2].split(',').map(v => v.trim());
-            vars.forEach(v => declaredVars.add(v));
+        // --- 🛠️ DE FIX: INPUT SCHOONMAKEN ---
+        // Als de gebruiker een hele regel zoals "sTmp := Entry(I,slRqsts);" selecteert,
+        // pakken we alleen het deel vóór de ':=' en gooien we puntkomma's weg.
+        if (word.includes(":=")) {
+            word = word.split(":=")[0];
         }
-
-        // We checken of het een ingebouwd object of veld is (die hoeven niet gedeclareerd te zijn)
-        const isBaseObject = /^(obj|ordr|rslt|prsn|spmn|mat|actn|crsp)/i.test(word) && !word.includes(".");
-        const isObjectField = word.includes(".");
-
-        // De ultieme check: Is het géén base object, géén veld, en NIET gedeclareerd? Dan is het wrs. een functie!
-        if (!isBaseObject && !isObjectField && !declaredVars.has(word)) {
-            vscode.window.showErrorMessage(`❌ Magic Debug Fout: Kan '${word}' niet debuggen. Dit is een functie of een niet-gedeclareerde variabele!`);
-            return; // Abort mission!
-        }
+        word = word.replace(/;/g, '').trim();
         // -----------------------------------------
+
+        const isBaseObject = /^(obj|ordr|rslt|prsn|spmn|mat|actn|crsp)/i.test(word) && !word.includes(".");
+
+        // 🗑️ De strenge "is dit wel gedeclareerd?!" check is hier volledig verwijderd!
+        // De tool vertrouwt nu gewoon op de programmeur.
 
         // --- DE GLIMS GEBRUIKERSNAAM LOGICA ---
         const config = vscode.workspace.getConfiguration('mispl');
@@ -96,7 +86,6 @@ async function insertMagicDebug() {
             debugStatement = `\n${indent}IF CurrentUser()="${glimsUser}" AND ${word}<>? THEN Message("Debug=${word}"); ENDIF;`;
             
         } else if (/^(l|b)[A-Z_]/.test(word)) {
-            // DE FIX VOOR LOGICALS
             debugStatement = `\n${indent}IF CurrentUser()="${glimsUser}" THEN IF ${word} THEN Message("DEBUG ${word}: TRUE"); ELSE Message("DEBUG ${word}: FALSE"); ENDIF; ENDIF;`;
             
         } else {
