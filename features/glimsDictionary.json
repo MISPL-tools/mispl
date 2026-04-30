@@ -1282,7 +1282,7 @@
       "APPROACHACTIVITY": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "ApproachActivity",
         "type": "Method"
       },
       "ATTRIBUTE": {
@@ -1290,7 +1290,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "CANCEL": {
@@ -1299,7 +1299,7 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "INPUTBYMNEMONIC": {
@@ -1307,7 +1307,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "INPUTRESULT": {
@@ -1315,19 +1315,19 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "MICROBIOLOGYACTION": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "MICROBIOLOGYACTION",
         "type": "Method"
       },
       "ORDER": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "ORDER",
         "type": "Method"
       },
       "OUTPUTRESULT": {
@@ -1335,7 +1335,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "PROPERTYLIST": {
@@ -1346,13 +1346,13 @@
           "LOGICAL"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "SPECIMENINPUT": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "SPECIMEN",
         "type": "Method"
       },
       "ID": {
@@ -1522,7 +1522,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ADDVARIANTREQUEST": {
@@ -1530,7 +1530,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "DISCONTINUELOCUSRESULTS": {
@@ -1539,7 +1539,7 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "GETAPPROACHACTIVITIES": {
@@ -1549,7 +1549,7 @@
           "STRING"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETHLASCREENINGRESULTS": {
@@ -1561,7 +1561,7 @@
           "INTEGER"
         ],
         "minParams": 5,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETHLATYPINGRESULTS": {
@@ -1571,7 +1571,7 @@
           "STRING"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETLOCUSRESULT": {
@@ -1582,7 +1582,7 @@
           "INTEGER"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "LocusResult",
         "type": "Method"
       },
       "GETVARIANTRESULT": {
@@ -1595,7 +1595,7 @@
           "INTEGER"
         ],
         "minParams": 6,
-        "returns": "UNKNOWN",
+        "returns": "VariantResult",
         "type": "Method"
       },
       "ID": {
@@ -1657,7 +1657,7 @@
           "DATE"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "AGEINDAYS": {
@@ -1665,7 +1665,7 @@
           "DATE"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "FRACTIONAL",
         "type": "Method"
       },
       "AGEINMONTHS": {
@@ -1673,7 +1673,7 @@
           "DATE"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "FRACTIONAL",
         "type": "Method"
       },
       "AGEINYEARS": {
@@ -1681,13 +1681,13 @@
           "DATE"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "FRACTIONAL",
         "type": "Method"
       },
       "ANIMAL": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "ANIMAL",
         "type": "Method"
       },
       "ATTRIBUTELIST": {
@@ -1700,7 +1700,7 @@
           "STRING|?"
         ],
         "minParams": 5,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "ATTRIBUTEPERIOD": {
@@ -1709,13 +1709,13 @@
           "DATE"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "INTEGER",
         "type": "Method"
       },
       "BIRTHDATE": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "DATE",
         "type": "Method"
       },
       "BLOODSELECTIONBYNUMBER": {
@@ -1726,7 +1726,7 @@
           "INTEGER"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "BloodSelection",
         "type": "Method"
       },
       "BUILDHISTORYGRAPH": {
@@ -1734,7 +1734,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "CLEARATTRIBUTE": {
@@ -1743,13 +1743,13 @@
           "DATE"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "DECLAREDTYPE": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "ObjectType",
         "type": "Method"
       },
       "DELETEATTRIBUTE": {
@@ -1758,7 +1758,7 @@
           "DATE"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "GETBLOODBAG": {
@@ -1769,7 +1769,7 @@
           "DATETIME"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "BloodBag",
         "type": "Method"
       },
       "GETCHECKEDOUTBAG": {
@@ -1780,7 +1780,7 @@
           "ANY"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "BloodBag",
         "type": "Method"
       },
       "GETDATA": {
@@ -1788,7 +1788,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETHLASCREENINGRESULTS": {
@@ -1800,7 +1800,7 @@
           "ANY"
         ],
         "minParams": 5,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETHLATYPINGRESULTS": {
@@ -1810,7 +1810,7 @@
           "ANY"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETLOCUSRESULT": {
@@ -1821,7 +1821,7 @@
           "ANY"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "LocusResult",
         "type": "Method"
       },
       "GETPHONELOG": {
@@ -1830,7 +1830,7 @@
           "LOGICAL"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "PhoneLog",
         "type": "Method"
       },
       "GETRESULT": {
@@ -1841,7 +1841,7 @@
           "DATETIME|?"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "GETTRANSPLANTREGISTRATIONS": {
@@ -1851,7 +1851,7 @@
           "ANY"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETTRANSPLANTS": {
@@ -1860,7 +1860,7 @@
           "MNEMONIC"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETVARIANTRESULT": {
@@ -1873,19 +1873,19 @@
           "ANY"
         ],
         "minParams": 6,
-        "returns": "UNKNOWN",
+        "returns": "VariantResult",
         "type": "Method"
       },
       "HASEXTERNALINFO": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "LOT": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "LOT",
         "type": "Method"
       },
       "MICROBIOLOGICHISTORY": {
@@ -1902,7 +1902,7 @@
           "ANY|?"
         ],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "PATIENTDATA": {
@@ -1910,13 +1910,13 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "PERSON": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "PERSON",
         "type": "Method"
       },
       "PIN": {
@@ -1924,13 +1924,13 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "QCLOT": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "QCLOT",
         "type": "Method"
       },
       "RESULT": {
@@ -1941,7 +1941,7 @@
           "STRING|?"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "RESULTATTRIBUTE": {
@@ -1953,7 +1953,7 @@
           "ANY"
         ],
         "minParams": 5,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "SETATTRIBUTE": {
@@ -1962,13 +1962,13 @@
           "DATE"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SEX": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "SEX",
         "type": "Method"
       },
       "ID": {
@@ -2032,7 +2032,7 @@
           "LOGICAL|?"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ADDREQUESTWITHBILLINGMARK": {
@@ -2043,7 +2043,7 @@
           "ANY"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ATTRIBUTE": {
@@ -2051,7 +2051,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "CANCELRESULTS": {
@@ -2060,13 +2060,13 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "CONSULT": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "CONSULT",
         "type": "Method"
       },
       "CREATEREPORT": {
@@ -2074,13 +2074,13 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "VOID",
         "type": "Method"
       },
       "GETCLINICALCONSULTATION": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "ClinConsultation",
         "type": "Method"
       },
       "GETDIAGNOSIS": {
@@ -2089,7 +2089,7 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "Diagnosis",
         "type": "Method"
       },
       "GETGENETICEXAMS": {
@@ -2099,7 +2099,7 @@
           "ANY"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETHLAEXAMS": {
@@ -2109,7 +2109,7 @@
           "ANY"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETIDENTIFIER": {
@@ -2117,7 +2117,7 @@
           "SITEENUMERATED"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "OrderIdentifier",
         "type": "Method"
       },
       "GETORDERTODOITEM": {
@@ -2125,7 +2125,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "OrderTodoItem",
         "type": "Method"
       },
       "GETORDERTODOITEMS": {
@@ -2134,7 +2134,7 @@
           "LOGICAL"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETPHONELOG": {
@@ -2143,7 +2143,7 @@
           "LOGICAL|?"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "PhoneLog",
         "type": "Method"
       },
       "GETSPECIMEN": {
@@ -2152,7 +2152,7 @@
           "MNEMONIC|?"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "SPECIMEN",
         "type": "Method"
       },
       "GETTRANSPLANTREGISTRATIONS": {
@@ -2162,13 +2162,13 @@
           "ANY"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "HASMISSINGSPECIMENS": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "HASPREVIOUSRESULTS": {
@@ -2177,13 +2177,13 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ISEMPTY": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ISREQUESTED": {
@@ -2192,7 +2192,7 @@
           "LOGICAL"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "PROPERTYLIST": {
@@ -2204,13 +2204,13 @@
           "ANY"
         ],
         "minParams": 5,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "RECALCULATESPECIMEN": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "VOID",
         "type": "Method"
       },
       "REPORTLIST": {
@@ -2222,7 +2222,7 @@
           "ANY"
         ],
         "minParams": 5,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "REQUESTEDCODE": {
@@ -2231,17 +2231,17 @@
           "INTEGER|?"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "RequestedCode",
         "type": "Method"
       },
       "RESULT": {
         "params": [
-          "MNEMONIC",
+          "MNEMONIC|?",
           "STRING|?",
           "STRING|?"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "SETDEPARTMENT": {
@@ -2249,7 +2249,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETIMAGE": {
@@ -2257,7 +2257,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETSTUDYEPISODE": {
@@ -2265,7 +2265,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SUMMARY": {
@@ -2279,7 +2279,7 @@
           "ANY"
         ],
         "minParams": 7,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "TARIFFRESULT": {
@@ -2288,13 +2288,13 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "TOBEPHONED": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ID": {
@@ -2698,7 +2698,7 @@
       "AFTERBIRTH": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "PERSON",
         "type": "Method"
       },
       "ANTIGENANTIBODY": {
@@ -2706,7 +2706,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "PersonAntigen",
         "type": "Method"
       },
       "ANTIGENBYNUMBER": {
@@ -2714,7 +2714,7 @@
           "INTEGER"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "PersonAntigen",
         "type": "Method"
       },
       "AVAILABLEBLOODBAGBYNUMBER": {
@@ -2725,7 +2725,7 @@
           "ANY"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "BloodBag",
         "type": "Method"
       },
       "BLOODFORPERSONAVAILABLE": {
@@ -2736,13 +2736,13 @@
           "ANY"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "CALCULATEMEDIDOCCASENUMBER": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "CHECKNATIONALNUMBER": {
@@ -2751,16 +2751,16 @@
           "INTEGER"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "ENCOUNTER": {
         "params": [
-          "STRING",
+          "STRING|?",
           "DATETIME"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "ENCOUNTER",
         "type": "Method"
       },
       "EXTENDEDBIRTHDATE": {
@@ -2768,7 +2768,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETANTIBODY": {
@@ -2776,7 +2776,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "GETANTIGEN": {
@@ -2784,7 +2784,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "GETENCOUNTER": {
@@ -2796,25 +2796,25 @@
           "ANY"
         ],
         "minParams": 5,
-        "returns": "UNKNOWN",
+        "returns": "Encounter",
         "type": "Method"
       },
       "GETENCOUNTERSLIST": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETMEDICALRECORD": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "PersonMedicalRecord",
         "type": "Method"
       },
       "GETNMRINFO": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "PersonNMRInfo",
         "type": "Method"
       },
       "GETTYPINGADVICE": {
@@ -2823,7 +2823,7 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "HLAANTIBODY": {
@@ -2831,7 +2831,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "PersonHLAAntibody",
         "type": "Method"
       },
       "HLAANTIBODYBYNUMBER": {
@@ -2839,7 +2839,7 @@
           "INTEGER"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "PersonHLAAntibody",
         "type": "Method"
       },
       "HLAANTIGEN": {
@@ -2847,7 +2847,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "PersonHLAAntigen",
         "type": "Method"
       },
       "HLAANTIGENBYNUMBER": {
@@ -2855,7 +2855,7 @@
           "INTEGER"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "PersonHLAAntigen",
         "type": "Method"
       },
       "HOSPITALIZED": {
@@ -2863,22 +2863,22 @@
           "DATETIME"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "OTHERANTIGENS": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "RELATION": {
         "params": [
-          "STRING",
+          "STRING|?",
           "INTEGER"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "PersonRelation",
         "type": "Method"
       },
       "RELATIONSOVERVIEW": {
@@ -2888,13 +2888,13 @@
           "LOGICAL"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "PersonRelation",
         "type": "Method"
       },
       "RHESUSPHENOTYPE": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "SETANTIBODY": {
@@ -2903,7 +2903,7 @@
           "LOGICAL"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETANTIGEN": {
@@ -2912,7 +2912,7 @@
           "LOGICAL"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETHLAANTIBODYPRESENCE": {
@@ -2922,7 +2922,7 @@
           "LOGICAL"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETHLAANTIBODYRVALUE": {
@@ -2932,7 +2932,7 @@
           "FRACTIONAL"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETHLAANTIGENPRESENCE": {
@@ -2941,16 +2941,16 @@
           "LOGICAL"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETMEDICALRECORD": {
         "params": [
           "STRING",
-          "STRING"
+          "STRING|?"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETTYPINGADVICE": {
@@ -2959,7 +2959,7 @@
           "LOGICAL"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "STAY": {
@@ -2967,13 +2967,13 @@
           "DATETIME"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STAY",
         "type": "Method"
       },
       "STAYS": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "ID": {
@@ -3201,25 +3201,25 @@
       "ACTION": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "ACTION",
         "type": "Method"
       },
       "ADDEXTERNALCOMMENT": {
         "params": [
-          "STRING",
-          "LOGICAL"
+          "STRING|?",
+          "LOGICAL|?"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ADDINTERNALCOMMENT": {
         "params": [
-          "STRING",
-          "LOGICAL"
+          "STRING|?",
+          "LOGICAL|?"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ATTRIBUTE": {
@@ -3227,7 +3227,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "BLOODSELECTIONDISCONTINUATION": {
@@ -3235,7 +3235,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "CANCEL": {
@@ -3244,13 +3244,13 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "GETBLOODSELECTION": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "BloodSelection",
         "type": "Method"
       },
       "GETCODE": {
@@ -3258,7 +3258,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETDILUTIONCODE": {
@@ -3266,22 +3266,22 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "DilutionCode",
         "type": "Method"
       },
       "GETPRIORRESULT": {
         "params": [
           "INTEGER",
-          "STRING"
+          "STRING|?"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "LASTORDER": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "ORDER",
         "type": "Method"
       },
       "LASTREQUEST": {
@@ -3289,25 +3289,25 @@
           "LOGICAL|?"
         ],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "REQUEST",
         "type": "Method"
       },
       "MARKASSOLICITED": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "MICROBIOLOGYACTION": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "MicrobiologyAction",
         "type": "Method"
       },
       "NUMERICVALUE": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "FRACTIONAL",
         "type": "Method"
       },
       "PRIORATTRIBUTE": {
@@ -3317,13 +3317,13 @@
           "STRING"
         ],
         "minParams": 3,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "REFERENCEVALUE": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "RELATEDRESULT": {
@@ -3331,13 +3331,13 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "REPORTEDNONCONFORMITY": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "Nonconformity",
         "type": "Method"
       },
       "SETAUTOMATICCONFIRMATION": {
@@ -3345,7 +3345,7 @@
           "LOGICAL"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETAUTOMATICVALIDATION": {
@@ -3353,7 +3353,7 @@
           "LOGICAL"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "SETMANUALSEVERITY": {
@@ -3361,19 +3361,19 @@
           "INTEGER"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "STATISTICALWEIGHT": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "FRACTIONAL",
         "type": "Method"
       },
       "SUCCESSOR": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "TRANSPLANTSELECTIONDISCONTINUATION": {
@@ -3381,19 +3381,19 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "TRANSPLANTSELECTIONPROMOTION": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "WORKSPECIMEN": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "SPECIMEN",
         "type": "Method"
       },
       "ID": {
@@ -3782,7 +3782,7 @@
           "LOGICAL"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "INTEGER",
         "type": "Method"
       },
       "ADDCARRIERS": {
@@ -3795,7 +3795,7 @@
           "ANY|?"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "LOGICAL",
         "type": "Method"
       },
       "ADDREQUEST": {
@@ -3805,7 +3805,7 @@
           "STRING|?"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "VOID",
         "type": "Method"
       },
       "ATTRIBUTE": {
@@ -3813,7 +3813,7 @@
           "STRING"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "CARRIERCOUNT": {
@@ -3822,19 +3822,19 @@
           "STRING"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "INTEGER",
         "type": "Method"
       },
       "COLLECTIONINFO": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "SpecimenCollectionInfo",
         "type": "Method"
       },
       "DIRECTPARENT": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "SPECIMEN",
         "type": "Method"
       },
       "FIRSTREQUEST": {
@@ -3842,28 +3842,28 @@
           "LOGICAL|?"
         ],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "REQUEST",
         "type": "Method"
       },
       "GETITEMSTORAGELOCATIONS": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "STRING",
         "type": "Method"
       },
       "GETLASTPOOL": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "SpecimenPool",
         "type": "Method"
       },
       "GETSTORAGE": {
         "params": [
-          "STRING",
-          "STRING"
+          "STRING|?",
+          "STRING|?"
         ],
         "minParams": 2,
-        "returns": "UNKNOWN",
+        "returns": "ItemStorage",
         "type": "Method"
       },
       "ISOLATIONCOUNT": {
@@ -3876,7 +3876,7 @@
           "ANY"
         ],
         "minParams": 6,
-        "returns": "UNKNOWN",
+        "returns": "INTEGER",
         "type": "Method"
       },
       "LABSPECIFICSIZE": {
@@ -3884,7 +3884,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "FRACTIONAL",
         "type": "Method"
       },
       "LASTREQUEST": {
@@ -3892,7 +3892,7 @@
           "LOGICAL|?"
         ],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "REQUEST",
         "type": "Method"
       },
       "RESULT": {
@@ -3900,10 +3900,10 @@
           "MNEMONIC",
           "STRING|?",
           "STRING|?",
-          "STRING"
+          "STRING|?"
         ],
         "minParams": 4,
-        "returns": "UNKNOWN",
+        "returns": "RESULT",
         "type": "Method"
       },
       "SETMEASUREDSIZE": {
@@ -3911,7 +3911,7 @@
           "FRACTIONAL"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "VOID",
         "type": "Method"
       },
       "SETREPLACEMENTLEVEL": {
@@ -3919,7 +3919,7 @@
           "INTEGER"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "VOID",
         "type": "Method"
       },
       "SETSTORAGE": {
@@ -3931,13 +3931,13 @@
           "ANY"
         ],
         "minParams": 5,
-        "returns": "UNKNOWN",
+        "returns": "ItemStorage",
         "type": "Method"
       },
       "SPECIMENOUTPUT": {
         "params": [],
         "minParams": 0,
-        "returns": "UNKNOWN",
+        "returns": "SpecimenOutput",
         "type": "Method"
       },
       "VARIABLE": {
@@ -3945,7 +3945,7 @@
           "MNEMONIC"
         ],
         "minParams": 1,
-        "returns": "UNKNOWN",
+        "returns": "SpecimenVariable",
         "type": "Method"
       },
       "ID": {

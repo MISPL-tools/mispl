@@ -3,7 +3,7 @@ const path = require("path");
 const { NodeTypes } = require("./ast");
 const PREFIXES = require("./features/glimsPrefixes");
 
-const VERSION = "v2.49.2 - De Definitieve Heelkunde (Patched)";
+const VERSION = "v2.50.27 - Dictionary Case Insensitivity Fix";
 
 let DICT_LOAD_ERROR = null;
 let GLIMS_DICT = { globals: {}, tables: {} };
@@ -26,12 +26,18 @@ const TypeChecker = {
     evaluate(expr, lineNo, context, targetVarName = null) {
         
         const STRICT_METHODS = {
-            "ORDER.RESULT": { params: ["STRING", "STRING|?", "STRING|?"], minParams: 3, returns: "RESULT" },
-            "OBJECT.RESULT": { params: ["STRING", "INTEGER|?", "ANY", "STRING|?"], minParams: 4, returns: "RESULT" },
-            "SPECIMEN.RESULT": { params: ["STRING", "STRING|?", "STRING|?"], minParams: 3, returns: "RESULT" },
-            "MICROBIOLOGYACTION.RESULT": { params: ["STRING", "STRING|?", "STRING|?"], minParams: 3, returns: "RESULT" },
+            "ORDER.RESULT": { params: ["STRING", "ANY", "ANY", "ANY"], minParams: 1, returns: "RESULT" },
+            "OBJECT.RESULT": { params: ["STRING", "ANY", "ANY", "ANY"], minParams: 1, returns: "RESULT" },
+            "SPECIMEN.RESULT": { params: ["STRING", "ANY", "ANY", "ANY"], minParams: 1, returns: "RESULT" },
+            "MICROBIOLOGYACTION.RESULT": { params: ["STRING", "ANY", "ANY", "ANY"], minParams: 1, returns: "RESULT" },
             
-            "ANY.RESULT": { params: ["STRING", "ANY", "ANY", "ANY", "ANY"], minParams: 1, returns: "RESULT" },
+            "RESULT.RELATEDRESULT": { params: ["STRING"], minParams: 1, returns: "RESULT" },
+            "RESULT.NUMERICVALUE": { params: [], minParams: 0, returns: "FRACTIONAL" },
+            "RESULT.ATTRIBUTE": { params: ["STRING"], minParams: 1, returns: "STRING" },
+
+            "ANY.RESULT": { params: ["STRING", "ANY", "ANY", "ANY"], minParams: 1, returns: "RESULT" },
+            "ANY.RELATEDRESULT": { params: ["STRING"], minParams: 1, returns: "RESULT" },
+            "ANY.NUMERICVALUE": { params: [], minParams: 0, returns: "FRACTIONAL" },
             "ANY.ATTRIBUTE": { params: ["STRING", "ANY", "ANY", "ANY", "ANY"], minParams: 1, returns: "STRING" },
             "ANY.ISREQUESTED": { params: ["STRING", "LOGICAL|?"], minParams: 2, returns: "LOGICAL" },
             "ANY.LASTREQUEST": { params: ["ANY"], minParams: 0, returns: "REQUEST" },
@@ -129,8 +135,6 @@ const TypeChecker = {
                             } else {
                                 context.addError(lineNo, `❌ FOUT: Klassevariabele '${vInfo.originalName}' (type ${t}) wordt gebruikt, maar heeft nog nergens een waarde gekregen! (Vergeten ':=' te gebruiken?)`);
                             }
-                        } else {
-                            // GLIMS initialiseert basis-types automatisch ("" / False / 0). Geen warning meer nodig!
                         }
                         context.registerWrite(vInfo.originalName, lineNo);
                     }
@@ -139,21 +143,29 @@ const TypeChecker = {
             }
         }
 
+        const fallbackWordRegex = /(?<![<\.])\b[a-zA-Z_][a-zA-Z0-9_]*\b(?!\s*[\(\.])/g;
+        const reservedKeywords = new Set(["IF", "WHILE", "REPEAT", "UNTIL", "AND", "OR", "NOT", "THEN", "ELSE", "ENDIF", "DO", "DONE", "TRUE", "FALSE", "YES", "NO", "LT", "LE", "GT", "GE", "EQ", "NE", "RETURN"]);
+        
+        work = work.replace(fallbackWordRegex, (match) => {
+            if (reservedKeywords.has(match.toUpperCase()) || match.startsWith('STR')) return match;
+            return "<ANY>";
+        });
+
         work = work.replace(/<MNEMONIC>/ig, "<STRING>");
         work = work.replace(/<SC_USER>/ig, "<USER>");
 
         const isMatch = (expectedRaw, actualRaw) => {
-            let expected = expectedRaw.replace("POSITIVE", "").replace("INT64", "INTEGER").trim();
-            let actual = actualRaw.replace("POSITIVE", "").replace("INT64", "INTEGER").replace("ENUMERATED", "INTEGER").trim();
+            // FIX: Datatypes vergelijken we nu altijd volledig in HOOFDLETTERS
+            let expected = expectedRaw.toUpperCase().replace("POSITIVE", "").replace("INT64", "INTEGER").trim();
+            let actual = actualRaw.toUpperCase().replace("POSITIVE", "").replace("INT64", "INTEGER").replace("ENUMERATED", "INTEGER").trim();
 
             const allowsQuestionMark = expected.endsWith("|?");
             expected = expected.replace(/\|\?$/, ""); 
 
-            if (actual === "QUESTIONMARK" || actual === "UNKNOWN") return true; 
+            if (actual === "QUESTIONMARK" || actual === "UNKNOWN" || actual === "ANY") return true; 
             if (expected === actual || expected === "ANY") return true;
             if (expected === "FRACTIONAL" && actual === "INTEGER") return true; 
             if (expected === "STRING" && actual === "INTEGER") return true; 
-            
             if (expected === "MNEMONIC" && actual === "STRING") return true;
             if (expected === "STRING" && actual === "MNEMONIC") return true;
             
@@ -165,18 +177,109 @@ const TypeChecker = {
             return false;
         };
 
-        const mathHighRegex = /<([A-Z_]+)>\s*([\*\/\%])\s*<([A-Z_]+)>(?!\s*[\.\(])/g;
-        const mathLowRegex = /<([A-Z_]+)>\s*([\+\-])\s*<([A-Z_]+)>(?!\s*[\.\(])/g;
-        const compRegex = /(?<![\+\-\*\/\%]\s*)<([A-Z_]+)>\s*(=|<>|!=|<|>|<=|>=)\s*<([A-Z_]+)>(?!\s*[\.\(\+\-\*\/\%])/g;
-        const logicalRegex = /(?<![\+\-\*\/\%=<>!]\s*)<([A-Z_]+)>\s*(AND|OR|&&|\|\|)\s*<([A-Z_]+)>(?!\s*[\.\(\+\-\*\/\%=<>!])/ig;
+        const processMethod = (callerRaw, methodName, argsStr, match, lineNo, context, prefix = "") => {
+            const strippedArgs = argsStr.replace(/<[A-Z0-9_]+>/g, "").trim();
+            if (/[a-zA-Z_]/.test(strippedArgs) || /[\+\-\*\/]/.test(strippedArgs) || /[\.=<>]/.test(strippedArgs)) {
+                return match; 
+            }
+
+            const fn = methodName.toUpperCase();
+            // FIX: Altijd toUpperCase voor de caller (de class)
+            let callerType = callerRaw ? (callerRaw.startsWith('<') ? callerRaw.replace(/[<>]/g, '').toUpperCase() : callerRaw.toUpperCase()) : "ANY";
+            
+            if (callerType === "UNKNOWN") return `${prefix}<UNKNOWN>`;
+
+            if (callerType === "ORDR" || callerType === "ORD") callerType = "ORDER";
+            if (callerType === "RSLT") callerType = "RESULT";
+            if (callerType === "OBJ") callerType = "OBJECT";
+            if (callerType === "SPMN") callerType = "SPECIMEN";
+            if (callerType === "CRSP") callerType = "CORRESPONDENT";
+
+            let def = STRICT_METHODS[`${callerType}.${fn}`] || STRICT_METHODS[`ANY.${fn}`] || (GLIMS_DICT.tables[callerType] ? GLIMS_DICT.tables[callerType][fn] : null);
+            
+            // FIX: Zorg dat het returnType ook altijd uppercase is
+            let returnType = def && def.returns ? def.returns.toUpperCase() : "UNKNOWN";
+
+            if (def) {
+                const rawArgs = argsStr.trim().length === 0 ? [] : argsStr.split(',');
+                const actualTypes = rawArgs.map(arg => {
+                    const m = arg.match(/<[A-Z0-9_]+>/);
+                    return m ? m[0].replace(/[<>]/g, "").toUpperCase() : "UNKNOWN";
+                });
+                
+                const expectedTypes = def.params || [];
+                const minParams = def.minParams !== undefined ? def.minParams : expectedTypes.length;
+
+                if (actualTypes.length < minParams) {
+                    context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' verwacht minimaal ${minParams} parameter(s), maar kreeg er ${actualTypes.length}.`);
+                } else if (expectedTypes.length > 0 && actualTypes.length > expectedTypes.length) {
+                    context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' verwacht maximaal ${expectedTypes.length} parameter(s), maar kreeg er ${actualTypes.length}.`);
+                } else {
+                    const allowedEmptyStrFuncs = ["COMMENT", "ASKCHOICE", "ASKSTRING", "ASKYESNO", "GETSPECIMEN", "LPAD", "RPAD"];
+                    for (let i = 0; i < actualTypes.length; i++) {
+                        if (expectedTypes[i]) {
+                            if (actualTypes[i] === "EMPTY_STRING") {
+                                if (allowedEmptyStrFuncs.some(f => fn.includes(f))) {
+                                    actualTypes[i] = "STRING"; 
+                                } else {
+                                    context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' (parameter ${i+1}) is een lege string (""). GLIMS accepteert dit, maar controleer of dit de bedoeling is.`);
+                                    actualTypes[i] = "STRING"; 
+                                }
+                            }
+
+                            if (!isMatch(expectedTypes[i], actualTypes[i])) {
+                                let expPrint = expectedTypes[i].replace(/\|\?$/, ""); 
+                                if (actualTypes[i] === "QUESTIONMARK") {
+                                    context.addWarning(lineNo, `⚠️ WAARSCHUWING: Parameter ${i+1} van '${callerType}.${fn}' mag GEEN vraagteken ('?') zijn. Verwacht type: '${expPrint}'.`);
+                                } else {
+                                    context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' (parameter ${i+1}) verwacht type '${expPrint}', maar kreeg '${actualTypes[i]}'.`);
+                                }
+                            } else if (actualTypes[i] === "QUESTIONMARK" && expectedTypes[i].includes("STRING") && !expectedTypes[i].includes("|?")) {
+                                if (i === 0 && (fn === "ADDREQUEST" || fn === "RESULT")) {
+                                    context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${fn}' staat een '?' niet toe als eerste parameter. Vul een geldige tekst in.`);
+                                } else if (!SAFE_UNKNOWN_FUNCS.has(fn)) {
+                                    context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je geeft een '?' door aan parameter ${i+1} van '${fn}'. Weet je zeker dat GLIMS dit accepteert?`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return `${prefix}<${returnType}>`;
+        };
+
+        const mathHighRegex = /<([A-Z0-9_]+)>\s*([\*\/\%])\s*<([A-Z0-9_]+)>/g;
+        const mathLowRegex  = /<([A-Z0-9_]+)>\s*([\+\-])\s*<([A-Z0-9_]+)>/g;
+        const compRegex     = /<([A-Z0-9_]+)>\s*(=|<>|!=|<|>|<=|>=)\s*<([A-Z0-9_]+)>/g;
+        const logicalRegex  = /<([A-Z0-9_]+)>\s*(AND|OR|&&|\|\|)\s*<([A-Z0-9_]+)>/ig;
+
+        const checkPrecedence = (offset, matchStr, fullStr, level) => {
+            const before = fullStr.substring(0, offset).trimEnd();
+            const after = fullStr.substring(offset + matchStr.length).trimStart();
+            
+            if (before.endsWith('.') || after.startsWith('.')) return true;
+            
+            if (level >= 2) { 
+                if (/[\*\/\%]$/.test(before) || /^[\*\/\%]/.test(after)) return true;
+            }
+            if (level >= 3) { 
+                if (/[\*\/\%\+\-]$/.test(before) || /^[\*\/\%\+\-]/.test(after)) return true;
+            }
+            if (level >= 4) { 
+                if (/(=|<>|!=|<|>|<=|>=|[\*\/\%\+\-])$/.test(before) || /^(=|<>|!=|<|>|<=|>=|[\*\/\%\+\-])/.test(after)) return true;
+                if (/\bNOT$/i.test(before)) return true;
+            }
+            return false;
+        };
 
         let prevWork;
         let infiniteLoopGuard = 0;
+        
         do {
             prevWork = work;
 
             work = work.replace(/(<[A-Z0-9_]+>|[a-zA-Z_][a-zA-Z0-9_]*)\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\b(?!\s*\()/g, (match, callerRaw, prop) => {
-                let typeName = callerRaw.startsWith('<') ? callerRaw.replace(/[<>]/g, '') : callerRaw.toUpperCase();
+                let typeName = callerRaw.startsWith('<') ? callerRaw.replace(/[<>]/g, '').toUpperCase() : callerRaw.toUpperCase();
                 if (typeName === "ORDR" || typeName === "ORD") typeName = "ORDER";
                 if (typeName === "RSLT") typeName = "RESULT";
                 if (typeName === "OBJ") typeName = "OBJECT";
@@ -185,13 +288,15 @@ const TypeChecker = {
 
                 let retType = "UNKNOWN";
                 if (GLIMS_DICT.tables[typeName] && GLIMS_DICT.tables[typeName][prop.toUpperCase()]) {
-                    retType = GLIMS_DICT.tables[typeName][prop.toUpperCase()].returns;
+                    retType = GLIMS_DICT.tables[typeName][prop.toUpperCase()].returns.toUpperCase(); // FIX: Zorg voor uppercase properties
                 }
                 
                 const p = prop.toUpperCase();
                 if (["INTERNALID", "NAME", "MNEMONIC", "SHORTNAME", "DESCRIPTION", "EXTERNALCOMMENT", "INTERNALCOMMENT", "RAWVALUE", "VALUE", "MESSAGE", "CODE"].includes(p)) retType = "STRING";
                 else if (["ID", "STATUS", "TYPE", "SEX"].includes(p)) retType = "INTEGER";
-                else if (["OBJECTTIME", "SAMPLINGTIME", "RECEIPTTIME", "CREATIONTIME", "EXPIRATIONTIME", "CHECKOUTTIME", "TRANSFUSIONENDTIME", "UTMOSTTRANSFUSIONTIME", "CHECKTIME", "BIRTHDATE", "DETERMINATIONDATE1", "DETERMINATIONDATE2"].includes(p)) retType = "DATETIME";
+                else if (["BIRTHDATE", "DETERMINATIONDATE1", "DETERMINATIONDATE2"].includes(p)) retType = "DATE";
+                else if (["OBJECTTIME", "SAMPLINGTIME", "RECEIPTTIME", "CREATIONTIME", "EXPIRATIONTIME", "CHECKOUTTIME", "TRANSFUSIONENDTIME", "UTMOSTTRANSFUSIONTIME", "CHECKTIME"].includes(p)) retType = "DATETIME";
+                else if (["UNSOLICITED", "SOLICITED", "ISREQUESTED", "AVAILABLE", "VALIDATED"].includes(p)) retType = "LOGICAL";
                 else if (p === "OBJECT") retType = "OBJECT";
                 else if (p === "ORDER") retType = "ORDER";
                 else if (p === "PERSON") retType = "PERSON";
@@ -215,7 +320,9 @@ const TypeChecker = {
                 
                 if (["INTERNALID", "NAME", "MNEMONIC", "SHORTNAME", "DESCRIPTION", "EXTERNALCOMMENT", "INTERNALCOMMENT", "RAWVALUE", "VALUE", "MESSAGE", "CODE"].includes(p)) retType = "STRING";
                 else if (["ID", "STATUS", "TYPE", "SEX"].includes(p)) retType = "INTEGER";
-                else if (["OBJECTTIME", "SAMPLINGTIME", "RECEIPTTIME", "CREATIONTIME", "EXPIRATIONTIME", "CHECKOUTTIME", "TRANSFUSIONENDTIME", "UTMOSTTRANSFUSIONTIME", "CHECKTIME", "BIRTHDATE", "DETERMINATIONDATE1", "DETERMINATIONDATE2"].includes(p)) retType = "DATETIME";
+                else if (["BIRTHDATE", "DETERMINATIONDATE1", "DETERMINATIONDATE2"].includes(p)) retType = "DATE";
+                else if (["OBJECTTIME", "SAMPLINGTIME", "RECEIPTTIME", "CREATIONTIME", "EXPIRATIONTIME", "CHECKOUTTIME", "TRANSFUSIONENDTIME", "UTMOSTTRANSFUSIONTIME", "CHECKTIME"].includes(p)) retType = "DATETIME";
+                else if (["UNSOLICITED", "SOLICITED", "ISREQUESTED", "AVAILABLE", "VALIDATED"].includes(p)) retType = "LOGICAL";
                 else if (p === "OBJECT") retType = "OBJECT";
                 else if (p === "ORDER") retType = "ORDER";
                 else if (p === "PERSON") retType = "PERSON";
@@ -232,83 +339,14 @@ const TypeChecker = {
                 return `${prefix}<${retType}>`; 
             });
 
-            const methodRegex = /(?:([a-zA-Z0-9_<>]+))?\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^()]*)\)/g;
-            work = work.replace(methodRegex, (match, callerRaw, methodName, argsStr) => {
-                const strippedArgs = argsStr.replace(/<[A-Z0-9_]+>/g, "").trim();
-                if (/[a-zA-Z_]/.test(strippedArgs) || /[\+\-\*\/]/.test(strippedArgs) || /[\.=<>]/.test(strippedArgs)) {
-                    return match; 
-                }
+            const explicitMethodRegex = /([a-zA-Z0-9_<>]+)\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^()]*)\)/g;
+            work = work.replace(explicitMethodRegex, (match, callerRaw, methodName, argsStr) => {
+                return processMethod(callerRaw, methodName, argsStr, match, lineNo, context, "");
+            });
 
-                const fn = methodName.toUpperCase();
-                let callerType = callerRaw ? (callerRaw.startsWith('<') ? callerRaw.replace(/[<>]/g, '') : callerRaw.toUpperCase()) : "ANY";
-                
-                if (callerType === "UNKNOWN") return "<UNKNOWN>";
-
-                if (callerType === "ORDR" || callerType === "ORD") callerType = "ORDER";
-                if (callerType === "RSLT") callerType = "RESULT";
-                if (callerType === "OBJ") callerType = "OBJECT";
-                if (callerType === "SPMN") callerType = "SPECIMEN";
-                if (callerType === "CRSP") callerType = "CORRESPONDENT";
-
-                const isCoreType = ["STRING", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "MNEMONIC", "VOID", "EMPTY_STRING"].includes(callerType);
-                
-                if (isCoreType && fn !== "ATTRIBUTE" && fn !== "RESULT" && fn !== "ADDREQUEST") {
-                    context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '.${fn}()' op datatype '${callerType}'. GLIMS doet hier mogelijk een impliciete lookup (bijv. String -> Record).`);
-                }
-
-                let def = STRICT_METHODS[`${callerType}.${fn}`] || STRICT_METHODS[`ANY.${fn}`] || (GLIMS_DICT.tables[callerType] ? GLIMS_DICT.tables[callerType][fn] : null);
-                if (!def && fn === "RESULT") def = STRICT_METHODS["ANY.RESULT"];
-                if (!def && fn === "ATTRIBUTE") def = STRICT_METHODS["ANY.ATTRIBUTE"];
-                if (!def && fn === "ADDREQUEST") def = STRICT_METHODS["ANY.ADDREQUEST"];
-                
-                let returnType = def ? def.returns : "UNKNOWN";
-
-                if (def) {
-                    const rawArgs = argsStr.trim().length === 0 ? [] : argsStr.split(',');
-                    const actualTypes = rawArgs.map(arg => {
-                        const m = arg.match(/<[A-Z0-9_]+>/);
-                        return m ? m[0].replace(/[<>]/g, "") : "UNKNOWN";
-                    });
-                    
-                    const expectedTypes = def.params || [];
-                    const minParams = def.minParams !== undefined ? def.minParams : expectedTypes.length;
-
-                    if (actualTypes.length < minParams) {
-                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' verwacht minimaal ${minParams} parameter(s), maar kreeg er ${actualTypes.length}.`);
-                    } else if (expectedTypes.length > 0 && actualTypes.length > expectedTypes.length) {
-                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' verwacht maximaal ${expectedTypes.length} parameter(s), maar kreeg er ${actualTypes.length}.`);
-                    } else {
-                        const allowedEmptyStrFuncs = ["COMMENT", "ASKCHOICE", "ASKSTRING", "ASKYESNO", "GETSPECIMEN", "LPAD", "RPAD"];
-                        for (let i = 0; i < actualTypes.length; i++) {
-                            if (expectedTypes[i]) {
-                                if (actualTypes[i] === "EMPTY_STRING") {
-                                    if (allowedEmptyStrFuncs.some(f => fn.includes(f))) {
-                                        actualTypes[i] = "STRING"; 
-                                    } else {
-                                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' (parameter ${i+1}) is een lege string (""). GLIMS accepteert dit, maar controleer of dit de bedoeling is.`);
-                                        actualTypes[i] = "STRING"; 
-                                    }
-                                }
-
-                                if (!isMatch(expectedTypes[i], actualTypes[i])) {
-                                    let expPrint = expectedTypes[i].replace(/\|\?$/, ""); 
-                                    if (actualTypes[i] === "QUESTIONMARK") {
-                                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Parameter ${i+1} van '${callerType}.${fn}' mag GEEN vraagteken ('?') zijn. Verwacht type: '${expPrint}'.`);
-                                    } else {
-                                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' (parameter ${i+1}) verwacht type '${expPrint}', maar kreeg '${actualTypes[i]}'.`);
-                                    }
-                                } else if (actualTypes[i] === "QUESTIONMARK" && expectedTypes[i].includes("STRING") && !expectedTypes[i].includes("|?")) {
-                                    if (i === 0 && (fn === "ADDREQUEST" || fn === "RESULT")) {
-                                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${fn}' staat een '?' niet toe als eerste parameter. Vul een geldige tekst in.`);
-                                    } else if (!SAFE_UNKNOWN_FUNCS.has(fn)) {
-                                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je geeft een '?' door aan parameter ${i+1} van '${fn}'. Weet je zeker dat GLIMS dit accepteert?`);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                return `${callerRaw ? '' : '.'}<${returnType}>`; 
+            const implicitMethodRegex = /(^|[^a-zA-Z0-9_>\]\)])\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^()]*)\)/g;
+            work = work.replace(implicitMethodRegex, (match, prefix, methodName, argsStr) => {
+                return processMethod(null, methodName, argsStr, match, lineNo, context, prefix);
             });
 
             const globalRegex = /(^|[^a-zA-Z0-9_\.>])([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^()]*)\)/g;
@@ -323,11 +361,11 @@ const TypeChecker = {
                 
                 if (!def) return `${prefix}<UNKNOWN>`;
 
-                let returnType = def.returns || "UNKNOWN";
+                let returnType = (def.returns || "UNKNOWN").toUpperCase(); // FIX: Global functies upperen
                 const rawArgs = argsStr.trim().length === 0 ? [] : argsStr.split(',');
                 const actualTypes = rawArgs.map(arg => {
                     const m = arg.match(/<[A-Z0-9_]+>/);
-                    return m ? m[0].replace(/[<>]/g, "") : "UNKNOWN";
+                    return m ? m[0].replace(/[<>]/g, "").toUpperCase() : "UNKNOWN";
                 });
                 
                 const expectedTypes = def.params || [];
@@ -366,12 +404,6 @@ const TypeChecker = {
                 return `${prefix}<${returnType}>`; 
             });
 
-            let unaryPrev;
-            do {
-                unaryPrev = work;
-                work = work.replace(/(^|[=<>!\(\*\/\s]|AND|OR|&&|\|\|)[\+\-]\s*<([A-Z_]+)>/ig, "$1<$2>");
-            } while (work !== unaryPrev);
-
             let parenPrev;
             do {
                 parenPrev = work;
@@ -379,17 +411,17 @@ const TypeChecker = {
             } while (work !== parenPrev);
 
             let mathGuard = 0;
-            const resolveMath = (t1, op, t2) => {
+            const resolveMath = (match, t1, op, t2) => {
+                const isCore1 = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "UNKNOWN", "QUESTIONMARK", "ANY", "EMPTY_STRING"].includes(t1);
+                const isCore2 = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "UNKNOWN", "QUESTIONMARK", "ANY", "EMPTY_STRING"].includes(t2);
+                if (!isCore1 || !isCore2) return match;
+
                 if (t1 === "EMPTY_STRING") t1 = "STRING";
                 if (t2 === "EMPTY_STRING") t2 = "STRING";
-                if (t1 === "UNKNOWN" || t2 === "UNKNOWN" || t1 === "QUESTIONMARK" || t2 === "QUESTIONMARK") return "<UNKNOWN>"; 
+                if (t1 === "UNKNOWN" || t2 === "UNKNOWN" || t1 === "QUESTIONMARK" || t2 === "QUESTIONMARK" || t1 === "ANY" || t2 === "ANY") return "<UNKNOWN>"; 
                 
                 if (op === "+") {
                     if (t1 === "STRING" || t2 === "STRING") {
-                        if (t1 !== "STRING" || t2 !== "STRING") {
-                            const wrongType = t1 === "STRING" ? t2 : t1;
-                            context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je voegt een 'STRING' en '${wrongType}' samen. GLIMS slikt dit vaak, maar IntegerToString() is schoner.`);
-                        }
                         return "<STRING>";
                     }
                 } else if (op === "%") {
@@ -426,15 +458,30 @@ const TypeChecker = {
                 return "<INTEGER>";
             };
 
+            let unaryPrev;
+            do {
+                unaryPrev = work;
+                work = work.replace(/(^|[=<>!\(\*\/\s]|AND|OR|&&|\|\|)[\+\-]\s*<([A-Z0-9_]+)>(?!\s*\.)/ig, (match, p1, p2, offset, fullStr) => {
+                    if (checkPrecedence(offset, match, fullStr, 2)) return match;
+                    return `${p1}<${p2}>`;
+                });
+            } while (work !== unaryPrev);
+
             let mathPrev;
             do {
                 mathPrev = work;
-                work = work.replace(mathHighRegex, (match, t1, op, t2) => resolveMath(t1, op, t2));
+                work = work.replace(mathHighRegex, (match, t1, op, t2, offset, fullStr) => {
+                    if (checkPrecedence(offset, match, fullStr, 1)) return match;
+                    return resolveMath(match, t1, op, t2);
+                });
             } while (work !== mathPrev);
 
             do {
                 mathPrev = work;
-                work = work.replace(mathLowRegex, (match, t1, op, t2) => resolveMath(t1, op, t2));
+                work = work.replace(mathLowRegex, (match, t1, op, t2, offset, fullStr) => {
+                    if (checkPrecedence(offset, match, fullStr, 2)) return match;
+                    return resolveMath(match, t1, op, t2);
+                });
             } while (work !== mathPrev);
 
             do {
@@ -442,14 +489,17 @@ const TypeChecker = {
                 work = work.replace(/(?<![a-zA-Z0-9_]\s*)\(\s*<([A-Z_]+)>\s*\)/g, "<$1>");
             } while (work !== parenPrev);
 
+
             let compPrev;
             do {
                 compPrev = work;
-                work = work.replace(compRegex, (match, t1, op, t2) => {
+                work = work.replace(compRegex, (match, t1, op, t2, offset, fullStr) => {
+                    if (checkPrecedence(offset, match, fullStr, 3)) return match;
+
                     if (t1 === "EMPTY_STRING") t1 = "STRING";
                     if (t2 === "EMPTY_STRING") t2 = "STRING";
 
-                    if (t1 === "QUESTIONMARK" || t2 === "QUESTIONMARK" || t1 === "UNKNOWN" || t2 === "UNKNOWN") {
+                    if (t1 === "QUESTIONMARK" || t2 === "QUESTIONMARK" || t1 === "UNKNOWN" || t2 === "UNKNOWN" || t1 === "ANY" || t2 === "ANY") {
                         return "<LOGICAL>";
                     }
 
@@ -463,8 +513,11 @@ const TypeChecker = {
                     if (t1 === "ENUMERATED" || t2 === "ENUMERATED") return "<LOGICAL>";
 
                     if (!isMatch(t1, t2) && !isMatch(t2, t1) && !(isNum1 && isNum2)) {
-                        if ((t1 === "LOGICAL" && t2 === "STRING") || (t2 === "LOGICAL" && t1 === "STRING")) {
-                            context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je vergelijkt een 'LOGICAL' met een 'STRING' ('${op}'). Zorg dat de string "YES", "NO", "TRUE" of "FALSE" is.`);
+                        if ((isTemporal1 && isNum2) || (isNum1 && isTemporal2)) {
+                            // Valid in GLIMS
+                        } else if ((t1 === "LOGICAL" && (t2 === "STRING" || t2 === "INTEGER" || t2 === "FRACTIONAL")) || 
+                                   (t2 === "LOGICAL" && (t1 === "STRING" || t1 === "INTEGER" || t1 === "FRACTIONAL"))) {
+                            // Valid in GLIMS (0/1 to false/true, string "YES"/"NO" to true/false)
                         } else {
                             context.addWarning(lineNo, `⚠️ WAARSCHUWING: Mogelijk type-conflict. Je vergelijkt '${t1}' en '${t2}' ('${op}'). Controleer of dit valide is in GLIMS.`);
                         }
@@ -478,13 +531,14 @@ const TypeChecker = {
                 work = work.replace(/(?<![a-zA-Z0-9_]\s*)\(\s*<([A-Z_]+)>\s*\)/g, "<$1>");
             } while (work !== parenPrev);
 
+
             let notPrev;
             do {
                 notPrev = work;
-                work = work.replace(/\bNOT\s+<([A-Z_]+)>/ig, (match, t1) => {
-                    if (t1 !== "LOGICAL" && t1 !== "UNKNOWN" && t1 !== "QUESTIONMARK") {
-                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Operator 'NOT' verwacht een LOGICAL, maar kreeg '${t1}'. GLIMS doet hier mogelijk een impliciete conversie.`);
-                    }
+                work = work.replace(/\bNOT\s+<([A-Z0-9_]+)>/ig, (match, t1, offset, fullStr) => {
+                    if (checkPrecedence(offset, match, fullStr, 4)) return match;
+                    const isCore1 = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "UNKNOWN", "QUESTIONMARK", "ANY", "EMPTY_STRING"].includes(t1);
+                    if (!isCore1) return match;
                     return "<LOGICAL>";
                 });
             } while (work !== notPrev);
@@ -492,13 +546,12 @@ const TypeChecker = {
             let logPrev;
             do {
                 logPrev = work;
-                work = work.replace(logicalRegex, (match, t1, op, t2) => {
-                    if (t1 !== "LOGICAL" && t1 !== "UNKNOWN" && t1 !== "QUESTIONMARK") {
-                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Operator '${op.toUpperCase()}' verwacht een LOGICAL, maar kreeg '${t1}'. GLIMS doet hier mogelijk een impliciete conversie.`);
-                    }
-                    if (t2 !== "LOGICAL" && t2 !== "UNKNOWN" && t2 !== "QUESTIONMARK") {
-                        context.addWarning(lineNo, `⚠️ WAARSCHUWING: Operator '${op.toUpperCase()}' verwacht een LOGICAL, maar kreeg '${t2}'. GLIMS doet hier mogelijk een impliciete conversie.`);
-                    }
+                work = work.replace(logicalRegex, (match, t1, op, t2, offset, fullStr) => {
+                    if (checkPrecedence(offset, match, fullStr, 4)) return match;
+                    const isCore1 = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "UNKNOWN", "QUESTIONMARK", "ANY", "EMPTY_STRING"].includes(t1);
+                    const isCore2 = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "UNKNOWN", "QUESTIONMARK", "ANY", "EMPTY_STRING"].includes(t2);
+                    if (!isCore1 || !isCore2) return match;
+                    
                     return "<LOGICAL>";
                 });
             } while (work !== logPrev);
@@ -523,7 +576,7 @@ const TypeChecker = {
                     
                     const isCoreTypeTarget = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "MNEMONIC", "VOID", "ANY"].includes(targetType);
                     
-                    if (!isMatch(targetType, finalType) && finalType !== "UNKNOWN" && finalType !== "QUESTIONMARK") {
+                    if (!isMatch(targetType, finalType) && finalType !== "UNKNOWN" && finalType !== "QUESTIONMARK" && finalType !== "ANY") {
                         const isTemporalTarget = ["DATE", "TIME", "DATETIME"].includes(targetType);
                         const isTemporalFinal = ["DATE", "TIME", "DATETIME"].includes(finalType);
                         const isNumTarget = ["INTEGER", "FRACTIONAL"].includes(targetType);
@@ -532,7 +585,15 @@ const TypeChecker = {
                         if (!isCoreTypeTarget && (finalType === "INTEGER" || finalType === "ENUMERATED" || finalType === "STRING")) {
                             // Valid
                         } else if ((isTemporalTarget && isNumFinal) || (isNumTarget && isTemporalFinal) || (isTemporalTarget && isTemporalFinal)) {
-                            context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je wijst een '${finalType}' toe aan een '${targetType}'. GLIMS accepteert dit momenteel omdat tijden als getallen worden opgeslagen, maar expliciete conversie is sterk aanbevolen.`);
+                            
+                            if (isTemporalTarget && isNumFinal) {
+                                context.addInfo(lineNo, `💡 Stijl-tip: Je wijst een getal toe aan een datum/tijd variabele ('${targetVarName}'). GLIMS accepteert dit (getallen worden als dagen/seconden gezien), maar let op de leesbaarheid.`);
+                            } else if (isNumTarget && isTemporalFinal) {
+                                context.addError(lineNo, `❌ FOUT: Je wijst een Datum/Tijd toe aan een Getalvariabele ('${targetVarName}'). Gebruik DateTimeToInteger() of soortgelijke functies om fouten in berekeningen te voorkomen.`);
+                            } else {
+                                context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je probeert een '${finalType}' toe te wijzen aan de variabele '${targetVarName}' (type '${targetType}'). Controleer of dit de bedoeling is.`);
+                            }
+
                         } else {
                             context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je probeert een '${finalType}' toe te wijzen aan de variabele '${targetVarName}' (type '${targetType}'). Controleer op type-mismatches.`);
                         }
@@ -841,6 +902,7 @@ const Validators = {
         };
 
         const heavyFunctions = /\b(Expand|GetSiteAttribute|Lookup|GetLogEntry|GetResult|GetCode|GetMedicalRecord|GetEncounter)\s*\(([^)]*)\)/ig;
+        const iteratorFunctions = /\b(GetSpecimen|GetAction|GetRequests|GetResults|GetPriorResult|GetNextResult|GetResult)\s*\(/i;
 
         for (let i = 0; i < nodes.length; i++) {
             const node = nodes[i];
@@ -865,18 +927,23 @@ const Validators = {
 
             if (loopCondition && blockEnd > -1) {
                 const conditionVars = getVarsInExpr(loopCondition).map(v => v.toLowerCase());
-                const assignedInLoop = new Map(); 
+                const assignedInLoop = new Set(); 
+                let hasIterator = false;
                 
                 for (let m = i + 1; m < blockEnd; m++) {
                     const subNode = nodes[m];
                     if (subNode.type === NodeTypes.Assignment) {
-                        assignedInLoop.set(String(subNode.name).toLowerCase(), getVarsInExpr(subNode.value).map(v => v.toLowerCase()));
+                        assignedInLoop.add(String(subNode.name).toLowerCase());
                     }
 
                     let exprToCheck = subNode.value || subNode.condition || subNode.expression || subNode.text;
                     if (exprToCheck) {
                         const safeExpr = String(exprToCheck);
                         if (safeExpr.toLowerCase().includes(".addrequest(")) context.addInfo(subNode.line, `💡 Prestatie-tip: Verzamel .AddRequest() buiten de lus.`);
+
+                        if (iteratorFunctions.test(safeExpr)) {
+                            hasIterator = true;
+                        }
 
                         let match;
                         heavyFunctions.lastIndex = 0;
@@ -885,7 +952,7 @@ const Validators = {
                             for (let av of getVarsInExpr(match[2].toLowerCase())) {
                                 if (assignedInLoop.has(av.toLowerCase())) { isDependent = true; break; }
                             }
-                            if (!isDependent) context.addWarning(subNode.line, `🐢 Prestatie-waarschuwing: '${match[1]}' staat in een loop maar argumenten wijzigen niet!`);
+                            if (!isDependent) context.addInfo(subNode.line, `💡 Stijl-tip: '${match[1]}' staat in een loop maar argumenten wijzigen niet. Overweeg een variabele!`);
                         }
                     }
                 }
@@ -893,16 +960,13 @@ const Validators = {
                 let isProperlyUpdated = false;
                 for (let condVar of conditionVars) {
                     if (assignedInLoop.has(condVar)) {
-                        const deps = assignedInLoop.get(condVar);
-                        if (deps.length === 0 || deps.includes(condVar)) { isProperlyUpdated = true; break; }
-                        for (let dep of deps) {
-                            if (assignedInLoop.has(dep)) { isProperlyUpdated = true; break; }
-                        }
+                        isProperlyUpdated = true; 
+                        break; 
                     }
                 }
 
-                if (conditionVars.length > 0 && !isProperlyUpdated) {
-                    context.addWarning(node.line, `⚠️ WAARSCHUWING: Mogelijke oneindige ${type}-loop! '${conditionVars[0]}' wordt overschreven met statische of niet-wijzigende data.`);
+                if (conditionVars.length > 0 && !isProperlyUpdated && !hasIterator) {
+                    context.addWarning(node.line, `⚠️ WAARSCHUWING: Mogelijke oneindige ${type}-loop! Geen van de variabelen in de conditie wordt binnen de loop bijgewerkt.`);
                 }
             }
         }
@@ -1049,7 +1113,6 @@ function parseMISPL(rawCode) {
             addWarning(lineNo, `⚠️ WAARSCHUWING: Ontbrekend sluitend haakje ']' in ${context}. Er openen meer haakjes dan er sluiten.`);
         }
 
-        // FIX TEST 2: Harde errors voor missing ; in expressies
         if (clean.includes(":=")) {
             addError(lineNo, "FOUT: Syntax error. Regel moet eindigen met ';'. (Onverwachte ':=' gevonden in expressie)");
         }
@@ -1381,7 +1444,6 @@ function parseMISPL(rawCode) {
             const name = trimmed.substring(0, firstIdx).trim();
             const value = trimmed.substring(firstIdx + 2).replace(/;$/, "").trim();
             
-            // FIX TEST 7: Lokale assignments mogen niet met een punt beginnen. Object-eigenschappen wel.
             if (name.startsWith(".")) {
                 const cleanName = name.replace(/^\./, '');
                 if (declaredVars.has(cleanName.toLowerCase()) || /^(s|i|l|b|f|d|obj|ordr|rslt)[A-Z]/.test(cleanName)) {
@@ -1624,7 +1686,6 @@ function analyze(astOrResult, rawText = "") {
     
     if (safeText.trim() !== "" && !safeText.includes("/*")) context.addInfo(0, `💡 Stijl-tip: Een MISPL hoort te beginnen met een /* commentaarblok */.`);
     
-    // FIX TEST 1: Verwijder commentaar voordat we zoeken naar RETURN
     const codeZonderCommentaar = safeText.replace(/\/\*[\s\S]*?\*\//g, "");
     const upperTextClean = codeZonderCommentaar.toUpperCase();
 
@@ -1647,7 +1708,7 @@ function analyze(astOrResult, rawText = "") {
             });
 
             context.assignedVars.forEach((info, key) => {
-                if (!context.readVars.has(key)) info.lines.forEach(lineNo => context.addInfo(lineNo, `💡 Optimalisatie: Waarde van '${info.originalName}' wordt hierna nooit meer uitgelezen.`));
+                if (!context.readVars.has(key)) info.lines.forEach(lineNo => context.addWarning(lineNo, `⚠️ WAARSCHUWING: Waarde van '${info.originalName}' wordt hierna nooit meer uitgelezen (Mogelijke dode code of overbodige query).`));
             });
         }
     } catch (err) {
