@@ -153,8 +153,11 @@ function normalizeLines(text) {
     // 2. Puntkomma splitsen
     result = result.replace(new RegExp(";" + inlineComments + "\\s*", "g"), ";$1\n");
 
-    // 3. Blok-openers
-    result = result.replace(new RegExp("\\s*\\b(THEN|DO|REPEAT)\\b" + inlineComments + "\\s*", "gi"), " $1$2\n");
+    // 3a. Blok-openers die AAN de vorige regel plakken (THEN, DO)
+    result = result.replace(new RegExp("\\s*\\b(THEN|DO)\\b" + inlineComments + "\\s*", "gi"), " $1$2\n");
+
+    // 3b. Blok-openers die EEN EIGEN regel krijgen (REPEAT)
+    result = result.replace(new RegExp("\\s*\\b(REPEAT)\\b" + inlineComments + "\\s*", "gi"), "\n$1$2\n");
 
     // 4. Blok-midden
     result = result.replace(new RegExp("\\s*\\b(ELSE)\\b" + inlineComments + "\\s*", "gi"), "\n$1$2\n");
@@ -164,6 +167,9 @@ function normalizeLines(text) {
 
     // 6. Gereserveerde flow-keywords
     result = result.replace(/([^\n;{}])\s*\b(IF|WHILE|RETURN)\b/gi, "$1\n$2");
+
+    // 6.5 Absolute isolatie van lege regels (voorkomt vastplakken aan keywords)
+    result = result.replace(/\s*__EMPTY_MARKER__\s*/g, "\n__EMPTY_MARKER__\n");
 
     // 7. Opschonen en splitsen
     let lines = result.split(/\r?\n/);

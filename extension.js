@@ -81,7 +81,7 @@ function activate(context) {
         return vscode.DiagnosticSeverity.Information;
     }
 
-    function runDiagnostics(document) {
+function runDiagnostics(document) {
         if (!document || document.languageId !== "mispl") return;
 
         const code = document.getText();
@@ -105,12 +105,16 @@ function activate(context) {
             }
 
             if (ast && parseErrors.length === 0) {
-                let analysisResult;
+                let analysisErrors = [];
                 try {
-                    analysisResult = analyze(parseResult, code) || [];
+                    // Vanaf v2.60.10 geeft dit een Object terug: { errors: [...], variables: Map }
+                    const analysisResult = analyze(parseResult, code);
+                    
+                    // Haal de lijst met fouten expliciet uit het object!
+                    analysisErrors = analysisResult.errors || [];
                 } catch (inner) {
                     console.error("UNEXPECTED STATIC ANALYSIS ERROR (analyzer):", inner);
-                    analysisResult = [
+                    analysisErrors = [
                         {
                             line: 0,
                             message: "Onverwachte fout in statische analyse: " + String(inner),
@@ -119,8 +123,9 @@ function activate(context) {
                     ];
                 }
 
+                // Gebruik hier de 'analysisErrors' lijst, NIET het analysisResult object
                 diagnostics.push(
-                    ...analysisResult.map(r => {
+                    ...analysisErrors.map(r => {
                         const line = typeof r.line === "number" ? r.line : 0;
                         return new vscode.Diagnostic(
                             new vscode.Range(line, 0, line, 200),

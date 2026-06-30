@@ -1,125 +1,136 @@
-// ./features/hoverProvider.js
 const vscode = require('vscode');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+const { parseMISPL } = require('../analyzeMISPL');
 
-let snippetsData = {};
+let glimsDict = { globals: {}, tables: {} };
 
-// Laad het tekstbestand één keer in het geheugen als de extensie start
-function loadSnippets(context) {
-    if (Object.keys(snippetsData).length > 0) return; 
-    
-    try {
-        const snippetsPath = path.join(context.extensionPath, 'snippets', 'mispl.code-snippets');
-        
-        if (fs.existsSync(snippetsPath)) {
-            const rawText = fs.readFileSync(snippetsPath, 'utf8');
-            
-            // 🚀 POGING 1: Lees het in als een echt JSON object (Kogelvrij!)
-            try {
-                // Verwijder eventuele // comments en /* */ comments zodat JSON.parse niet crasht
-                const cleanJson = rawText.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
-                const parsed = JSON.parse(cleanJson);
-                
-                for (const key in parsed) {
-                    const snip = parsed[key];
-                    if (snip.prefix) {
-                        let desc = "";
-                        // Soms is description een array van regels, soms één lange string
-                        if (Array.isArray(snip.description)) {
-                            desc = snip.description.join('\n');
-                        } else if (typeof snip.description === 'string') {
-                            desc = snip.description;
-                        }
-                        snippetsData[key] = { prefix: snip.prefix, description: desc };
-                    }
-                }
-                console.log(`✅ HoverProvider: ${Object.keys(snippetsData).length} snippets geladen via JSON.parse.`);
-                return; // Gelukt! We hoeven niet verder.
-
-            } catch (jsonErr) {
-                console.warn("⚠️ JSON parse mislukt (misschien een typefoutje in de json?), we schakelen over op Regex fallback...");
-            }
-
-            // 🛠️ POGING 2: Reserve-wiel (Regex Fallback)
-            // DE FIX: Hij stopt nu pas bij een } die aan het EIND van een regel staat (met een enter ervoor).
-            // Hierdoor stopt hij niet per ongeluk bij ${1:sSource}
-            const blockRegex = /"([^"]+)":\s*\{([\s\S]*?)\n[ \t]*\}/g;
-            let match;
-            
-            while ((match = blockRegex.exec(rawText)) !== null) {
-                const key = match[1];
-                const blockContent = match[2];
-                
-                let prefix = "";
-                const prefixMatch = blockContent.match(/"prefix":\s*"([^"]+)"/);
-                if (prefixMatch) prefix = prefixMatch[1];
-                
-                let description = "";
-                const descStrMatch = blockContent.match(/"description":\s*"((?:\\.|[^"\\])*)"/);
-                if (descStrMatch) {
-                    description = descStrMatch[1];
-                }
-                
-                if (prefix) {
-                    snippetsData[key] = {
-                        prefix: prefix,
-                        description: description
-                    };
-                }
-            }
-            console.log(`✅ HoverProvider: ${Object.keys(snippetsData).length} snippets geladen via Regex fallback.`);
-        } else {
-            console.warn("⚠️ Snippets bestand niet gevonden op pad: " + snippetsPath);
-        }
-    } catch (err) {
-        console.error("❌ Kon snippets niet laden voor HoverProvider:", err);
+try {
+    const dictPath = path.join(__dirname, 'glimsDictionary.json');
+    if (fs.existsSync(dictPath)) {
+        const rawData = fs.readFileSync(dictPath, "utf8");
+        const cleanData = rawData.replace(/^\uFEFF/, ''); 
+        glimsDict = JSON.parse(cleanData);
+    } else {
+        console.warn("HoverProvider: glimsDictionary.json niet gevonden.");
     }
+} catch (err) {
+    console.error("HoverProvider Error loading glimsDictionary.json:", err);
 }
 
 class MisplHoverProvider {
     provideHover(document, position, token) {
-        if (Object.keys(snippetsData).length === 0) return null;
-
-        const wordRange = document.getWordRangeAtPosition(position, /[\w.]+/);
+        const wordRange = document.getWordRangeAtPosition(position);
         if (!wordRange) return null;
-
-        const word = document.getText(wordRange);
-        const lowerWord = word.toLowerCase();
         
-        const fallbackWord = word.includes('.') ? word.split('.').pop().toLowerCase() : null;
-
-        let snippetMatch = null;
-
-        for (const key in snippetsData) {
-            const snip = snippetsData[key];
-            const lowerKey = key.toLowerCase();
-            const lowerPrefix = snip.prefix.toLowerCase();
-
-            if (lowerKey === lowerWord || lowerPrefix === lowerWord) {
-                snippetMatch = snip;
-                break; 
-            }
-            if (fallbackWord && (lowerKey === fallbackWord || lowerPrefix === fallbackWord)) {
-                snippetMatch = snip;
+        const word = document.getText(wordRange);
+        const lineText = document.lineAt(position.line).text;
+        
+        // --- 1. LOCAL VARIABLE HOVER ---
+        // Laat de parser razendsnel de gedeclareerde variabelen uit dit script halen
+        const sourceCode = document.getText();
+        const parseResult = parseMISPL(sourceCode);
+        
+        if (parseResult && parseResult.variables) {
+            const varType = parseResult.variables.get(word.toLowerCase());
+            if (varType) {
+                // Return een chique popup voor de lokale variabele
+                const md = new vscode.MarkdownString();
+                md.appendCodeblock(`(local variable) ${varType} ${word}`, 'mispl');
+                md.appendMarkdown(`\nGedeclareerde **${varType}** variabele in dit script.`);
+                return new vscode.Hover(md, wordRange);
             }
         }
 
-        if (snippetMatch) {
-            const hoverMd = new vscode.MarkdownString();
-            hoverMd.isTrusted = true;
-            
-            hoverMd.appendCodeblock(snippetMatch.prefix, "mispl");
-            
-            if (snippetMatch.description && snippetMatch.description.trim() !== "") {
-                // Vervang stiekeme string enters (\\n) door échte enters
-                const cleanDescription = snippetMatch.description.replace(/\\n/g, '\n');
-                hoverMd.appendMarkdown(`\n---\n${cleanDescription}`);
-            } else {
-                hoverMd.appendMarkdown(`\n---\n*(⚠️ Geen description gevonden in mispl.code-snippets voor '${snippetMatch.prefix}')*`);
+        // --- 2. GLOBAL FUNCTION HOVER ---
+        const isFunctionCall = new RegExp(`\\b${word}\\s*\\(`, 'i').test(lineText);
+        if (isFunctionCall) {
+            const globalDef = this.findGlobalFunction(word);
+            if (globalDef) {
+                const md = new vscode.MarkdownString();
+                const params = globalDef.params ? globalDef.params.join(", ") : "";
+                const returns = globalDef.returns || "UNKNOWN";
+                
+                md.appendCodeblock(`(global) ${returns} ${word}(${params})`, 'mispl');
+                
+                if (globalDef.description) {
+                    md.appendMarkdown(`\n\n---\n${globalDef.description}`);
+                } else {
+                    md.appendMarkdown(`\n\n---\n*Standaard GLIMS functie.*`);
+                }
+                
+                return new vscode.Hover(md, wordRange);
             }
+        }
+
+        // --- 3. PROPERTY / METHOD HOVER ---
+        const propMatch = lineText.substring(0, wordRange.end.character).match(new RegExp(`\\.(${word})$`, 'i'));
+        if (propMatch) {
+            const tableMatch = this.guessTableContext(lineText, wordRange.start.character);
             
-            return new vscode.Hover(hoverMd, wordRange);
+            if (tableMatch) {
+                const def = this.findTableProperty(tableMatch, word);
+                if (def) {
+                    const md = new vscode.MarkdownString();
+                    
+                    if (def.type === "Method") {
+                        const params = def.params ? def.params.join(", ") : "";
+                        const returns = def.returns || "UNKNOWN";
+                        md.appendCodeblock(`(method) ${tableMatch}.${word}(${params}) : ${returns}`, 'mispl');
+                    } else {
+                        const returns = def.returns || "UNKNOWN";
+                        md.appendCodeblock(`(property) ${tableMatch}.${word} : ${returns}`, 'mispl');
+                    }
+
+                    if (def.description) {
+                        md.appendMarkdown(`\n\n---\n${def.description}`);
+                    }
+                    return new vscode.Hover(md, wordRange);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    findGlobalFunction(name) {
+        const upperName = name.toUpperCase();
+        for (const [key, def] of Object.entries(glimsDict.globals || {})) {
+            if (key.toUpperCase() === upperName) return def;
+        }
+        return null;
+    }
+
+    findTableProperty(tableName, propName) {
+        const upperTable = tableName.toUpperCase();
+        const upperProp = propName.toUpperCase();
+        
+        const table = glimsDict.tables[upperTable];
+        if (!table) return null;
+
+        for (const [key, def] of Object.entries(table)) {
+            if (key.toUpperCase() === upperProp) return def;
+        }
+        return null;
+    }
+
+    guessTableContext(lineText, wordStartIndex) {
+        const beforeWord = lineText.substring(0, wordStartIndex).trim();
+        
+        const classMatch = beforeWord.match(/\b([a-zA-Z_][a-zA-Z0-9_]*)\.$/);
+        if (classMatch) {
+            const possibleAlias = classMatch[1].toUpperCase();
+            if (possibleAlias === "ORDR" || possibleAlias === "ORD") return "ORDER";
+            if (possibleAlias === "RSLT") return "RESULT";
+            if (possibleAlias === "OBJ") return "OBJECT";
+            if (possibleAlias === "SPMN") return "SPECIMEN";
+            if (possibleAlias === "CRSP") return "CORRESPONDENT";
+            if (possibleAlias === "PRSN") return "PERSON";
+            return possibleAlias;
+        }
+
+        if (beforeWord.endsWith(".")) {
+            return "UNKNOWN_TABLE";
         }
 
         return null;
@@ -127,7 +138,6 @@ class MisplHoverProvider {
 }
 
 function registerHoverProvider(context) {
-    loadSnippets(context);
     context.subscriptions.push(
         vscode.languages.registerHoverProvider('mispl', new MisplHoverProvider())
     );
