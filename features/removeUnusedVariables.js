@@ -1,6 +1,6 @@
 // ./features/removeUnusedVariables.js
-const { parseMISPL } = require("../engine/parser");
-const { analyze } = require("../engine/analyzer_logic");
+const { parseMISPL } = require("../parser");
+const { analyze } = require("../analyzer");
 
 function removeUnusedVariablesText(text) {
     if (!text) return "";
