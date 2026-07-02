@@ -3,18 +3,18 @@ const path = require("path");
 const { NodeTypes } = require("./ast");
 const PREFIXES = require("./features/glimsPrefixes");
 
-const VERSION = "v2.71.0 - Fixes That Make Everybody Happy";
+const VERSION = "v2.81.0 - Fixes That Make Everybody a Genius";
 
 // 🛡️ HELPER: Checkt of een waarde de default is voor een bepaald type
-const isDefaultValue = (val, type) => {
-	const t = type.toUpperCase();
-	if (t === "INTEGER") return val === "0";
-	if (t === "FRACTIONAL") return val === "0" || val === "0.0";
-	if (t === "STRING") return val === "" || val === "<EMPTY_STRING>";
-	if (t === "LOGICAL") return val === "FALSE";
-	if (t === "DATE" || t === "TIME" || t === "DATETIME") return val === "?" || val === "";
-	return false;
-};
+//const isDefaultValue = (val, type) => {
+//	const t = type.toUpperCase();
+//	if (t === "INTEGER") return val === "0";
+//	if (t === "FRACTIONAL") return val === "0" || val === "0.0";
+//	if (t === "STRING") return val === "" || val === "<EMPTY_STRING>";
+//	if (t === "LOGICAL") return val === "FALSE";
+//	if (t === "DATE" || t === "TIME" || t === "DATETIME") return val === "?" || val === "";
+//	return false;
+//};
 
 let DICT_LOAD_ERROR = null;
 let GLIMS_DICT = { globals: {}, tables: {} };
@@ -538,22 +538,45 @@ const TypeChecker = {
 				const regexReplace = new RegExp(`(?<!\\.)\\b${vKey}\\b(?!\\s*\\()`, 'gi');
 
 				if (regexTest.test(work)) {
+					// 1. Wordt er veilig getest tegen een vraagteken (null)? (We gebruiken 'work' vanwege <QUESTIONMARK>)
 					const isCheckingNull = new RegExp(`\\b${vKey}\\b\\s*(=|<>|!=|<|>|<=|>=)\\s*<QUESTIONMARK>`, 'i').test(work) ||
 						new RegExp(`<QUESTIONMARK>\\s*(=|<>|!=|<|>|<=|>=)\\s*\\b${vKey}\\b`, 'i').test(work);
 
-					// NIEUW: Check voor niet-default vergelijkingen
-					const nonDefaultMatch = work.match(new RegExp(`\\b${vKey}\\b\\s*(=|<>|!=|<|>|<=|>=)\\s*([^<\\s]+)`, 'i'));
-					const isCheckingNonDefault = nonDefaultMatch && !isDefaultValue(nonDefaultMatch[2], vInfo.dataType);
+					// 2. Wordt er veilig getest tegen een GLIMS default?
+					// We pakken hiervoor de originele ruwe 'expr', want in 'work' is '0' al omgezet naar '<INTEGER>'!
+					const safeExpr = String(expr).toUpperCase();
+					const vUpper = vKey.toUpperCase();
+					const varType = vInfo.dataType.toUpperCase();
+					let isGlimsDefaultCheck = false;
 
-					if (isCheckingNull) {
-						// Legitiem
-					} else if (!context.assignedVars.has(vKey) && isCheckingNonDefault) {
+					if (varType === "STRING" || varType === "MNEMONIC") {
+						const strRegex = new RegExp(`\\b${vUpper}\\b\\s*(=|<>|!=|<=|>=|<|>)\\s*(""|'')|(""|'')\\s*(=|<>|!=|<=|>=|<|>)\\s*\\b${vUpper}\\b`);
+						if (strRegex.test(safeExpr)) isGlimsDefaultCheck = true;
+					}
+					else if (varType === "INTEGER" || varType === "FRACTIONAL") {
+						const numRegex = new RegExp(`\\b${vUpper}\\b\\s*(=|<>|!=|<=|>=|<|>)\\s*0(\\.0+)?\\b|\\b0(\\.0+)?\\s*(=|<>|!=|<=|>=|<|>)\\s*\\b${vUpper}\\b`);
+						if (numRegex.test(safeExpr)) isGlimsDefaultCheck = true;
+					}
+					else if (varType === "LOGICAL") {
+						const logRegex = new RegExp(`\\b${vUpper}\\b\\s*(=|<>|!=|<=|>=|<|>)\\s*(FALSE|NO)\\b|\\b(FALSE|NO)\\s*(=|<>|!=|<=|>=|<|>)\\s*\\b${vUpper}\\b`);
+						if (logRegex.test(safeExpr)) isGlimsDefaultCheck = true;
+					}
+
+					// 3. Wordt de variabele überhaupt ergens mee vergeleken?
+					const isCompared = new RegExp(`\\b${vKey}\\b\\s*(=|<>|!=|<=|>=|<|>)|(=|<>|!=|<=|>=|<|>)\\s*\\b${vKey}\\b`, 'i').test(work);
+
+					// De Logica:
+					if (isCheckingNull || isGlimsDefaultCheck) {
+						// Legitiem! In GLIMS mag je een unassigned var veilig wegstrepen tegen zijn default ("", 0, FALSE).
+					} else if (!context.assignedVars.has(vKey) && isCompared) {
+						// Oeps: Hij wordt vergeleken met een SPECIFIEKE (non-default) waarde, maar heeft nog geen := gehad.
 						context.addWarning(lineNo, `⚠️ WAARSCHUWING: Variabele '${vInfo.originalName}' (type ${vInfo.dataType}) wordt vergeleken met een specifieke waarde, maar heeft nog geen toewijzing (:=) gehad. Controleer of je de initialisatie niet bent vergeten.`);
 					} else if (!context.assignedVars.has(vKey) && !context.uninitializedWarned.has(vKey)) {
 						context.uninitializedWarned.add(vKey);
 						const t = vInfo.dataType.toUpperCase();
 						const isCoreType = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "MNEMONIC", "VOID", "ANY"].includes(t);
 
+						// Klassevariabelen (zoals Object, Order, etc.) zónder default toewijzing crashen de boel wel!
 						if (!isCoreType) {
 							const isIteratorArg = new RegExp(`\\b(?:GetSpecimen|GetAction|GetRequests|GetResults|GetPriorResult)\\s*\\(\\s*${vKey}\\b`, 'i').test(work);
 							if (!isIteratorArg) {
@@ -562,6 +585,8 @@ const TypeChecker = {
 						}
 						context.registerWrite(vInfo.originalName, lineNo);
 					}
+
+					// Maskeer de variabele in work, zodat de rest van de TypeChecker kan doorgaan
 					work = work.replace(regexReplace, `<${vInfo.dataType.toUpperCase()}>`);
 				}
 			}
@@ -1038,22 +1063,42 @@ const Validators = {
 		const validPrefixes = PREFIXES[typeKey];
 		if (validPrefixes) {
 			const nameLower = String(node.name).toLowerCase();
+			const hasValidStart = validPrefixes.some(prefix => nameLower.startsWith(prefix.toLowerCase()));
 
-			if (validPrefixes.some(p => p.toLowerCase() === nameLower)) return;
+			if (!hasValidStart) {
+				let originalName = String(node.name);
+				let suggestedName = "";
 
-			const isValidCamel = validPrefixes.some(prefix => {
-				if (nameLower.startsWith(prefix.toLowerCase())) {
-					const remainder = node.name.substring(prefix.length);
-					if (remainder.length > 0) return /^[A-Z0-9_]/.test(remainder[0]);
+				// 1. Strip 'The' (veel gebruikt in oude GLIMS scripts)
+				let baseName = originalName;
+				if (/^The[A-Z]/i.test(originalName)) {
+					baseName = originalName.substring(3); // Maakt van TheResultVorig -> ResultVorig
 				}
-				return false;
-			});
 
-			if (!isValidCamel) {
-				let cleanName = String(node.name);
-				if (/^[a-z]+[A-Z]/.test(cleanName)) cleanName = cleanName.replace(/^[a-z]+/, '');
-				cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-				context.addInfo(node.line, `👮 Stijl-tip: Variabele '${node.name}' is type '${dataType}'. Conventie: '${validPrefixes[0]}' (bijv. '${validPrefixes[0] + cleanName}' of gewoon '${validPrefixes[0]}').`);
+				// 2. Kijk of de variabelenaam letterlijk de naam van het datatype bevat (bijv. ResultVorig)
+				const dtRegex = new RegExp(`^${dataType}`, 'i');
+				if (dtRegex.test(baseName)) {
+					// Haal het datatype eraf, houd de suffix (zoals 'Vorig') over
+					let suffix = baseName.replace(dtRegex, '');
+
+					if (suffix.length > 0) {
+						// Zorg voor nette camelCase: prefix + Vorig -> rsltVorig
+						suffix = suffix.charAt(0).toUpperCase() + suffix.slice(1);
+						suggestedName = validPrefixes[0] + suffix;
+					} else {
+						// Precies 'TheResult' of 'Result' wordt gewoon 'rslt'
+						suggestedName = validPrefixes[0];
+					}
+				} else {
+					// Het woord is iets anders (bijv 'Issuer' bij type Correspondent)
+					let cleanName = baseName;
+					// Zorg voor nette camelCase: crsp + Issuer -> crspIssuer
+					if (/^[a-z]+[A-Z]/.test(cleanName)) cleanName = cleanName.replace(/^[a-z]+/, '');
+					cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+					suggestedName = validPrefixes[0] + cleanName;
+				}
+
+				context.addInfo(node.line, `👮 Stijl-tip: Variabele '${originalName}' is type '${dataType}'. Conventie: begin met '${validPrefixes[0]}' (bijv. '${suggestedName}').`);
 			}
 		}
 	},
@@ -1064,9 +1109,36 @@ const Validators = {
 			this.checkHungarianNotation(node, context);
 		}
 
+		// ▶️ DE FIX: Strikte Default Waarde Checker MET uitzondering voor tellers én LOOPS
 		if (node.type === NodeTypes.Assignment) {
+			const key = String(node.name).toLowerCase();
 			const valClean = node.value ? String(node.value).trim().toUpperCase() : "";
-			if (valClean === '""') context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Strings automatisch als "".`);
+
+			if (!context.assignedVars.has(key)) {
+
+				// 🚀 UITZONDERING 2: Als we in een WHILE of REPEAT loop zitten, is dit een functionele RESET voor de volgende iteratie!
+				if (!context.inLoop) {
+					const varInfo = context.declaredVars.get(key);
+					const declaredType = varInfo ? String(varInfo.dataType).toUpperCase() : "UNKNOWN";
+
+					const isStr = declaredType === "STRING" || /^(s|sl|stl)[A-Z_]/.test(node.name);
+					const isLog = declaredType === "LOGICAL" || /^(l|b)[A-Z_]/.test(node.name);
+					const isNum = declaredType === "INTEGER" || declaredType === "FRACTIONAL" || /^(i|f|d)[A-Z_]/.test(node.name) && !/^dt[A-Z_]/.test(node.name);
+					const isDate = declaredType === "DATETIME" || declaredType === "DATE" || declaredType === "TIME" || /^(dt|tm|d)[A-Z_]/.test(node.name);
+
+					const isLoopCounter = /^[ijk]$/.test(key);
+
+					if ((valClean === '""' || valClean === "''") && isStr) {
+						context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Strings automatisch als "". Deze eerste toewijzing is overbodig.`);
+					} else if ((valClean === "FALSE" || valClean === "NO") && isLog) {
+						context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Logicals automatisch als FALSE. Deze eerste toewijzing is overbodig.`);
+					} else if ((valClean === "0" || valClean === "0.0") && isNum && !isLoopCounter) {
+						context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Getallen automatisch als 0. Deze eerste toewijzing is overbodig.`);
+					} else if (valClean === "?" && isDate) {
+						context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Date/Time automatisch als leeg (?). Deze eerste toewijzing is overbodig.`);
+					}
+				}
+			}
 		}
 
 		let exprToAnalyze = null;
@@ -1082,6 +1154,12 @@ const Validators = {
 		else if (node.type === NodeTypes.GenericStatement) exprToAnalyze = node.condition || node.text;
 
 		if (exprToAnalyze) {
+			// ▶️ DE FIX: Slimme regex voor de Index(...) + Index(...) tip
+			const safeExpr = String(exprToAnalyze);
+			if (/Index\s*\([^)]+\)\s*>\s*0\s+OR\s+Index\s*\([^)]+\)\s*>\s*0/i.test(safeExpr)) {
+				context.addInfo(node.line, `💡 Stijl-tip: Maak nette code: verander 'Index(...) > 0 OR Index(...) > 0' naar 'Index(...) + Index(...) > 0'`);
+			}
+
 			ExpressionParser.extractReferences(String(exprToAnalyze), node.line, context);
 			TypeChecker.evaluate(exprToAnalyze, node.line, context, targetVarName);
 		}
@@ -1261,10 +1339,18 @@ const Validators = {
 				}
 
 				if (inElse && thenNodes.length > 0 && thenNodes.length === elseNodes.length) {
+					// Bestaande logic: THEN en ELSE zijn identiek...
 					const strip = (n) => { const { line, ...rest } = n; return rest; };
 					if (JSON.stringify(thenNodes.map(strip)) === JSON.stringify(elseNodes.map(strip))) {
 						context.addWarning(node.line, `⚠️ Logica-waarschuwing: Code in THEN is identiek aan ELSE. Deze IF doet niets.`);
 					}
+				}
+
+				// ▶️ DE FIX: Check voor een leeg IF of ELSE blok!
+				if (thenNodes.length === 0) {
+					context.addWarning(node.line, `⚠️ WAARSCHUWING: Leeg IF blok gedetecteerd. Deze code doet niets.`);
+				} else if (inElse && elseNodes.length === 0) {
+					context.addWarning(node.line, `⚠️ WAARSCHUWING: Leeg ELSE blok gedetecteerd.`);
 				}
 			}
 		}
@@ -1310,6 +1396,12 @@ function parseSingleStatement(stmt, lineNo, maskedStmt = null, addError, declare
 
 	if (/^RETURN\b/i.test(masked)) {
 		hasExecutableStatement = true;
+
+		// â–¶ï¸  DE FIX: Controleer of het statement wel netjes afsluit met een puntkomma
+		if (!trimmed.endsWith(";")) {
+			addError(lineNo, "FOUT: Statement moet eindigen met ';'.");
+		}
+
 		const content = trimmed.substring(6).replace(/;$/, "").trim();
 		validateExpression(content, lineNo, "RETURN-waarde");
 		return [{ type: NodeTypes.ReturnStatement, expression: content, line: lineNo }];
@@ -1805,8 +1897,8 @@ function parseMISPL(rawCode) {
 	}
 
 	blockStack.forEach(open => {
-		if (open.type === "REPEAT") addError(open.line - 1, "FOUT: REPEAT..UNTIL; wordt niet afgesloten");
-		else addError(open.line - 1, `FOUT: ${open.type}-blok is niet afgesloten.`);
+		if (open.type === "REPEAT") addError(Math.max(0, open.line - 1), "FOUT: REPEAT..UNTIL; wordt niet afgesloten");
+		else addError(Math.max(0, open.line - 1), `FOUT: ${open.type}-blok is niet afgesloten.`);
 	});
 
 	const variableTypes = new Map();
@@ -1846,7 +1938,26 @@ function analyze(astOrResult, rawText = "") {
 
 	try {
 		if (ast && ast.type === NodeTypes.Program && Array.isArray(ast.body)) {
-			ast.body.forEach(node => { Validators.analyzeScope(node, context); Validators.analyzeStructure(node, context); });
+			let loopDepth = 0; // 🚀 NIEUW: Houdt bij of we in een lus zitten
+
+			ast.body.forEach(node => {
+				// 1. Zien we de start van een loop? Teller omhoog!
+				if (node.type === NodeTypes.WhileStatement || node.type === NodeTypes.RepeatStatement) {
+					loopDepth++;
+				}
+
+				// 2. Geef de status door aan de scope validator
+				context.inLoop = loopDepth > 0;
+
+				Validators.analyzeScope(node, context);
+				Validators.analyzeStructure(node, context);
+
+				// 3. Zien we het einde van een loop? Teller omlaag!
+				if (node.type === "Done" || node.isUntil) {
+					loopDepth--;
+				}
+			});
+
 			Validators.analyzeLoops(ast.body, context);
 			Validators.analyzeIfStatements(ast.body, context);
 
@@ -1861,6 +1972,73 @@ function analyze(astOrResult, rawText = "") {
 			context.assignedVars.forEach((info, key) => {
 				if (!context.readVars.has(key)) info.lines.forEach(lineNo => context.addWarning(lineNo, `⚠️ WAARSCHUWING: Waarde van '${info.originalName}' wordt hierna nooit meer uitgelezen (Mogelijke dode code of overbodige query).`));
 			});
+
+			// ▶️ DE FIX: Controleer of een database veld meerdere keren wordt opgevraagd
+			context.tableRefs.forEach((info, key) => {
+
+				// 1. SLIMME METHOD FILTER (Bestaand): Negeer actie-inducerende functies.
+				if (/\b(Add|Set|Cancel|Create|Ask)[a-zA-Z0-9_]*\s*\(/i.test(info.originalName)) {
+					return;
+				}
+
+				// 2. 🚀 NIEUW: LOOP- EN MUTATIE FILTER
+				// Splits de naam op. Bijv. "rsltRel.Status" -> ["rsltRel", "Status"]
+				const parts = info.originalName.split('.');
+				let baseVar = parts[0];
+
+				// Als het object zelf begint met een functie (bijv. Entry(...).Status), negeren we het direct.
+				if (baseVar.includes('(')) {
+					return;
+				}
+
+				// Controleer of de basis-variabele (bijv. rsltRel) ergens gemuteerd wordt.
+				// Als baseVar leeg is (bijv. ".NumericValue()"), is het veilig.
+				if (baseVar.length > 0) {
+					// Zoek of "baseVar :=" of "baseVar:=" ergens in de code voorkomt (case-insensitive)
+					const assignRegex = new RegExp(`\\b${baseVar}\\s*:=`, "i");
+
+					// 🚀 DE FIX: We gebruiken 'codeZonderCommentaar' in deze scope!
+					if (assignRegex.test(codeZonderCommentaar)) {
+						// Deze variabele krijgt dynamisch een waarde toegewezen (bijv. in een loop).
+						// Het is functioneel fout om eigenschappen van veranderende objecten te cachen!
+						return;
+					}
+				}
+
+				if (info.count > 1) {
+					// Haal vreemde tekens weg (b.v. de punt bij .Mnemonic)
+					let cleanName = info.originalName.replace(/[^a-zA-Z0-9]/g, "");
+
+					// 🚀 SLIMME PREFIX: Bepaal de prefix op basis van het opgevraagde veld
+					let prefix = "s"; // Standaard String
+					const parts = info.originalName.split('.');
+
+					if (parts.length > 1) {
+						// Haal de property naam op (b.v. "ID" uit "Ordr.ID") en negeer eventuele haakjes
+						let propName = parts[parts.length - 1].toUpperCase().replace(/\(\)/g, "");
+
+						if (["ID", "STATUS", "TYPE", "SEX"].includes(propName)) prefix = "i";
+						else if (["BIRTHDATE", "DETERMINATIONDATE1", "DETERMINATIONDATE2"].includes(propName)) prefix = "d";
+						else if (["OBJECTTIME", "SAMPLINGTIME", "RECEIPTTIME", "CREATIONTIME", "EXPIRATIONTIME", "CHECKOUTTIME", "TRANSFUSIONENDTIME", "UTMOSTTRANSFUSIONTIME", "CHECKTIME"].includes(propName)) prefix = "dt";
+						else if (["UNSOLICITED", "SOLICITED", "ISREQUESTED", "AVAILABLE", "VALIDATED"].includes(propName)) prefix = "l";
+						else if (["NUMERICVALUE"].includes(propName)) prefix = "f";
+
+						// Uitzonderingen voor Klasse-Objecten!
+						else if (propName === "OBJECT") prefix = "obj";
+						else if (propName === "ORDER") prefix = "ord";
+						else if (propName === "PERSON") prefix = "prsn";
+						else if (propName === "SPECIMEN") prefix = "spmn";
+						else if (propName === "AGENT" || propName === "ISSUER" || propName === "TARGET") prefix = "crsp";
+						else if (propName === "PROPERTY") prefix = "prp";
+					}
+
+					// Genereer de suggestie (b.v. iOrdrID)
+					let varSuggestie = prefix + cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+					context.addInfo(info.lines[0], `💡 Stijl-tip: Maak van '${info.originalName}' een variabele: b.v. ${varSuggestie} (wordt ${info.count}x aangeroepen).`);
+				}
+			});
+
 		}
 	} catch (err) {
 		context.addError(0, `🚨 Linter Fout: ${err.message}`);
