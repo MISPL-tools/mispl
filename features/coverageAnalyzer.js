@@ -4,22 +4,21 @@ function generateCoverageReport(misplCode, logText, fileName = "Huidig Script") 
     const codeLines = misplCode.split(/\r?\n/);
     const allMarkers = new Map(); 
     
-    // De zoek-machine om de ID's te vinden
-    const markerRegex = /\/\*@V\*\/[ \t]*_sV[ \t]*:=[ \t]*_sV[ \t]*\+[ \t]*"([TDER]\d+)\|"[ \t]*;/g;
+    // 🚀 DE FIX: We maken de /*@V*/ tag optioneel met (?:\/\*@V\*\/\s*)?
+    // Zo herkent hij het ZOWEL in je originele code als in je geminificeerde code!
+    const markerRegex = /(?:\/\*@V\*\/\s*)?_sV\s*:=\s*_sV\s*\+\s*"([TDER]\d+)\|"\s*;/g;
     
-    // Een APARTE zoek-machine om de code schoon te maken (zonder ID capture), 
-    // zodat ze elkaars tellers niet in de war sturen en een infinite loop veroorzaken!
-    const cleanRegex = /\/\*@V\*\/[ \t]*_sV[ \t]*:=[ \t]*_sV[ \t]*\+[ \t]*"[TDER]\d+\|"[ \t]*;/g;
+    // De APARTE zoek-machine om de code schoon te maken
+    const cleanRegex = /(?:\/\*@V\*\/\s*)?_sV\s*:=\s*_sV\s*\+\s*"[TDER]\d+\|"\s*;/g;
     
     for (let i = 0; i < codeLines.length; i++) {
         let match;
-        // Zorg dat de regex vooraan begint met zoeken op deze regel
         markerRegex.lastIndex = 0;
         
         while ((match = markerRegex.exec(codeLines[i])) !== null) {
             const id = match[1];
             
-            // Maak de code netjes leesbaar voor het rapport met de APARTE regex
+            // Maak de code netjes leesbaar voor het rapport
             let cleanLine = codeLines[i].replace(cleanRegex, "").trim();
             if (cleanLine.length > 85) cleanLine = cleanLine.substring(0, 85) + "...";
             
@@ -29,60 +28,70 @@ function generateCoverageReport(misplCode, logText, fileName = "Huidig Script") 
 
     const total = allMarkers.size;
     if (total === 0) {
-        return "# ⚠️ Fout\nGeen validatie-markers (`/*@V*/...`) gevonden in de code. Zorg dat je de Validation Flow eerst injecteert in dit bestand!";
+        return "# ⚠️ Fout\nGeen validatie-markers (`_sV:=_sV+...`) gevonden in de code. Zorg dat je de Validation Flow eerst injecteert in dit bestand!";
     }
 
-    // Lees de GLIMS logs uit (kan 1 regel zijn, of 1000 aan elkaar geplakt)
-    const executedIds = new Set();
+    // Chronologisch uitlezen van de GLIMS logs
+    const chronologicalPath = []; 
+    const executedIds = new Set(); 
+    
     const logRegex = /([TDER]\d+)\|/g;
     let logMatch;
     while ((logMatch = logRegex.exec(logText)) !== null) {
+        chronologicalPath.push(logMatch[1]);
         executedIds.add(logMatch[1]);
     }
 
-    // Sorteer in 'Uitgevoerd' en 'Nooit uitgevoerd'
-    const executed = [];
+    // Bepaal de 'Dode code' voor deze specifieke run
     const unexecuted = [];
-
     for (const [id, data] of allMarkers.entries()) {
-        if (executedIds.has(id)) {
-            executed.push({ id, ...data });
-        } else {
+        if (!executedIds.has(id)) {
             unexecuted.push({ id, ...data });
         }
     }
 
-    const coveragePercent = Math.round((executed.length / total) * 100);
+    const coveragePercent = Math.round((executedIds.size / total) * 100);
 
     // Bouw het Markdown rapport
-    let report = `# 📊 MISPL Validation Coverage Report\n`;
+    let report = `# 🗺️ MISPL Kruimelspoor (Chronologisch)\n`;
     report += `**Script:** ${fileName}\n`;
     report += `**Totale beslismomenten in code:** ${total}\n`;
-    report += `**Uitgevoerd in GLIMS:** ${executed.length} (${coveragePercent}%)\n`;
-    report += `**Nooit uitgevoerd:** ${unexecuted.length} (${100 - coveragePercent}%)\n\n`;
+    report += `**Aantal stappen in deze run:** ${chronologicalPath.length}\n`;
+    report += `**Unieke paden geraakt:** ${executedIds.size} (${coveragePercent}%)\n\n`;
     report += `---\n\n`;
 
-    report += `## 🔴 Dode Code (Nooit uitgevoerd)\n`;
-    report += `*Deze paden zijn in géén van de aangeleverde logs voorgekomen.*\n\n`;
+    report += `## 📍 Gevolgde Route (Stap-voor-stap)\n`;
+    report += `*Deze stappen heeft de MISPL in exacte chronologische volgorde doorlopen voor dit specifieke monster.*\n\n`;
+
+    if (chronologicalPath.length === 0) {
+        report += `_Geen log-data gevonden of de run heeft geen enkel beslismoment geraakt._\n\n`;
+    } else {
+        let stepCounter = 1;
+        chronologicalPath.forEach(id => {
+            if (allMarkers.has(id)) {
+                const item = allMarkers.get(id);
+                let typeName = getTypeDescription(item.type);
+                report += `${stepCounter}. **[Regel ${item.line}]** \`${item.code}\` _(${typeName})_\n`;
+            } else {
+                report += `${stepCounter}. ⚠️ **[Onbekende Tag: ${id}]** _(Is de code gewijzigd na injectie?)_\n`;
+            }
+            stepCounter++;
+        });
+        report += `\n`;
+    }
+
+    report += `---\n\n`;
+    report += `## 🔕 Overgeslagen Beslismomenten\n`;
+    report += `*Deze paden zijn voor dit monster **niet** geraakt (bijv. IF was FALSE of lus werd overgeslagen).*\n\n`;
+    
     if (unexecuted.length === 0) {
-        report += `🎉 **Fantastisch! Alle paden in dit script zijn uitgevoerd in de logs.**\n\n`;
+        report += `🎉 **Fantastisch! Alle paden in dit script zijn uitgevoerd.**\n\n`;
     } else {
         unexecuted.forEach(item => {
             let typeName = getTypeDescription(item.type);
             report += `* **[Regel ${item.line}]** \`${item.code}\` _(${typeName})_\n`;
         });
         report += `\n`;
-    }
-
-    report += `## 🟢 Gedekte Code (Succesvol doorlopen)\n`;
-    report += `*Deze paden zijn minimaal 1 keer met succes doorlopen.*\n\n`;
-    if (executed.length === 0) {
-        report += `_Geen enkele marker uit deze code is in de logs gevonden._\n\n`;
-    } else {
-        executed.forEach(item => {
-            let typeName = getTypeDescription(item.type);
-            report += `* **[Regel ${item.line}]** \`${item.code}\` _(${typeName})_\n`;
-        });
     }
 
     return report;

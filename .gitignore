@@ -1,4 +1,2 @@
-mispl-2.50.0.vsix
-mispl-2.50.1.vsix
-mispl-2.50.0.vsix
-mispl-2.50.2.vsix
+node_modules/
+*.vsix

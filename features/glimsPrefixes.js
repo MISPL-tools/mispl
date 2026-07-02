@@ -1,13 +1,13 @@
 // ./features/glimsPrefixes.js
 
-// 1. Onze basis datatypes (die staan niet in de GLIMS objectenlijst)
+// 1. Onze basis datatypes (Laat deze lijst ALTIJD staan!)
 const basePrefixes = {
-    "string": ["s", "sl", "stl"], 
-    "integer": ["i"],
-    "logical": ["l", "b"],
+    "string": ["s"],       // 's' vangt nu ook 'sl', 'stl', 'sfg' etc. af!
+    "integer": ["i"],      // 'i' vangt 'ie', 'ifg' etc. af
+    "logical": ["l", "b"], // 'l' vangt nu automatisch 'lfg', 'lvg', 'lneu' af!
     "fractional": ["f", "d"],
     "date": ["d"],
-    "datetime": ["dt"],
+    "datetime": ["dt"],    // Jouw 'dt' vangt alles af voor datetime
     "time": ["tm"]
 };
 
@@ -813,17 +813,17 @@ WorkPlace	wrkp
 const PREFIXES = { ...basePrefixes };
 
 rawGlimsList.trim().split('\n').forEach(line => {
-    // Knip de regel op bij de tab of spaties
-    const parts = line.trim().split(/\s+/);
-    
-    // Als we netjes een Naam en een Korte Naam hebben:
-    if (parts.length === 2) {
-        const typeName = parts[0].toLowerCase();
-        const prefix = parts[1].toLowerCase();
-        
-        // Voeg toe aan de dictionary! (bijv. PREFIXES["accesslist"] = ["acl"])
-        PREFIXES[typeName] = [prefix];
-    }
+	// Knip de regel op bij de tab of spaties
+	const parts = line.trim().split(/\s+/);
+
+	// Als we netjes een Naam en een Korte Naam hebben:
+	if (parts.length === 2) {
+		const typeName = parts[0].toLowerCase();
+		const prefix = parts[1].toLowerCase();
+
+		// Voeg toe aan de dictionary! (bijv. PREFIXES["accesslist"] = ["acl"])
+		PREFIXES[typeName] = [prefix];
+	}
 });
 
 module.exports = PREFIXES;

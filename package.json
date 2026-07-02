@@ -2,7 +2,7 @@
 	"name": "mispl",
 	"displayName": "MISPL Language Support",
 	"description": "Language support, formatting, static debug, flowcharts and tools for MISPL / GLIMS",
-	"version": "2.71.0",
+	"version": "2.81.0",
 	"icon": "icon.png",
 	"publisher": "dirkoppenaal",
 	"repository": {
