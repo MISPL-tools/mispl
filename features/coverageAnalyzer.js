@@ -1,4 +1,5 @@
 // ./features/coverageAnalyzer.js
+const { t } = require("../i18n"); // 🌍 Importeer de vertaalfunctie
 
 function generateCoverageReport(misplCode, logText, fileName = "Huidig Script") {
     const codeLines = misplCode.split(/\r?\n/);
@@ -28,7 +29,7 @@ function generateCoverageReport(misplCode, logText, fileName = "Huidig Script") 
 
     const total = allMarkers.size;
     if (total === 0) {
-        return "# ⚠️ Fout\nGeen validatie-markers (`_sV:=_sV+...`) gevonden in de code. Zorg dat je de Validation Flow eerst injecteert in dit bestand!";
+        return t('COV_ERR_NO_MARKERS');
     }
 
     // Chronologisch uitlezen van de GLIMS logs
@@ -52,28 +53,28 @@ function generateCoverageReport(misplCode, logText, fileName = "Huidig Script") 
 
     const coveragePercent = Math.round((executedIds.size / total) * 100);
 
-    // Bouw het Markdown rapport
-    let report = `# 🗺️ MISPL Kruimelspoor (Chronologisch)\n`;
-    report += `**Script:** ${fileName}\n`;
-    report += `**Totale beslismomenten in code:** ${total}\n`;
-    report += `**Aantal stappen in deze run:** ${chronologicalPath.length}\n`;
-    report += `**Unieke paden geraakt:** ${executedIds.size} (${coveragePercent}%)\n\n`;
+    // Bouw het Markdown rapport via de i18n vertalingen
+    let report = t('COV_REP_TITLE');
+    report += t('COV_REP_SCRIPT', fileName);
+    report += t('COV_REP_TOTAL', total);
+    report += t('COV_REP_STEPS', chronologicalPath.length);
+    report += t('COV_REP_UNIQUE', executedIds.size, coveragePercent);
     report += `---\n\n`;
 
-    report += `## 📍 Gevolgde Route (Stap-voor-stap)\n`;
-    report += `*Deze stappen heeft de MISPL in exacte chronologische volgorde doorlopen voor dit specifieke monster.*\n\n`;
+    report += t('COV_REP_ROUTE_TITLE');
+    report += t('COV_REP_ROUTE_DESC');
 
     if (chronologicalPath.length === 0) {
-        report += `_Geen log-data gevonden of de run heeft geen enkel beslismoment geraakt._\n\n`;
+        report += t('COV_REP_ROUTE_EMPTY');
     } else {
         let stepCounter = 1;
         chronologicalPath.forEach(id => {
             if (allMarkers.has(id)) {
                 const item = allMarkers.get(id);
                 let typeName = getTypeDescription(item.type);
-                report += `${stepCounter}. **[Regel ${item.line}]** \`${item.code}\` _(${typeName})_\n`;
+                report += t('COV_REP_ROUTE_ITEM', stepCounter, item.line, item.code, typeName);
             } else {
-                report += `${stepCounter}. ⚠️ **[Onbekende Tag: ${id}]** _(Is de code gewijzigd na injectie?)_\n`;
+                report += t('COV_REP_ROUTE_UNKNOWN', stepCounter, id);
             }
             stepCounter++;
         });
@@ -81,15 +82,15 @@ function generateCoverageReport(misplCode, logText, fileName = "Huidig Script") 
     }
 
     report += `---\n\n`;
-    report += `## 🔕 Overgeslagen Beslismomenten\n`;
-    report += `*Deze paden zijn voor dit monster **niet** geraakt (bijv. IF was FALSE of lus werd overgeslagen).*\n\n`;
+    report += t('COV_REP_MISSED_TITLE');
+    report += t('COV_REP_MISSED_DESC');
     
     if (unexecuted.length === 0) {
-        report += `🎉 **Fantastisch! Alle paden in dit script zijn uitgevoerd.**\n\n`;
+        report += t('COV_REP_MISSED_EMPTY');
     } else {
         unexecuted.forEach(item => {
             let typeName = getTypeDescription(item.type);
-            report += `* **[Regel ${item.line}]** \`${item.code}\` _(${typeName})_\n`;
+            report += t('COV_REP_MISSED_ITEM', item.line, item.code, typeName);
         });
         report += `\n`;
     }
@@ -102,7 +103,7 @@ function getTypeDescription(char) {
     if (char === 'E') return "ELSE";
     if (char === 'D') return "WHILE / DO";
     if (char === 'R') return "REPEAT / UNTIL";
-    return "Logica";
+    return t('COV_TYPE_LOGIC');
 }
 
 module.exports = { generateCoverageReport };

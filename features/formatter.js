@@ -1,4 +1,4 @@
-function formatMISPL(text) {
+function formatMISPL(text, style = "Standaard (UMC Utrecht)") {
     // 0. DE OUTLOOK-FIX: Strip onzichtbare Non-Breaking Spaces (NBSP) eruit!
     let sanitizedText = text.replace(/\xA0/g, ' '); 
 
@@ -8,8 +8,8 @@ function formatMISPL(text) {
     // 2. Inline IF-constructies beschermen
     const { protectedText, protectedLines } = protectInlineIf(cleaned);
 
-    // 3. Normaliseren (regelstructuur)
-    const normalized = normalizeLines(protectedText);
+    // 3. Normaliseren (regelstructuur) - 🚀 FIX: Geef style door
+    const normalized = normalizeLines(protectedText, style);
 
     // 4. Inline IF-regels terugzetten
     const withInlineRestored = restoreProtectedInline(normalized, protectedLines);
@@ -143,9 +143,10 @@ function restoreProtectedInline(text, protectedLines) {
 /* ----------------------------------------------------------
      FASE 3: NORMALIZER
 ----------------------------------------------------------- */
-function normalizeLines(text) {
+function normalizeLines(text, style) {
     let result = text;
     const inlineComments = "([ \t]*(?:__COMMENT_(?:BLK|LN)_\\d+__[ \t]*)*)";
+    const isClinisys = style && style.includes("Clinisys");
 
     // 1. Bescherm bewuste lege regels
     result = result.replace(/(\r?\n[ \t]*){2,}/g, "\n__EMPTY_MARKER__\n");
@@ -153,16 +154,22 @@ function normalizeLines(text) {
     // 2. Puntkomma splitsen
     result = result.replace(new RegExp(";" + inlineComments + "\\s*", "g"), ";$1\n");
 
-    // 3a. Blok-openers die AAN de vorige regel plakken (THEN, DO)
-    result = result.replace(new RegExp("\\s*\\b(THEN|DO)\\b" + inlineComments + "\\s*", "gi"), " $1$2\n");
+    // 3a. Blok-openers (THEN, DO)
+    if (isClinisys) {
+        // 🚀 CLINISYS STIJL: THEN en DO krijgen een eigen regel (enter voor én na)
+        result = result.replace(new RegExp("\\s*\\b(THEN|DO)\\b" + inlineComments + "\\s*", "gi"), "\n$1$2\n");
+    } else {
+        // 🚀 STANDAARD STIJL: THEN en DO plakken we AAN de vorige regel
+        result = result.replace(new RegExp("\\s*\\b(THEN|DO)\\b" + inlineComments + "\\s*", "gi"), " $1$2\n");
+    }
 
-    // 3b. Blok-openers die EEN EIGEN regel krijgen (REPEAT)
+    // 3b. Blok-openers die ALTIJD een eigen regel krijgen (REPEAT)
     result = result.replace(new RegExp("\\s*\\b(REPEAT)\\b" + inlineComments + "\\s*", "gi"), "\n$1$2\n");
 
     // 4. Blok-midden
     result = result.replace(new RegExp("\\s*\\b(ELSE)\\b" + inlineComments + "\\s*", "gi"), "\n$1$2\n");
 
-    // 5. Blok-sluiters
+    // 5. Blok-sluiters (UNTIL krijgt nu altijd weer gewoon een enter ervoor, conditie blijft erachter)
     result = result.replace(/\s*\b(ENDIF|DONE|UNTIL)\b/gi, "\n$1");
 
     // 6. Gereserveerde flow-keywords
@@ -184,7 +191,7 @@ function normalizeLines(text) {
         }
         if (!line) continue;
         
-        // DE FIX: Zorg dat placeholders (__COMMENT_BLK_x__) NIET worden aangezien voor afgebroken code!
+        // Zorg dat placeholders (__COMMENT_BLK_x__) NIET worden aangezien voor afgebroken code!
         if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(line) && !line.startsWith("__") && !/^(IF|WHILE|REPEAT|ELSE|ENDIF|DONE|UNTIL|RETURN)$/i.test(line)) {
             out.push(line + " "); // Bewaar met spatie, wacht op de volgende regel
             continue;
@@ -208,22 +215,30 @@ function normalizeLines(text) {
             finalLines.push("");
             continue;
         }
-        if (/^IF\b/i.test(cur) && /^THEN$/i.test(next)) {
-            finalLines.push(cur + " " + next);
-            i++; 
-            continue;
+        
+        // 🚀 Sla het samenvoegen van IF+THEN en WHILE+DO over in Clinisys stijl!
+        if (!isClinisys) {
+            if (/^IF\b/i.test(cur) && /^THEN$/i.test(next)) {
+                finalLines.push(cur + " " + next);
+                i++; 
+                continue;
+            }
+            if (/^WHILE\b/i.test(cur) && /^DO$/i.test(next)) {
+                finalLines.push(cur + " " + next);
+                i++;
+                continue;
+            }
         }
-        if (/^WHILE\b/i.test(cur) && /^DO$/i.test(next)) {
-            finalLines.push(cur + " " + next);
-            i++;
-            continue;
-        }
+        
         finalLines.push(cur);
     }
 
     return finalLines.join("\n");
 }
 
+/* ----------------------------------------------------------
+     FASE 5: INDENTER
+----------------------------------------------------------- */
 /* ----------------------------------------------------------
      FASE 5: INDENTER
 ----------------------------------------------------------- */

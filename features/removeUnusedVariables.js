@@ -1,21 +1,25 @@
 // ./features/removeUnusedVariables.js
-const { parseMISPL } = require("../parser");
-const { analyze } = require("../analyzer");
+const { parseMISPL, analyze } = require("../analyzeMISPL"); // 🚀 FIX: Verwijst nu naar het juiste, gecombineerde bestand
+const { t } = require("../i18n"); // 🌍 Importeer de vertaler
 
 function removeUnusedVariablesText(text) {
     if (!text) return "";
 
     const parseResult = parseMISPL(text);
-    const errors = analyze(parseResult, text);
+    const analysisResult = analyze(parseResult, text);
+    
+    // 🚀 FIX: analyze geeft nu een object terug, dus we moeten .errors hebben!
+    const errors = analysisResult.errors || analysisResult; 
 
     const unusedVars = [];
     
-    // 🛑 DE FIX: Aangepast naar de exacte tekst uit jouw screenshot ("wordt nooit gebruikt")
-    const regex = /Variabele '(.+?)' wordt (nooit|niet) gebruikt/i; 
+    // 🌍 TAALONAFHANKELIJK ZOEKEN: We pakken het eerste unieke stukje van de vertaalde zin
+    const unusedPrefix = t('WARN_VAR_DECLARED_NOT_USED', '@@@').split('@@@')[0];
 
     for (const err of errors) {
-        if (err && err.message) {
-            const match = err.message.match(regex);
+        if (err && err.message && err.message.includes(unusedPrefix)) {
+            // Haal de variabelenaam simpelweg uit de enkele aanhalingstekens ('variabelenaam')
+            const match = err.message.match(/'([^']+)'/);
             if (match) {
                 unusedVars.push(match[1]); // match[1] is de naam van de variabele
             }

@@ -1,5 +1,6 @@
 // ./features/magicDebug.js
 const vscode = require('vscode');
+const { t } = require('../i18n'); // 🌍 Importeer de i18n module
 
 async function insertMagicDebug() {
     try {
@@ -21,7 +22,7 @@ async function insertMagicDebug() {
         }
 
         if (!word) {
-            vscode.window.showWarningMessage("⚠️ MISPL Debug: Zet je cursor in een variabele (of selecteer er een) om te loggen.");
+            vscode.window.showWarningMessage(t('WARN_DEBUG_NO_VAR'));
             return;
         }
 
@@ -45,30 +46,34 @@ async function insertMagicDebug() {
 
         // Als de instelling nog leeg is (de allereerste keer)
         if (!glimsUser || glimsUser.trim() === "") {
-            const windowsUser = process.env.USERNAME || process.env.USER || "ONBEKEND";
+            const windowsUser = process.env.USERNAME || process.env.USER || t('DEBUG_UNKNOWN_USER');
             
+            // 🚀 Taalonafhankelijke knoppen
+            const btnYes = t('BTN_YES');
+            const btnNo = t('BTN_NO_EDIT');
+
             const answer = await vscode.window.showInformationMessage(
-                `Controleer inlognaam GLIMS. Is deze: "${windowsUser}"?`,
-                "Ja", "Nee, pas aan"
+                t('PROMPT_DEBUG_CHECK_USER', windowsUser),
+                btnYes, btnNo
             );
 
-            if (answer === "Ja") {
+            if (answer === btnYes) {
                 glimsUser = windowsUser;
                 await config.update('glimsUsername', glimsUser, vscode.ConfigurationTarget.Global);
-                vscode.window.showInformationMessage(`Top! Inlognaam '${glimsUser}' is opgeslagen in je instellingen.`);
-            } else if (answer === "Nee, pas aan") {
+                vscode.window.showInformationMessage(t('MSG_DEBUG_USER_SAVED', glimsUser));
+            } else if (answer === btnNo) {
                 const customName = await vscode.window.showInputBox({
-                    prompt: "Vul hier je daadwerkelijke GLIMS inlognaam in:",
-                    placeHolder: "bijv. jansend",
-                    value: windowsUser !== "ONBEKEND" ? windowsUser : ""
+                    prompt: t('PROMPT_DEBUG_ENTER_USER'),
+                    placeHolder: t('PLACEHOLDER_DEBUG_USER'),
+                    value: windowsUser !== t('DEBUG_UNKNOWN_USER') ? windowsUser : ""
                 });
 
                 if (customName && customName.trim() !== "") {
                     glimsUser = customName.trim();
                     await config.update('glimsUsername', glimsUser, vscode.ConfigurationTarget.Global);
-                    vscode.window.showInformationMessage(`Top! Inlognaam '${glimsUser}' is opgeslagen in je instellingen.`);
+                    vscode.window.showInformationMessage(t('MSG_DEBUG_USER_SAVED', glimsUser));
                 } else {
-                    vscode.window.showWarningMessage("Actie geannuleerd: Geen GLIMS naam ingevuld.");
+                    vscode.window.showWarningMessage(t('WARN_DEBUG_CANCELLED'));
                     return; 
                 }
             } else {
@@ -117,7 +122,7 @@ async function insertMagicDebug() {
         });
 
     } catch (err) {
-        vscode.window.showErrorMessage("❌ Onverwachte fout in Magic Debug: " + err.message);
+        vscode.window.showErrorMessage(t('ERR_DEBUG_UNEXPECTED', err.message));
     }
 }
 

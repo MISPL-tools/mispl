@@ -1,5 +1,6 @@
 // ./features/wrapInBlock.js
 const vscode = require('vscode');
+const { t } = require('../i18n'); // 🌍 Importeer de i18n module
 
 async function wrapInBlock() {
     const editor = vscode.window.activeTextEditor;
@@ -7,14 +8,17 @@ async function wrapInBlock() {
 
     const selection = editor.selection;
     if (selection.isEmpty) {
-        vscode.window.showWarningMessage("⚠️ MISPL Inpakker: Selecteer eerst de regels code die je wilt inpakken.");
+        vscode.window.showWarningMessage(t('ERR_WRAP_NO_SELECTION'));
         return;
     }
 
+    // De optie voor commentaar is taalonafhankelijk gemaakt
+    const optComment = t('WRAP_COMMENT');
+
     // 1. Vraag welk type blok de gebruiker wil
     const blockType = await vscode.window.showQuickPick(
-        ["IF ... THEN", "WHILE ... DO", "REPEAT ... UNTIL", "/* Commentaar */"],
-        { placeHolder: "Kies het type blok om de code mee in te pakken", ignoreFocusOut: true }
+        ["IF ... THEN", "WHILE ... DO", "REPEAT ... UNTIL", optComment],
+        { placeHolder: t('WRAP_PROMPT'), ignoreFocusOut: true }
     );
 
     if (!blockType) return; // Gebruiker heeft geannuleerd
@@ -58,7 +62,7 @@ async function wrapInBlock() {
         newText = `${baseIndent}REPEAT\n${indentedText}\n${baseIndent}UNTIL TRUE;`;
         startLineOffset = lines.length + 1; // De UNTIL staat helemaal onderaan
         charOffset = baseIndent.length + 6; // "UNTIL " is 6 tekens
-    } else if (blockType === "/* Commentaar */") {
+    } else if (blockType === optComment) {
         // Bij commentaar laten we de inspringing van de code zelf met rust
         if (lines.length === 1) {
             newText = `/* ${selectedText} */`;

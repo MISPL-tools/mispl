@@ -1,7 +1,8 @@
 const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
-const { parseMISPL } = require('../analyzeMISPL');
+const { parseMISPL, analyze } = require('../analyzeMISPL');
+const { t } = require('../i18n'); 
 
 let glimsDict = { globals: {}, tables: {} };
 
@@ -12,7 +13,7 @@ try {
         const cleanData = rawData.replace(/^\uFEFF/, ''); 
         glimsDict = JSON.parse(cleanData);
     } else {
-        console.warn("HoverProvider: glimsDictionary.json niet gevonden.");
+        console.warn(t('WARN_DICT_NOT_FOUND'));
     }
 } catch (err) {
     console.error("HoverProvider Error loading glimsDictionary.json:", err);
@@ -27,17 +28,50 @@ class MisplHoverProvider {
         const lineText = document.lineAt(position.line).text;
         
         // --- 1. LOCAL VARIABLE HOVER ---
-        // Laat de parser razendsnel de gedeclareerde variabelen uit dit script halen
         const sourceCode = document.getText();
-        const parseResult = parseMISPL(sourceCode);
         
-        if (parseResult && parseResult.variables) {
-            const varType = parseResult.variables.get(word.toLowerCase());
-            if (varType) {
-                // Return een chique popup voor de lokale variabele
+        const parseResult = parseMISPL(sourceCode);
+        const analysisResult = analyze(parseResult, sourceCode); 
+        
+        if (analysisResult && analysisResult.variables) {
+            const lowerWord = word.toLowerCase();
+            const varType = analysisResult.variables.get(lowerWord);
+            
+            const assignedData = analysisResult.assignedVars ? analysisResult.assignedVars.get(lowerWord) : null;
+
+            if (varType || assignedData) {
                 const md = new vscode.MarkdownString();
-                md.appendCodeblock(`(local variable) ${varType} ${word}`, 'mispl');
-                md.appendMarkdown(`\nGedeclareerde **${varType}** variabele in dit script.`);
+                const displayType = varType ? varType : "UNKNOWN";
+                
+                md.appendCodeblock(`(local variable) ${displayType} ${word}`, 'mispl');
+                md.appendMarkdown(t('HOVER_LOCAL_VAR_DECL', displayType));
+
+                if (assignedData && assignedData.history && assignedData.history.length > 0) {
+                    const totalCount = assignedData.history.length;
+                    md.appendMarkdown(t('HOVER_ASSIGN_COUNT', totalCount));
+
+                    const currentLine = position.line;
+                    
+                    // 🚀 DE FIX: We kijken nu strikt naar toewijzingen VÓÓR deze regel
+                    const pastAssignments = assignedData.history.filter(h => h.line < currentLine);
+                    const sameLineAssignments = assignedData.history.filter(h => h.line === currentLine);
+
+                    if (pastAssignments.length > 0) {
+                        // Er is een historie vóór deze regel!
+                        const last = pastAssignments[pastAssignments.length - 1];
+                        md.appendMarkdown(t('HOVER_LAST_VAL', last.line + 1));
+                        
+                        const valToShow = last.value !== undefined && last.value !== null ? String(last.value) : "???";
+                        md.appendCodeblock(valToShow, "mispl");
+                    } else if (sameLineAssignments.length > 0) {
+                        // Er is geen historie vóór deze regel, maar wel óp deze regel.
+                        md.appendMarkdown(t('HOVER_VAL_FIRST_TIME'));
+                    } else {
+                        // Er is geen historie vóór, en niet op deze regel. Waarde komt pas later.
+                        md.appendMarkdown(t('HOVER_VAL_LATER', currentLine + 1));
+                    }
+                }
+
                 return new vscode.Hover(md, wordRange);
             }
         }
@@ -56,7 +90,7 @@ class MisplHoverProvider {
                 if (globalDef.description) {
                     md.appendMarkdown(`\n\n---\n${globalDef.description}`);
                 } else {
-                    md.appendMarkdown(`\n\n---\n*Standaard GLIMS functie.*`);
+                    md.appendMarkdown(t('HOVER_STD_FUNC'));
                 }
                 
                 return new vscode.Hover(md, wordRange);

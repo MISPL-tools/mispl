@@ -1,0 +1,45 @@
+{
+	"_handleiding": [
+		"==========================================================================",
+		" MISPL CUSTOM DICTIONARY SJABLOON",
+		"==========================================================================",
+		" Dit bestand is bedoeld om jullie eigen ziekenhuis-specifieke tabellen",
+		" en functies in te zetten. De linter leest dit bestand in.",
+		"",
+		" SPELREGELS:",
+		" 1. Overschrijven: Als je hier een functie of tabel invult die al",
+		"    bestaat in de standaard linter, overschrijft dit bestand de standaard.",
+		" 2. Veiligheid: Bewaar dit bestand op een veilige plek (bijv. C:\\GLIMS\\) ",
+		"    en vul het pad in bij de VS Code Instellingen -> MISPL -> Custom Dictionary.",
+		"    Bewaar hem NIET in de extensie-map, anders raak je alles kwijt bij een update!",
+		"=========================================================================="
+	],
+	"globals": {
+		"RUNSITEFUNCTION": {
+			"params": [
+				"STRING",
+				"ANY"
+			],
+			"minParams": 2,
+			"returns": "ANY",
+			"description": "⚠️ LEGACY/MYTHE: Voert een externe MISPL uit. Wordt officieel niet ondersteund en veroorzaakt onvoorspelbare buffer-overschrijvingen in de database. Gebruik op eigen risico!"
+		}
+	},
+	"tables": {
+		"LOCAL_PATIENT_DATA": {
+			"SpecialScore": {
+				"type": "Property",
+				"returns": "Integer",
+				"description": "Lokaal veld voor een speciale patiëntenscore."
+			},
+			"CalculateRisk": {
+				"type": "Method",
+				"returns": "Fractional",
+				"params": [
+					"String"
+				],
+				"description": "Lokale methode om een risico te berekenen."
+			}
+		}
+	}
+}

@@ -1,14 +1,11 @@
 // astPrinter.js
+const { t } = require('./i18n'); // 🌍 Importeer de i18n module vanuit de root!
 
 function printAst(ast) {
-    if (!ast) return "Geen AST gevonden.";
+    if (!ast) return t('AST_NO_AST');
     // We beginnen bij Program met een compleet lege prefix
     return render(ast, "", true).join("\n");
 }
-
-// astPrinter.js
-
-// astPrinter.js
 
 function getChildren(node) {
     if (!node || typeof node !== "object") return [];
@@ -50,12 +47,10 @@ function getChildren(node) {
     return children;
 }
 
-// astPrinter.js
-
 function nodeLabel(node, kind) {
     // 1. Speciale case voor onze samengevatte node
     if (node.type === 'Declarations') {
-        return `Declarations (${node.count} variables)`;
+        return t('AST_DECLARATIONS', node.count);
     }
 
     // 2. Bepaal het voorvoegsel ([THEN] of [ELSE])

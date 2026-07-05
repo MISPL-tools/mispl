@@ -1,17 +1,18 @@
 // ./features/extractVariable.js
 const vscode = require('vscode');
+const { t } = require('../i18n'); // 🌍 Importeer i18n
 
 async function extractToVariable() {
     try {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            vscode.window.showErrorMessage("⚠️ MISPL Extract: Geen actieve editor gevonden.");
+            vscode.window.showErrorMessage(t('ERR_NO_EDITOR'));
             return;
         }
 
         const selection = editor.selection;
         if (selection.isEmpty) {
-            vscode.window.showErrorMessage("⚠️ MISPL Extract: Je hebt geen tekst geselecteerd! Markeer (highlight) eerst de tekst die je wilt vervangen met je muis.");
+            vscode.window.showErrorMessage(t('ERR_NO_SELECTION'));
             return;
         }
 
@@ -45,27 +46,28 @@ async function extractToVariable() {
         // 3. Vraag wat we moeten doen bij meerdere resultaten
         let rangesToReplace = [selection];
         if (occurrences.length > 1) {
+            // 🚀 Taalonafhankelijke opties
+            const optAll = t('EXTRACT_REPLACE_ALL', occurrences.length);
+            const optOne = t('EXTRACT_REPLACE_ONE');
+
             const choice = await vscode.window.showQuickPick(
-                [
-                    `Vervang ALLE ${occurrences.length} instanties in dit bestand (Slim Takelen)`,
-                    "Vervang ALLEEN deze geselecteerde instantie"
-                ],
+                [optAll, optOne],
                 {
-                    placeHolder: `De code '${selectedText}' komt ${occurrences.length} keer voor. Wat wil je doen?`,
+                    placeHolder: t('EXTRACT_PROMPT_MULTIPLE', selectedText, occurrences.length),
                     ignoreFocusOut: true
                 }
             );
 
             if (!choice) return;
-            if (choice.startsWith("Vervang ALLE ")) {
+            if (choice === optAll) {
                 rangesToReplace = occurrences;
             }
         }
 
         // 4. Vraag om de nieuwe variabelenaam
         const varName = await vscode.window.showInputBox({
-            prompt: `Naam voor de nieuwe variabele (vervangt '${selectedText}')`,
-            placeHolder: "Bijv. iOrdrID of crspIssuer",
+            prompt: t('EXTRACT_PROMPT_NAME', selectedText),
+            placeHolder: t('EXTRACT_PLACEHOLDER_NAME'),
             ignoreFocusOut: true
         });
 
@@ -95,22 +97,23 @@ async function extractToVariable() {
         else if (/^enum[A-Z]/.test(cleanVarName)) { varType = "CorrespondentType"; typeGuessed = true; }
 
         if (!typeGuessed) {
+            const optOther = t('EXTRACT_TYPE_OTHER');
             const typeList = [
                 "String", "Integer", "Logical", "Fractional", "Date", "DateTime", "Time", 
                 "Correspondent", "CorrespondentType", "Object", "Person", "Specimen", "Order", "Result", 
                 "Material", "Request", "Action", "gp_Text", "Animal", "Rack", "ItemStorage", 
-                "Ward", "Anders..."
+                "Ward", optOther
             ];
 
             const selectedType = await vscode.window.showQuickPick(typeList, {
-                placeHolder: `Welk datatype is '${cleanVarName}'? (We konden het niet bepalen uit de naam)`,
+                placeHolder: t('EXTRACT_PROMPT_TYPE', cleanVarName),
                 ignoreFocusOut: true
             });
 
             if (!selectedType) return; 
 
-            if (selectedType === "Anders...") {
-                varType = await vscode.window.showInputBox({ prompt: "Typ het exacte MISPL datatype in:", ignoreFocusOut: true });
+            if (selectedType === optOther) {
+                varType = await vscode.window.showInputBox({ prompt: t('EXTRACT_PROMPT_EXACT_TYPE'), ignoreFocusOut: true });
                 if (!varType || varType.trim() === "") return;
             } else {
                 varType = selectedType;
@@ -199,13 +202,13 @@ async function extractToVariable() {
         });
 
         if (!success) {
-            vscode.window.showErrorMessage("❌ Fout: VS Code weigerde de code aan te passen. Mogelijk overlappen selecties.");
+            vscode.window.showErrorMessage(t('ERR_EXTRACT_VSCODE_DENIED'));
         } else {
-            vscode.window.showInformationMessage(`Refactor geslaagd! De variabele is 'getakeld' naar de hoogst noodzakelijke plek.`);
+            vscode.window.showInformationMessage(t('MSG_EXTRACT_SUCCESS'));
         }
 
     } catch (err) {
-        vscode.window.showErrorMessage("❌ Onverwachte fout in Extract to Variable: " + err.message);
+        vscode.window.showErrorMessage(t('ERR_EXTRACT_UNEXPECTED', err.message));
     }
 }
 

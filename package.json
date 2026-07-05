@@ -2,13 +2,18 @@
 	"name": "mispl",
 	"displayName": "MISPL Language Support",
 	"description": "Language support, formatting, static debug, flowcharts and tools for MISPL / GLIMS",
-	"version": "2.81.0",
+	"version": "3.0.2",
 	"icon": "icon.png",
-	"publisher": "dirkoppenaal",
+	"publisher": "dirkkoppenaal",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/dirkoppenaal/mispl"
+		"url": "https://github.com/MISPL-tools/mispl"
 	},
+	"license": "SEE LICENSE IN License.txt",
+	"bugs": {
+		"url": "https://github.com/MISPL-tools/mispl/issues"
+	},
+	"homepage": "https://github.com/MISPL-tools/mispl/blob/main/README.md",
 	"engines": {
 		"vscode": "^1.85.0"
 	},
@@ -60,7 +65,7 @@
 			},
 			{
 				"command": "mispl.replaceWords",
-				"title": "MISPL: Replace words according list"
+				"title": "MISPL: Replace words according to list"
 			},
 			{
 				"command": "mispl.wrapInBlock",
@@ -245,17 +250,44 @@
 			]
 		},
 		"configuration": {
-			"title": "MISPL Settings",
+			"type": "object",
+			"title": "MISPL",
 			"properties": {
 				"mispl.validationLogId": {
 					"type": "string",
 					"default": "",
-					"description": "Het interne GLIMS ID van de dummy gp_SiteFunction (MISPL) die gebruikt wordt om de Validation Flow logs naar weg te schrijven."
+					"description": "The internal GLIMS ID of the dummy gp_SiteFunction (MISPL) used to log the Validation Flow results."
 				},
 				"mispl.glimsUsername": {
 					"type": "string",
 					"default": "",
-					"description": "Jouw persoonlijke inlognaam in GLIMS. Wordt gebruikt voor het genereren van veilige debug-meldingen."
+					"description": "Your personal GLIMS login name. Used to generate safe, targeted debug messages."
+				},
+				"mispl.customDictionary": {
+					"type": "string",
+					"default": "",
+					"description": "Path to a custom JSON file (e.g., C:\\GLIMS\\custom_dict.json) containing locally defined GLIMS tables and functions."
+				},
+				"mispl.formattingStyle": {
+					"type": "string",
+					"enum": [
+						"Standaard (UMC Utrecht)",
+						"Clinisys (Multi-line: THEN, DO op extra regel)"
+					],
+					"default": "Standaard (UMC Utrecht)",
+					"description": "Select the formatting style for the code formatter. The Clinisys style places THEN, DO, and UNTIL on new lines."
+				},
+				"mispl.language": {
+					"type": "string",
+					"enum": [
+						"Auto (Systeemtaal)",
+						"nl",
+						"en",
+						"fr",
+						"de"
+					],
+					"default": "Auto (Systeemtaal)",
+					"description": "Choose the language for the linter errors and quick fixes. 'Auto' will use your current VS Code display language."
 				}
 			}
 		},

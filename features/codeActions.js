@@ -1,4 +1,5 @@
 const vscode = require('vscode');
+const { t } = require('../i18n'); // 🌍 Importeer i18n
 
 class MisplCodeActionProvider {
     provideCodeActions(document, range, context, token) {
@@ -8,15 +9,15 @@ class MisplCodeActionProvider {
         // 1. CONTEXT: Selectie Acties (Wrap, Extract, Flowchart)
         // =========================================================
         if (!range.isEmpty) {
-            const wrapAction = new vscode.CodeAction('💡 Inpakken in IF / WHILE blok', vscode.CodeActionKind.Refactor);
+            const wrapAction = new vscode.CodeAction(t('ACTION_WRAP_BLOCK'), vscode.CodeActionKind.Refactor);
             wrapAction.command = { command: 'mispl.wrapInBlock', title: 'Wrap' };
             actions.push(wrapAction);
 
-            const extractAction = new vscode.CodeAction('✂️ Extract to Variable (Maak nieuwe variabele)', vscode.CodeActionKind.RefactorExtract);
+            const extractAction = new vscode.CodeAction(t('ACTION_EXTRACT_VAR'), vscode.CodeActionKind.RefactorExtract);
             extractAction.command = { command: 'mispl.extractVariable', title: 'Extract' };
             actions.push(extractAction);
 
-            const flowAction = new vscode.CodeAction('📊 Teken Flowchart van deze selectie', vscode.CodeActionKind.Empty);
+            const flowAction = new vscode.CodeAction(t('ACTION_FLOWCHART'), vscode.CodeActionKind.Empty);
             flowAction.command = { command: 'mispl.showSelectedFlowchart', title: 'Flowchart' };
             actions.push(flowAction);
         }
@@ -27,13 +28,13 @@ class MisplCodeActionProvider {
         const lineText = document.lineAt(range.start.line).text;
         
         if (lineText.includes(':=')) {
-            const alignAction = new vscode.CodeAction('📏 Lijn alle := toewijzingen netjes uit', vscode.CodeActionKind.RefactorRewrite);
+            const alignAction = new vscode.CodeAction(t('ACTION_ALIGN_ASSIGN'), vscode.CodeActionKind.RefactorRewrite);
             alignAction.command = { command: 'mispl.alignAssignments', title: 'Align' };
             actions.push(alignAction);
         }
 
         if (/\b(YES|NO)\b/i.test(lineText) && !lineText.trim().startsWith('/*') && !lineText.trim().startsWith('//')) {
-            const fixYesNo = new vscode.CodeAction("💡 Stijl-tip: Vervang YES/NO door TRUE/FALSE", vscode.CodeActionKind.RefactorRewrite);
+            const fixYesNo = new vscode.CodeAction(t('ACTION_FIX_YESNO'), vscode.CodeActionKind.RefactorRewrite);
             const edit = new vscode.WorkspaceEdit();
             const newLineText = lineText.replace(/\bYES\b/ig, 'TRUE').replace(/\bNO\b/ig, 'FALSE');
             edit.replace(document.uri, document.lineAt(range.start.line).range, newLineText);
@@ -42,7 +43,7 @@ class MisplCodeActionProvider {
         }
 
         if (range.isEmpty && lineText.trim().length > 0 && !lineText.includes('//') && !lineText.includes('/*')) {
-            const debugAction = new vscode.CodeAction('🐛 Snel-Logger (Magic Debug) invoegen', vscode.CodeActionKind.Refactor);
+            const debugAction = new vscode.CodeAction(t('ACTION_MAGIC_DEBUG'), vscode.CodeActionKind.Refactor);
             debugAction.command = { command: 'mispl.magicDebug', title: 'Magic Debug' };
             actions.push(debugAction);
         }
@@ -53,21 +54,23 @@ class MisplCodeActionProvider {
         const diagnostics = context.diagnostics;
         
         // 3.1 - Declaraties opruimen (Massale opschoonactie)
-        const hasUnusedVar = diagnostics.some(d => d.message.includes('wordt niet gebruikt'));
+        const unusedPrefix = t('WARN_VAR_DECLARED_NOT_USED', '@@@').split('@@@')[0];
+        const hasUnusedVar = diagnostics.some(d => d.message.includes(unusedPrefix));
         if (hasUnusedVar) {
-            const fixAction = new vscode.CodeAction('🧹 Ruim ongebruikte declaraties automatisch op', vscode.CodeActionKind.QuickFix);
+            const fixAction = new vscode.CodeAction(t('ACTION_REMOVE_UNUSED_DECL'), vscode.CodeActionKind.QuickFix);
             fixAction.command = { command: 'mispl.removeUnusedVariables', title: 'Opruimen' };
             fixAction.isPreferred = true; 
             actions.push(fixAction);
         }
 
         // 3.2 - Dode Toewijzingen (Assignments) verwijderen
+        const deadAssignPrefix = t('WARN_VAR_ASSIGNED_NOT_READ', '@@@').split('@@@')[0];
         for (const diagnostic of diagnostics) {
-            if (diagnostic.message.includes("nooit meer uitgelezen")) {
-                const match = diagnostic.message.match(/Waarde van '(.*?)' wordt hierna nooit meer uitgelezen/);
+            if (diagnostic.message.includes(deadAssignPrefix)) {
+                const match = diagnostic.message.match(/'([^']+)'/);
                 if (match) {
                     const varName = match[1];
-                    const action = new vscode.CodeAction(`🗑️ Verwijder overbodige toewijzing aan '${varName}'`, vscode.CodeActionKind.QuickFix);
+                    const action = new vscode.CodeAction(t('ACTION_REMOVE_DEAD_ASSIGN', varName), vscode.CodeActionKind.QuickFix);
                     action.edit = new vscode.WorkspaceEdit();
 
                     const fullText = document.getText();
@@ -77,12 +80,25 @@ class MisplCodeActionProvider {
                     const execMatch = regex.exec(fullText);
 
                     if (execMatch && (execMatch.index - startOffset) < 150) {
+                        let matchStart = execMatch.index;
                         let matchEnd = execMatch.index + execMatch[0].length;
+
+                        // 🚀 DE FIX: Wis ook inspringing (tabs/spaties) aan het begin van de regel!
+                        const prefix = fullText.substring(startOffset, matchStart);
+                        if (prefix.trim() === '') {
+                            matchStart = startOffset; 
+                        }
+
                         const trailing = fullText.substring(matchEnd);
                         const whitespaceMatch = trailing.match(/^[ \t]*\r?\n/);
-                        if (whitespaceMatch) matchEnd += whitespaceMatch[0].length;
+                        if (whitespaceMatch && prefix.trim() === '') {
+                            matchEnd += whitespaceMatch[0].length; // Neem enter mee
+                        } else if (!whitespaceMatch) {
+                            const trailingSpaceMatch = trailing.match(/^[ \t]+/);
+                            if (trailingSpaceMatch) matchEnd += trailingSpaceMatch[0].length;
+                        }
 
-                        action.edit.delete(document.uri, new vscode.Range(document.positionAt(execMatch.index), document.positionAt(matchEnd)));
+                        action.edit.delete(document.uri, new vscode.Range(document.positionAt(matchStart), document.positionAt(matchEnd)));
                         action.diagnostics = [diagnostic];
                         action.isPreferred = true;
                         actions.push(action);
@@ -92,9 +108,10 @@ class MisplCodeActionProvider {
         }
 
         // 3.3 - Overbodige Default Toewijzingen verwijderen
+        const redundantMsgs = [t('INFO_DEFAULT_INIT_STRING'), t('INFO_DEFAULT_INIT_LOGICAL'), t('INFO_DEFAULT_INIT_NUMBER'), t('INFO_DEFAULT_INIT_DATE')];
         for (const diagnostic of diagnostics) {
-            if (diagnostic.message.includes("Deze eerste toewijzing is overbodig")) {
-                const action = new vscode.CodeAction(`🗑️ Verwijder overbodige default toewijzing`, vscode.CodeActionKind.QuickFix);
+            if (redundantMsgs.some(msg => diagnostic.message === msg)) {
+                const action = new vscode.CodeAction(t('ACTION_REMOVE_REDUNDANT_DEF'), vscode.CodeActionKind.QuickFix);
                 action.edit = new vscode.WorkspaceEdit();
 
                 const fullText = document.getText();
@@ -104,12 +121,25 @@ class MisplCodeActionProvider {
                 const execMatch = regex.exec(fullText);
 
                 if (execMatch && (execMatch.index - startOffset) < 150) {
+                    let matchStart = execMatch.index;
                     let matchEnd = execMatch.index + execMatch[0].length;
+
+                    // 🚀 DE FIX: Wis inspringing
+                    const prefix = fullText.substring(startOffset, matchStart);
+                    if (prefix.trim() === '') {
+                        matchStart = startOffset;
+                    }
+
                     const trailing = fullText.substring(matchEnd);
                     const whitespaceMatch = trailing.match(/^[ \t]*\r?\n/);
-                    if (whitespaceMatch) matchEnd += whitespaceMatch[0].length;
+                    if (whitespaceMatch && prefix.trim() === '') {
+                        matchEnd += whitespaceMatch[0].length;
+                    } else if (!whitespaceMatch) {
+                        const trailingSpaceMatch = trailing.match(/^[ \t]+/);
+                        if (trailingSpaceMatch) matchEnd += trailingSpaceMatch[0].length;
+                    }
 
-                    action.edit.delete(document.uri, new vscode.Range(document.positionAt(execMatch.index), document.positionAt(matchEnd)));
+                    action.edit.delete(document.uri, new vscode.Range(document.positionAt(matchStart), document.positionAt(matchEnd)));
                     action.diagnostics = [diagnostic];
                     action.isPreferred = true;
                     actions.push(action);
@@ -118,9 +148,10 @@ class MisplCodeActionProvider {
         }
 
         // 3.4 - Lege IF-blokken verwijderen
+        const emptyIfMsg = t('WARN_IF_EMPTY_THEN');
         for (const diagnostic of diagnostics) {
-            if (diagnostic.message.includes("Leeg IF blok gedetecteerd")) {
-                const action = new vscode.CodeAction(`🗑️ Verwijder leeg IF-blok`, vscode.CodeActionKind.QuickFix);
+            if (diagnostic.message === emptyIfMsg) {
+                const action = new vscode.CodeAction(t('ACTION_REMOVE_EMPTY_IF'), vscode.CodeActionKind.QuickFix);
                 action.edit = new vscode.WorkspaceEdit();
 
                 const fullText = document.getText();
@@ -130,12 +161,22 @@ class MisplCodeActionProvider {
                 const match = regex.exec(fullText);
 
                 if (match && (match.index - startOffset) < 150) {
+                    let matchStart = match.index;
                     let matchEnd = match.index + match[0].length;
+
+                    // 🚀 DE FIX: Wis inspringing
+                    const prefix = fullText.substring(startOffset, matchStart);
+                    if (prefix.trim() === '') {
+                        matchStart = startOffset;
+                    }
+
                     const trailing = fullText.substring(matchEnd);
                     const whitespaceMatch = trailing.match(/^[ \t]*\r?\n/);
-                    if (whitespaceMatch) matchEnd += whitespaceMatch[0].length;
+                    if (whitespaceMatch && prefix.trim() === '') {
+                        matchEnd += whitespaceMatch[0].length;
+                    }
 
-                    action.edit.delete(document.uri, new vscode.Range(document.positionAt(match.index), document.positionAt(matchEnd)));
+                    action.edit.delete(document.uri, new vscode.Range(document.positionAt(matchStart), document.positionAt(matchEnd)));
                     action.diagnostics = [diagnostic];
                     action.isPreferred = true;
                     actions.push(action);
@@ -145,24 +186,27 @@ class MisplCodeActionProvider {
 
         // 3.5 - Verbose Boolean (IF TRUE THEN RETURN TRUE)
         for (const diagnostic of diagnostics) {
-            if (diagnostic.message.includes("veel korter schrijven als één regel:")) {
+            if (diagnostic.message.includes("IF") && diagnostic.message.match(/:\s*(.*)$/)) {
                 const action = this.createBooleanFix(document, diagnostic);
                 if (action) actions.push(action);
             }
         }
 
         // 3.6 - Optimalisatie (Alias) - Individueel
+        const aliasPrefix = t('OPT_ALIAS_PREFIX', '@@@', '', '').split('@@@')[0];
+        const aliasExact = t('OPT_ALIAS_EXACT', '@@@', '').split('@@@')[0];
+        
         for (const diagnostic of diagnostics) {
-            if (diagnostic.message.includes("💡 Optimalisatie: Je hebt")) {
-                const match = diagnostic.message.match(/Je hebt '(.*?)' al opgeslagen in klasse-variabele '(.*?)'\. Gebruik '(.*?)' om/);
-                if (match) {
-                    const prefix = match[1];
-                    const alias = match[2];
-                    const newFullText = match[3];
+            if (diagnostic.message.includes(aliasPrefix) || diagnostic.message.includes(aliasExact)) {
+                const quotes = diagnostic.message.match(/'([^']+)'/g);
+                if (quotes && quotes.length >= 3) {
+                    const prefix = quotes[0].replace(/'/g, '');
+                    const alias = quotes[1].replace(/'/g, '');
+                    const newFullText = quotes[2].replace(/'/g, '');
                     const remainder = newFullText.substring(alias.length);
                     const originalFullText = prefix + remainder; 
 
-                    const action = new vscode.CodeAction(`✨ Vervang door: '${newFullText}'`, vscode.CodeActionKind.QuickFix);
+                    const action = new vscode.CodeAction(t('ACTION_REPLACE_ALIAS', newFullText), vscode.CodeActionKind.QuickFix);
                     action.edit = new vscode.WorkspaceEdit();
                     const line = document.lineAt(diagnostic.range.start.line);
                     const maskedLine = this.getMaskedCode(line.text);
@@ -181,10 +225,10 @@ class MisplCodeActionProvider {
 
         // 3.7 - Optimalisatie (Alias) - FIX ALL
         const allDiagnostics = vscode.languages.getDiagnostics(document.uri);
-        const optDiagnostics = allDiagnostics.filter(d => d.message.includes("💡 Optimalisatie: Je hebt"));
+        const optDiagnostics = allDiagnostics.filter(d => d.message.includes(aliasPrefix) || d.message.includes(aliasExact));
 
-        if (optDiagnostics.length > 1 && diagnostics.some(d => d.message.includes("💡 Optimalisatie: Je hebt"))) {
-            const fixAllOpt = new vscode.CodeAction(`🚀 Pas ALLE ${optDiagnostics.length} optimalisaties (Aliassen) toe in dit script`, vscode.CodeActionKind.QuickFix);
+        if (optDiagnostics.length > 1 && diagnostics.some(d => d.message.includes(aliasPrefix) || d.message.includes(aliasExact))) {
+            const fixAllOpt = new vscode.CodeAction(t('ACTION_FIX_ALL_ALIASES', optDiagnostics.length), vscode.CodeActionKind.QuickFix);
             fixAllOpt.edit = new vscode.WorkspaceEdit();
             
             const fullText = document.getText();
@@ -192,11 +236,11 @@ class MisplCodeActionProvider {
             const optChanges = new Map(); 
 
             for (const d of optDiagnostics) {
-                const match = d.message.match(/Je hebt '(.*?)' al opgeslagen in klasse-variabele '(.*?)'\. Gebruik '(.*?)' om/);
-                if (match) {
-                    const prefix = match[1];
-                    const alias = match[2];
-                    const newFullText = match[3];
+                const quotes = d.message.match(/'([^']+)'/g);
+                if (quotes && quotes.length >= 3) {
+                    const prefix = quotes[0].replace(/'/g, '');
+                    const alias = quotes[1].replace(/'/g, '');
+                    const newFullText = quotes[2].replace(/'/g, '');
                     const remainder = newFullText.substring(alias.length);
                     const originalFullText = prefix + remainder;
                     optChanges.set(originalFullText, newFullText);
@@ -228,14 +272,15 @@ class MisplCodeActionProvider {
         }
 
         // 3.8 - Hernoem 1 variabele naar Conventie
+        const conventionPrefix = t('INFO_HUNGARIAN_NOTATION', '@@@', '', '', '').split('@@@')[0];
         for (const diagnostic of diagnostics) {
-            if (diagnostic.message.includes("Stijl-tip:") && (diagnostic.message.includes("Variabele") || diagnostic.message.includes("Parameter"))) {
-                const match = diagnostic.message.match(/(?:Variabele|Parameter) '([^']+)' .* \(bijv\. '([^']+)'/);
-                if (match) {
-                    const oldName = match[1];
-                    const newName = match[2];
+            if (diagnostic.message.includes(conventionPrefix)) {
+                const quotes = diagnostic.message.match(/'([^']+)'/g);
+                if (quotes && quotes.length >= 4) {
+                    const oldName = quotes[0].replace(/'/g, '');
+                    const newName = quotes[3].replace(/'/g, '');
 
-                    const fixOne = new vscode.CodeAction(`✨ Hernoem '${oldName}' overal naar '${newName}'`, vscode.CodeActionKind.QuickFix);
+                    const fixOne = new vscode.CodeAction(t('ACTION_RENAME_CONVENTION', oldName, newName), vscode.CodeActionKind.QuickFix);
                     fixOne.edit = new vscode.WorkspaceEdit();
                     
                     const fullText = document.getText();
@@ -257,10 +302,10 @@ class MisplCodeActionProvider {
         }
 
         // 3.9 - Variabelen Conventie - FIX ALL
-        const styleDiagnostics = allDiagnostics.filter(d => d.message.includes("Stijl-tip:") && (d.message.includes("Variabele") || d.message.includes("Parameter")));
+        const styleDiagnostics = allDiagnostics.filter(d => d.message.includes(conventionPrefix));
 
-        if (styleDiagnostics.length > 1 && diagnostics.some(d => d.message.includes("Stijl-tip:") && (d.message.includes("Variabele") || d.message.includes("Parameter")))) {
-            const fixAll = new vscode.CodeAction(`🚀 Hernoem ALLE ${styleDiagnostics.length} variabelen in dit script naar de juiste conventie`, vscode.CodeActionKind.QuickFix);
+        if (styleDiagnostics.length > 1 && diagnostics.some(d => d.message.includes(conventionPrefix))) {
+            const fixAll = new vscode.CodeAction(t('ACTION_FIX_ALL_CONVENTIONS', styleDiagnostics.length), vscode.CodeActionKind.QuickFix);
             fixAll.edit = new vscode.WorkspaceEdit();
             
             const fullText = document.getText();
@@ -268,8 +313,10 @@ class MisplCodeActionProvider {
             const changes = new Map();
 
             for (const d of styleDiagnostics) {
-                const match = d.message.match(/(?:Variabele|Parameter) '([^']+)' .* \(bijv\. '([^']+)'/);
-                if (match) changes.set(match[1], match[2]); 
+                const quotes = d.message.match(/'([^']+)'/g);
+                if (quotes && quotes.length >= 4) {
+                    changes.set(quotes[0].replace(/'/g, ''), quotes[3].replace(/'/g, '')); 
+                }
             }
 
             const editedRanges = [];
@@ -294,20 +341,22 @@ class MisplCodeActionProvider {
         }
 
         // 3.10 - Extract Database Veld naar Variabele
+        const extractPrefix = t('INFO_SUGGEST_VAR_CACHE', '@@@', '', '').split('@@@')[0];
         for (const diagnostic of diagnostics) {
-            const msg = diagnostic.message;
-            if (msg.includes("Maak van") && msg.includes("een variabele: b.v.")) {
+            if (diagnostic.message.includes(extractPrefix)) {
                 try {
-                    const rawExpr = msg.split("Maak van '")[1]?.split("'")[0]?.trim(); 
-                    const rawVar = msg.split("b.v. ")[1]?.split(" ")[0]?.trim();
+                    const rawExprMatch = diagnostic.message.match(/'([^']+)'/);
+                    const rawVarMatch = diagnostic.message.match(/(?:b\.v\.|e\.g\.|ex\.|z\.B\.)\s+([a-zA-Z0-9_]+)/);
 
-                    if (rawExpr && rawVar) {
-                        const action = new vscode.CodeAction(`⚡ Extract: Maak variabele '${rawVar}'`, vscode.CodeActionKind.QuickFix);
+                    if (rawExprMatch && rawVarMatch) {
+                        const rawExpr = rawExprMatch[1];
+                        const rawVar = rawVarMatch[1];
+
+                        const action = new vscode.CodeAction(t('ACTION_EXTRACT_DB_VAR', rawVar), vscode.CodeActionKind.QuickFix);
                         action.edit = new vscode.WorkspaceEdit();
                         action.diagnostics = [diagnostic];
                         action.isPreferred = true; 
 
-                        // 🚀 SLIMMER UITLEZEN: Ondersteunt nu ook Datum en alle GLIMS Objecten
                         let dataType = "String"; 
                         if (rawVar.startsWith("i")) dataType = "Integer";
                         else if (rawVar.startsWith("l") || rawVar.startsWith("b")) dataType = "Logical";
@@ -399,7 +448,6 @@ class MisplCodeActionProvider {
         return actions;
     }
 
-    // --- DE MASKER HELPER FUNCTIE ---
     getMaskedCode(text) {
         let masked = "";
         let inString = false;
@@ -471,11 +519,11 @@ class MisplCodeActionProvider {
     }
 
     createBooleanFix(document, diagnostic) {
-        const fix = new vscode.CodeAction("💡 Vereenvoudig IF-statement naar één regel", vscode.CodeActionKind.QuickFix);
+        const fix = new vscode.CodeAction(t('ACTION_SIMPLIFY_IF'), vscode.CodeActionKind.QuickFix);
         fix.diagnostics = [diagnostic];
         fix.isPreferred = true; 
 
-        const match = diagnostic.message.match(/één regel:\s*(.*)$/);
+        const match = diagnostic.message.match(/:\s*(.*)$/);
         if (!match) return null;
         const newCode = match[1].trim();
 

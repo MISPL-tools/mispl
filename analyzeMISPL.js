@@ -3,18 +3,10 @@ const path = require("path");
 const { NodeTypes } = require("./ast");
 const PREFIXES = require("./features/glimsPrefixes");
 
-const VERSION = "v2.81.0 - Fixes That Make Everybody a Genius";
+// 🌍 NIEUW: Importeer de vertaalfunctie
+const { t } = require("./i18n");
 
-// 🛡️ HELPER: Checkt of een waarde de default is voor een bepaald type
-//const isDefaultValue = (val, type) => {
-//	const t = type.toUpperCase();
-//	if (t === "INTEGER") return val === "0";
-//	if (t === "FRACTIONAL") return val === "0" || val === "0.0";
-//	if (t === "STRING") return val === "" || val === "<EMPTY_STRING>";
-//	if (t === "LOGICAL") return val === "FALSE";
-//	if (t === "DATE" || t === "TIME" || t === "DATETIME") return val === "?" || val === "";
-//	return false;
-//};
+const VERSION = "v3.0.2 - Ready for GitHub";
 
 let DICT_LOAD_ERROR = null;
 let GLIMS_DICT = { globals: {}, tables: {} };
@@ -27,11 +19,48 @@ try {
 		if (!GLIMS_DICT.globals) GLIMS_DICT.globals = {};
 		if (!GLIMS_DICT.tables) GLIMS_DICT.tables = {};
 	} else {
-		DICT_LOAD_ERROR = "glimsDictionary.json niet gevonden in de 'features' map.";
+		DICT_LOAD_ERROR = t('ERR_DICT_NOT_FOUND');
 	}
 } catch (e) {
-	DICT_LOAD_ERROR = "Fout bij inlezen JSON: " + e.message;
+	DICT_LOAD_ERROR = t('ERR_DICT_READ', e.message);
 }
+
+// 🛡️ NIEUW: Functie om de basis-dictionary veilig aan te vullen met een lokaal bestand
+function loadCustomDictionary(customPath) {
+	if (!customPath || customPath.trim() === "") return;
+
+	try {
+		if (fs.existsSync(customPath)) {
+			const rawData = fs.readFileSync(customPath, "utf8");
+			const cleanData = rawData.replace(/^\uFEFF/, '');
+			const customDict = JSON.parse(cleanData);
+
+			// Voeg lokale globals toe (bestaande worden niet overschreven, tenzij expliciet overlappend)
+			if (customDict.globals) {
+				GLIMS_DICT.globals = { ...GLIMS_DICT.globals, ...customDict.globals };
+			}
+
+			// Voeg lokale tabellen toe
+			if (customDict.tables) {
+				for (const [tableName, props] of Object.entries(customDict.tables)) {
+					const upperTable = tableName.toUpperCase();
+					if (!GLIMS_DICT.tables[upperTable]) {
+						GLIMS_DICT.tables[upperTable] = {}; // Maak nieuwe tabel aan als hij niet bestaat
+					}
+					// Voeg de eigenschappen/methoden toe aan de tabel
+					GLIMS_DICT.tables[upperTable] = { ...GLIMS_DICT.tables[upperTable], ...props };
+				}
+			}
+			console.log(t('MSG_CUSTOM_DICT_SUCCESS', customPath));
+		} else {
+			console.warn(t('WARN_CUSTOM_DICT_MISSING', customPath));
+		}
+	} catch (e) {
+		console.error(t('ERR_CUSTOM_DICT_READ', e.message));
+	}
+}
+
+
 
 // 🛡️ HELPER: 100% Depth-Aware Comment Remover
 function removeCommentsDepthAware(text) {
@@ -143,15 +172,15 @@ function maskTextMispl(code) {
 					const looksLikeCode = peek.startsWith('RETURN') || peek.startsWith('STRING') || peek.startsWith('INTEGER') || peek.startsWith('LOGICAL') || peek.startsWith('FRACTIONAL') || peek.startsWith('IF ') || peek.startsWith('WHILE ') || peek.startsWith('REPEAT') || peek.startsWith('OBJECT ') || peek.startsWith('DATETIME ');
 
 					if (looksLikeCode) {
-						errors.push({ index: i, msg: "FOUT: Vergeten dubbele punt! Een code- of commentaarblok in TekstMISPL moet altijd beginnen met '{:'." });
+						errors.push({ index: i, msg: t('ERR_TEXT_MISSING_COLON') });
 						mode = "PROG";
 					} else {
-						errors.push({ index: i, msg: "FOUT: Losse '{' in tekst. Gebruik '~{' als je dit letterlijk wilt tonen, of '{:', '{=', '{<' voor code." });
+						errors.push({ index: i, msg: t('ERR_TEXT_LONE_OPEN') });
 					}
 					masked += ' ';
 				}
 			} else if (char === '}' && !isEscaped) {
-				errors.push({ index: i, msg: "FOUT: Losse '}' in tekst. Gebruik '~}' als je dit letterlijk wilt tonen." });
+				errors.push({ index: i, msg: t('ERR_TEXT_LONE_CLOSE') });
 				masked += ' ';
 			} else {
 				masked += (char === '\n' || char === '\r') ? char : ' ';
@@ -204,14 +233,14 @@ function maskTextMispl(code) {
 	}
 
 	if (mode === "PROG" || mode === "EXPR") {
-		errors.push({ index: code.length - 1, msg: "FOUT: TekstMISPL blok is geopend maar nergens afgesloten met een '}'." });
+		errors.push({ index: code.length - 1, msg: t('ERR_TEXT_UNCLOSED_BRACE') });
 	}
 
 	let trailingWarning = null;
 	if (lastClosingBraceIndex !== -1 && mode === "TEXT") {
 		const afterLastBrace = code.substring(lastClosingBraceIndex + 1);
 		if (afterLastBrace.length > 0 && /^\s+$/.test(afterLastBrace)) {
-			trailingWarning = "💡 INFO: Er staan nog onzichtbare tekens (spaties, tabs of enters) na de allerlaatste '}'. GLIMS print deze mee in de uitslag. Verwijder ze om een schone output te garanderen.";
+			trailingWarning = t('INFO_TRAILING_CHARS');
 		}
 	}
 
@@ -330,7 +359,7 @@ const ExpressionParser = {
 			let foundAlias = false;
 
 			if (context.aliases.has(lookupKey)) {
-				context.addInfo(line, `💡 Optimalisatie: Je hebt '${fullReference}' al opgeslagen in klasse-variabele '${context.aliases.get(lookupKey)}'. Gebruik '${context.aliases.get(lookupKey)}' om dubbele database-queries te voorkomen.`);
+				context.addInfo(line, t('OPT_ALIAS_EXACT', fullReference, context.aliases.get(lookupKey)));
 				foundAlias = true;
 			}
 
@@ -346,7 +375,7 @@ const ExpressionParser = {
 						const originalPrefix = fullReference.substring(0, currentStr.length);
 						const originalRemainder = fullReference.substring(currentStr.length);
 
-						context.addInfo(line, `💡 Optimalisatie: Je hebt '${originalPrefix}' al opgeslagen in klasse-variabele '${alias}'. Gebruik '${alias}${originalRemainder}' om dubbele database-queries te voorkomen.`);
+						context.addInfo(line, t('OPT_ALIAS_PREFIX', originalPrefix, alias, alias + originalRemainder));
 						break;
 					}
 				}
@@ -402,14 +431,16 @@ class AnalysisContext {
 		this.registerUsage(name, line);
 	}
 
-	registerWrite(name, line) {
+	registerWrite(name, line, value = null) { // 🚀 FIX: value toegevoegd als parameter
 		if (!name) return;
 		const key = String(name).toLowerCase();
 		for (const [cachedExpression, cachedVarName] of this.aliases.entries()) {
 			if (new RegExp(`\\b${key}\\b`).test(cachedExpression)) this.aliases.delete(cachedExpression);
 		}
-		const info = this.assignedVars.get(key) || { lines: [], originalName: name };
+		// 🚀 FIX: history array toegevoegd aan de opslag
+		const info = this.assignedVars.get(key) || { lines: [], originalName: name, history: [] };
 		info.lines.push(line);
+		if (value !== null) info.history.push({ line, value }); // 🚀 FIX: Sla de toegewezen waarde op!
 		this.assignedVars.set(key, info);
 		this.registerUsage(name, line);
 	}
@@ -517,7 +548,7 @@ const TypeChecker = {
 
 		const workNoSpaces = work.replace(/\s+/g, '');
 		if (workNoSpaces.includes(',,') || workNoSpaces.includes(',)') || workNoSpaces.includes('(,')) {
-			context.addError(lineNo, `❌ SYNTAX-FOUT: Lege of overtollige komma gevonden in parameters.`);
+			context.addError(lineNo, t('ERR_SYNTAX_COMMA'));
 		}
 
 		work = work.replace(/(?<![a-zA-Z0-9_])(?:\d+\.\d+|\.\d+)(?![a-zA-Z0-9_])/g, "<FRACTIONAL>");
@@ -570,17 +601,17 @@ const TypeChecker = {
 						// Legitiem! In GLIMS mag je een unassigned var veilig wegstrepen tegen zijn default ("", 0, FALSE).
 					} else if (!context.assignedVars.has(vKey) && isCompared) {
 						// Oeps: Hij wordt vergeleken met een SPECIFIEKE (non-default) waarde, maar heeft nog geen := gehad.
-						context.addWarning(lineNo, `⚠️ WAARSCHUWING: Variabele '${vInfo.originalName}' (type ${vInfo.dataType}) wordt vergeleken met een specifieke waarde, maar heeft nog geen toewijzing (:=) gehad. Controleer of je de initialisatie niet bent vergeten.`);
+						context.addWarning(lineNo, t('WARN_UNASSIGNED_COMPARE', vInfo.originalName, vInfo.dataType));
 					} else if (!context.assignedVars.has(vKey) && !context.uninitializedWarned.has(vKey)) {
 						context.uninitializedWarned.add(vKey);
-						const t = vInfo.dataType.toUpperCase();
-						const isCoreType = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "MNEMONIC", "VOID", "ANY"].includes(t);
+						const t_type = vInfo.dataType.toUpperCase();
+						const isCoreType = ["STRING", "INTEGER", "FRACTIONAL", "LOGICAL", "DATE", "TIME", "DATETIME", "MNEMONIC", "VOID", "ANY"].includes(t_type);
 
 						// Klassevariabelen (zoals Object, Order, etc.) zónder default toewijzing crashen de boel wel!
 						if (!isCoreType) {
 							const isIteratorArg = new RegExp(`\\b(?:GetSpecimen|GetAction|GetRequests|GetResults|GetPriorResult)\\s*\\(\\s*${vKey}\\b`, 'i').test(work);
 							if (!isIteratorArg) {
-								context.addError(lineNo, `❌ FOUT: Klassevariabele '${vInfo.originalName}' (type ${t}) wordt gebruikt zonder toewijzing.`);
+								context.addError(lineNo, t('ERR_CLASS_VAR_UNASSIGNED', vInfo.originalName, t_type));
 							}
 						}
 						context.registerWrite(vInfo.originalName, lineNo);
@@ -657,9 +688,9 @@ const TypeChecker = {
 				const minParams = def.minParams !== undefined ? def.minParams : expectedTypes.length;
 
 				if (actualTypes.length < minParams) {
-					context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' verwacht minimaal ${minParams} parameter(s), maar kreeg er ${actualTypes.length}.`);
+					context.addWarning(lineNo, t('WARN_METHOD_MIN_PARAMS', callerType, fn, minParams, actualTypes.length));
 				} else if (expectedTypes.length > 0 && actualTypes.length > expectedTypes.length) {
-					context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' verwacht maximaal ${expectedTypes.length} parameter(s), maar kreeg er ${actualTypes.length}.`);
+					context.addWarning(lineNo, t('WARN_METHOD_MAX_PARAMS', callerType, fn, expectedTypes.length, actualTypes.length));
 				} else {
 					const allowedEmptyStrFuncs = ["COMMENT", "ASKCHOICE", "ASKSTRING", "ASKYESNO", "GETSPECIMEN", "LPAD", "RPAD"];
 					for (let i = 0; i < actualTypes.length; i++) {
@@ -668,7 +699,7 @@ const TypeChecker = {
 								if (allowedEmptyStrFuncs.some(f => fn.includes(f))) {
 									actualTypes[i] = "STRING";
 								} else {
-									context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' (parameter ${i + 1}) is een lege string (""). GLIMS accepteert dit, maar controleer of dit de bedoeling is.`);
+									context.addWarning(lineNo, t('WARN_METHOD_EMPTY_STRING', callerType, fn, i + 1));
 									actualTypes[i] = "STRING";
 								}
 							}
@@ -676,15 +707,15 @@ const TypeChecker = {
 							if (!isMatch(expectedTypes[i], actualTypes[i])) {
 								let expPrint = expectedTypes[i].replace(/\|\?$/, "");
 								if (actualTypes[i] === "QUESTIONMARK") {
-									context.addWarning(lineNo, `⚠️ WAARSCHUWING: Parameter ${i + 1} van '${callerType}.${fn}' mag GEEN vraagteken ('?') zijn. Verwacht type: '${expPrint}'.`);
+									context.addWarning(lineNo, t('WARN_PARAM_NO_QUESTIONMARK', i + 1, callerType, fn, expPrint));
 								} else {
-									context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${callerType}.${fn}' (parameter ${i + 1}) verwacht type '${expPrint}', maar kreeg '${actualTypes[i]}'.`);
+									context.addWarning(lineNo, t('WARN_PARAM_TYPE_MISMATCH', callerType, fn, i + 1, expPrint, actualTypes[i]));
 								}
 							} else if (actualTypes[i] === "QUESTIONMARK" && expectedTypes[i].includes("STRING") && !expectedTypes[i].includes("|?")) {
 								if (i === 0 && (fn === "ADDREQUEST" || fn === "RESULT")) {
-									context.addWarning(lineNo, `⚠️ WAARSCHUWING: Methode '${fn}' staat een '?' niet toe als eerste parameter. Vul een geldige tekst in.`);
+									context.addWarning(lineNo, t('WARN_FIRST_PARAM_NO_QUESTIONMARK', fn));
 								} else if (!SAFE_UNKNOWN_FUNCS.has(fn)) {
-									context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je geeft een '?' door aan parameter ${i + 1} van '${fn}'. Weet je zeker dat GLIMS dit accepteert?`);
+									context.addWarning(lineNo, t('WARN_DUBIOUS_QUESTIONMARK', i + 1, fn));
 								}
 							}
 						}
@@ -818,9 +849,9 @@ const TypeChecker = {
 				const minParams = def.minParams !== undefined ? def.minParams : expectedTypes.length;
 
 				if (actualTypes.length < minParams) {
-					context.addWarning(lineNo, `⚠️ WAARSCHUWING: Functie '${fn}' verwacht minimaal ${minParams} parameter(s), maar kreeg er ${actualTypes.length}.`);
+					context.addWarning(lineNo, t('WARN_FUNC_MIN_PARAMS', fn, minParams, actualTypes.length));
 				} else if (expectedTypes.length > 0 && actualTypes.length > expectedTypes.length) {
-					context.addWarning(lineNo, `⚠️ WAARSCHUWING: Functie '${fn}' verwacht maximaal ${expectedTypes.length} parameter(s), maar kreeg er ${actualTypes.length}.`);
+					context.addWarning(lineNo, t('WARN_FUNC_MAX_PARAMS', fn, expectedTypes.length, actualTypes.length));
 				} else {
 					const allowedEmptyStrFuncs = ["IFKNOWNSTRING", "STRIP", "ASKCHOICE", "ASKSTRING", "ASKYESNO", "IDENTIFIER", "TRANSLATECHARACTERS", "FITTEXT", "LPAD", "RPAD", "GETSPECIMEN", "INDEX"];
 					for (let i = 0; i < actualTypes.length; i++) {
@@ -831,7 +862,7 @@ const TypeChecker = {
 								} else if (allowedEmptyStrFuncs.includes(fn)) {
 									actualTypes[i] = "STRING";
 								} else {
-									context.addWarning(lineNo, `⚠️ WAARSCHUWING: Functie '${fn}' (parameter ${i + 1}) is een lege string (""). GLIMS accepteert dit, maar controleer of dit de bedoeling is.`);
+									context.addWarning(lineNo, t('WARN_FUNC_EMPTY_STRING', fn, i + 1));
 									actualTypes[i] = "STRING";
 								}
 							}
@@ -839,9 +870,9 @@ const TypeChecker = {
 							if (!isMatch(expectedTypes[i], actualTypes[i])) {
 								let expPrint = expectedTypes[i].replace(/\|\?$/, "");
 								if (actualTypes[i] === "QUESTIONMARK") {
-									context.addWarning(lineNo, `⚠️ WAARSCHUWING: Parameter ${i + 1} van '${fn}' mag GEEN vraagteken ('?') zijn. Verwacht type: '${expPrint}'.`);
+									context.addWarning(lineNo, t('WARN_FUNC_NO_QUESTIONMARK', i + 1, fn, expPrint));
 								} else {
-									context.addWarning(lineNo, `⚠️ WAARSCHUWING: Functie '${fn}' (parameter ${i + 1}) verwacht type '${expPrint}', maar kreeg '${actualTypes[i]}'.`);
+									context.addWarning(lineNo, t('WARN_FUNC_TYPE_MISMATCH', fn, i + 1, expPrint, actualTypes[i]));
 								}
 							}
 						}
@@ -872,16 +903,16 @@ const TypeChecker = {
 					}
 				} else if (op === "%") {
 					if (t1 === "STRING" || t2 === "STRING") {
-						context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je kunt de operator '${op}' niet gebruiken op een STRING.`);
+						context.addWarning(lineNo, t('WARN_OP_STRING_INVALID', op));
 						return "<UNKNOWN>";
 					}
 					if (t1 !== "INTEGER" || t2 !== "INTEGER") {
-						context.addWarning(lineNo, `⚠️ WAARSCHUWING: De modulo operator '%' verwacht normaal gesproken INTEGERs.`);
+						context.addWarning(lineNo, t('WARN_OP_MODULO_INTEGER'));
 					}
 					return "<INTEGER>";
 				} else {
 					if (t1 === "STRING" || t2 === "STRING") {
-						context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je kunt de operator '${op}' niet gebruiken op een STRING.`);
+						context.addWarning(lineNo, t('WARN_OP_STRING_INVALID', op));
 						return "<UNKNOWN>";
 					}
 				}
@@ -965,7 +996,7 @@ const TypeChecker = {
 							(t2 === "LOGICAL" && (t1 === "STRING" || t1 === "INTEGER" || t1 === "FRACTIONAL"))) {
 							// Valid in GLIMS
 						} else {
-							context.addWarning(lineNo, `⚠️ WAARSCHUWING: Mogelijk type-conflict. Je vergelijkt '${t1}' en '${t2}' ('${op}'). Controleer of dit valide is in GLIMS.`);
+							context.addWarning(lineNo, t('WARN_TYPE_CONFLICT', t1, t2, op));
 						}
 					}
 					return "<LOGICAL>";
@@ -1033,15 +1064,15 @@ const TypeChecker = {
 						} else if ((isTemporalTarget && isNumFinal) || (isNumTarget && isTemporalFinal) || (isTemporalTarget && isTemporalFinal)) {
 
 							if (isTemporalTarget && isNumFinal) {
-								context.addInfo(lineNo, `💡 Stijl-tip: Je wijst een getal toe aan een datum/tijd variabele ('${targetVarName}'). GLIMS accepteert dit (getallen worden als dagen/seconden gezien), maar let op de leesbaarheid.`);
+								context.addInfo(lineNo, t('INFO_ASSIGN_NUM_TO_DATE', targetVarName));
 							} else if (isNumTarget && isTemporalFinal) {
-								context.addError(lineNo, `❌ FOUT: Je wijst een Datum/Tijd toe aan een Getalvariabele ('${targetVarName}'). Gebruik DateTimeToInteger() of soortgelijke functies om fouten in berekeningen te voorkomen.`);
+								context.addError(lineNo, t('ERR_ASSIGN_DATE_TO_NUM', targetVarName));
 							} else {
-								context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je probeert een '${finalType}' toe te wijzen aan de variabele '${targetVarName}' (type '${targetType}'). Controleer of dit de bedoeling is.`);
+								context.addWarning(lineNo, t('WARN_ASSIGN_TYPE_MISMATCH_SOFT', finalType, targetVarName, targetType));
 							}
 
 						} else {
-							context.addWarning(lineNo, `⚠️ WAARSCHUWING: Je probeert een '${finalType}' toe te wijzen aan de variabele '${targetVarName}' (type '${targetType}'). Controleer op type-mismatches.`);
+							context.addWarning(lineNo, t('WARN_ASSIGN_TYPE_MISMATCH_HARD', finalType, targetVarName, targetType));
 						}
 					}
 				}
@@ -1098,7 +1129,7 @@ const Validators = {
 					suggestedName = validPrefixes[0] + cleanName;
 				}
 
-				context.addInfo(node.line, `👮 Stijl-tip: Variabele '${originalName}' is type '${dataType}'. Conventie: begin met '${validPrefixes[0]}' (bijv. '${suggestedName}').`);
+				context.addInfo(node.line, t('INFO_HUNGARIAN_NOTATION', originalName, dataType, validPrefixes[0], suggestedName));
 			}
 		}
 	},
@@ -1129,13 +1160,13 @@ const Validators = {
 					const isLoopCounter = /^[ijk]$/.test(key);
 
 					if ((valClean === '""' || valClean === "''") && isStr) {
-						context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Strings automatisch als "". Deze eerste toewijzing is overbodig.`);
+						context.addInfo(node.line, t('INFO_DEFAULT_INIT_STRING'));
 					} else if ((valClean === "FALSE" || valClean === "NO") && isLog) {
-						context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Logicals automatisch als FALSE. Deze eerste toewijzing is overbodig.`);
+						context.addInfo(node.line, t('INFO_DEFAULT_INIT_LOGICAL'));
 					} else if ((valClean === "0" || valClean === "0.0") && isNum && !isLoopCounter) {
-						context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Getallen automatisch als 0. Deze eerste toewijzing is overbodig.`);
+						context.addInfo(node.line, t('INFO_DEFAULT_INIT_NUMBER'));
 					} else if (valClean === "?" && isDate) {
-						context.addInfo(node.line, `💡 Code-tip: GLIMS initialiseert Date/Time automatisch als leeg (?). Deze eerste toewijzing is overbodig.`);
+						context.addInfo(node.line, t('INFO_DEFAULT_INIT_DATE'));
 					}
 				}
 			}
@@ -1157,7 +1188,7 @@ const Validators = {
 			// ▶️ DE FIX: Slimme regex voor de Index(...) + Index(...) tip
 			const safeExpr = String(exprToAnalyze);
 			if (/Index\s*\([^)]+\)\s*>\s*0\s+OR\s+Index\s*\([^)]+\)\s*>\s*0/i.test(safeExpr)) {
-				context.addInfo(node.line, `💡 Stijl-tip: Maak nette code: verander 'Index(...) > 0 OR Index(...) > 0' naar 'Index(...) + Index(...) > 0'`);
+				context.addInfo(node.line, t('INFO_STYLE_INDEX_OR'));
 			}
 
 			ExpressionParser.extractReferences(String(exprToAnalyze), node.line, context);
@@ -1165,12 +1196,31 @@ const Validators = {
 		}
 
 		if (node.type === NodeTypes.Assignment) {
-			context.registerWrite(node.name, node.line);
+			// 🚀 FIX: node.value doorgegeven als derde parameter
+			context.registerWrite(node.name, node.line, node.value);
 			context.registerAssignment(node.name, node.value);
 		}
 	},
 
-	analyzeStructure(node, context) { },
+	analyzeStructure(node, context) {
+		// 1. Zelf-toewijzing detector (bijv. iTeller := iTeller;)
+		if (node.type === NodeTypes.Assignment && node.value) {
+			const cleanValue = String(node.value).trim().replace(/;$/, '').toLowerCase();
+			if (String(node.name).toLowerCase() === cleanValue) {
+				context.addWarning(node.line, t('WARN_SELF_ASSIGNMENT', node.name));
+			}
+		}
+
+		// 2. Hardcoded 'TRUE' of 'FALSE' in een IF-statement
+		if (node.type === NodeTypes.IfStatement && node.condition) {
+			const condClean = String(node.condition).trim().toUpperCase();
+			if (condClean === "TRUE" || condClean === "YES") {
+				context.addInfo(node.line, t('INFO_IF_ALWAYS_TRUE', condClean));
+			} else if (condClean === "FALSE" || condClean === "NO") {
+				context.addWarning(node.line, t('WARN_IF_ALWAYS_FALSE', condClean));
+			}
+		}
+	},
 
 	analyzeLoops(nodes, context) {
 		if (!Array.isArray(nodes)) return;
@@ -1230,7 +1280,7 @@ const Validators = {
 					let exprToCheck = subNode.value || subNode.condition || subNode.expression || subNode.text;
 					if (exprToCheck) {
 						const safeExpr = String(exprToCheck);
-						if (safeExpr.toLowerCase().includes(".addrequest(")) context.addInfo(subNode.line, `💡 Prestatie-tip: Verzamel .AddRequest() buiten de lus.`);
+						if (safeExpr.toLowerCase().includes(".addrequest(")) context.addInfo(subNode.line, t('INFO_PERF_ADDREQUEST'));
 
 						for (let hFunc of heavyFuncList) {
 							const regexTest = new RegExp(`\\b${hFunc}\\s*\\(`, 'gi');
@@ -1264,7 +1314,7 @@ const Validators = {
 									if (assignedInLoop.has(av.toLowerCase())) { isDependent = true; break; }
 								}
 								if (!isDependent) {
-									context.addInfo(subNode.line, `⚡ Prestatie-tip: '${hFunc}' staat in een loop maar argumenten wijzigen niet. Bereken dit 1x voor de loop en gebruik een variabele!`);
+									context.addInfo(subNode.line, t('INFO_PERF_LOOP_CONST', hFunc));
 								}
 							}
 						}
@@ -1272,7 +1322,7 @@ const Validators = {
 				}
 
 				let isProperlyUpdated = false;
-				let staticAssignmentWarning = null;
+				let staticAssignmentWarningVar = null; // 🚀 Aangepast voor i18n
 
 				for (let condVar of conditionVars) {
 					if (assignedInLoop.has(condVar)) {
@@ -1308,16 +1358,16 @@ const Validators = {
 							isProperlyUpdated = true;
 							break;
 						} else {
-							staticAssignmentWarning = `Variabele '${condVar}' krijgt in de loop een waarde via andere variabelen, maar geen van die variabelen verandert. Ben je vergeten een index (zoals 'I') op te hogen?`;
+							staticAssignmentWarningVar = condVar; // 🚀 Aangepast voor i18n
 						}
 					}
 				}
 
 				if (conditionVars.length > 0 && !isProperlyUpdated && !hasIterator) {
-					if (staticAssignmentWarning) {
-						context.addWarning(node.line, `⚠️ WAARSCHUWING: Mogelijke oneindige ${type}-loop! ${staticAssignmentWarning}`);
+					if (staticAssignmentWarningVar) {
+						context.addWarning(node.line, t('WARN_INFINITE_LOOP_STATIC', type, staticAssignmentWarningVar));
 					} else {
-						context.addWarning(node.line, `⚠️ WAARSCHUWING: Mogelijke oneindige ${type}-loop! Geen van de variabelen in de conditie wordt binnen de loop bijgewerkt.`);
+						context.addWarning(node.line, t('WARN_INFINITE_LOOP_NO_UPDATE', type));
 					}
 				}
 			}
@@ -1342,15 +1392,15 @@ const Validators = {
 					// Bestaande logic: THEN en ELSE zijn identiek...
 					const strip = (n) => { const { line, ...rest } = n; return rest; };
 					if (JSON.stringify(thenNodes.map(strip)) === JSON.stringify(elseNodes.map(strip))) {
-						context.addWarning(node.line, `⚠️ Logica-waarschuwing: Code in THEN is identiek aan ELSE. Deze IF doet niets.`);
+						context.addWarning(node.line, t('WARN_IF_THEN_ELSE_IDENTICAL'));
 					}
 				}
 
 				// ▶️ DE FIX: Check voor een leeg IF of ELSE blok!
 				if (thenNodes.length === 0) {
-					context.addWarning(node.line, `⚠️ WAARSCHUWING: Leeg IF blok gedetecteerd. Deze code doet niets.`);
+					context.addWarning(node.line, t('WARN_IF_EMPTY_THEN'));
 				} else if (inElse && elseNodes.length === 0) {
-					context.addWarning(node.line, `⚠️ WAARSCHUWING: Leeg ELSE blok gedetecteerd.`);
+					context.addWarning(node.line, t('WARN_IF_EMPTY_ELSE'));
 				}
 			}
 		}
@@ -1363,7 +1413,7 @@ function parseSingleStatement(stmt, lineNo, maskedStmt = null, addError, declare
 
 	const masked = maskedStmt ? maskedStmt : getMaskedForKeywords(trimmed);
 
-	if (trimmed.startsWith("/")) { addError(lineNo, 'FOUT: onjuist gebruik "/"'); return []; }
+	if (trimmed.startsWith("/")) { addError(lineNo, t('ERR_INVALID_SLASH')); return []; }
 
 	if (!masked.includes(":=") && !masked.includes("(") && !/^(IF|WHILE|REPEAT|RETURN|UNTIL|ELSE|ENDIF|DONE|THEN|DO)\b/i.test(masked)) {
 		const declMatch = /^([a-zA-Z_][a-zA-Z0-9_]*)\s+([^=;]+);$/.exec(trimmed);
@@ -1373,16 +1423,16 @@ function parseSingleStatement(stmt, lineNo, maskedStmt = null, addError, declare
 			if (!new Set(["TRUE", "FALSE", "YES", "NO", "AND", "OR", "NOT"]).has(typeName.toUpperCase())) {
 
 				if (hasExecutableStatement) {
-					addError(lineNo, `FOUT: Declaratie van '${typeName}' is te laat. Alle variabelen moeten in één blok bovenaan gedeclareerd worden, vóór de eerste actie of toewijzing.`);
+					addError(lineNo, t('ERR_DECLARATION_TOO_LATE', typeName));
 				}
 
 				varListString.split(",").forEach(raw => {
 					const name = raw.trim();
-					if (name.length === 0) addError(lineNo, "FOUT: Lege variabele gedetecteerd.");
-					else if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) addError(lineNo, `FOUT: variabele '${name}' bevat ongeldige karakters.`);
+					if (name.length === 0) addError(lineNo, t('ERR_EMPTY_VARIABLE'));
+					else if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) addError(lineNo, t('ERR_INVALID_CHAR_IN_VAR', name));
 					else {
 						const key = name.toLowerCase();
-						if (declaredVars.has(key)) addError(lineNo, `FOUT: variabele '${name}' is reeds gedeclareerd.`);
+						if (declaredVars.has(key)) addError(lineNo, t('ERR_VAR_ALREADY_DECLARED', name));
 						else {
 							declaredVars.set(key, typeName.toUpperCase());
 							resultNodes.push({ type: NodeTypes.Declaration, name: name, dataType: typeName, line: lineNo });
@@ -1397,49 +1447,49 @@ function parseSingleStatement(stmt, lineNo, maskedStmt = null, addError, declare
 	if (/^RETURN\b/i.test(masked)) {
 		hasExecutableStatement = true;
 
-		// â–¶ï¸  DE FIX: Controleer of het statement wel netjes afsluit met een puntkomma
+		// ▶️ DE FIX: Controleer of het statement wel netjes afsluit met een puntkomma
 		if (!trimmed.endsWith(";")) {
-			addError(lineNo, "FOUT: Statement moet eindigen met ';'.");
+			addError(lineNo, t('ERR_MISSING_SEMICOLON'));
 		}
 
 		const content = trimmed.substring(6).replace(/;$/, "").trim();
-		validateExpression(content, lineNo, "RETURN-waarde");
+		validateExpression(content, lineNo, t('CTX_RETURN_VALUE'));
 		return [{ type: NodeTypes.ReturnStatement, expression: content, line: lineNo }];
 	}
 
 	const firstIdx = masked.indexOf(":=");
 	if (firstIdx !== -1) {
 		hasExecutableStatement = true;
-		if (!trimmed.endsWith(";")) addError(lineNo, "FOUT: Statement moet eindigen met ';'.");
+		if (!trimmed.endsWith(";")) addError(lineNo, t('ERR_MISSING_SEMICOLON'));
 		const name = trimmed.substring(0, firstIdx).trim();
 		const value = trimmed.substring(firstIdx + 2).replace(/;$/, "").trim();
 
 		if (name.startsWith(".")) {
 			const cleanName = name.replace(/^\./, '');
 			if (declaredVars.has(cleanName.toLowerCase()) || /^(s|i|l|b|f|d|obj|ordr|rslt)[A-Z]/.test(cleanName)) {
-				addError(lineNo, `FOUT: Lokale variabelen ('${cleanName}') mogen niet voorafgegaan worden door een punt.`);
+				addError(lineNo, t('ERR_LOCAL_VAR_WITH_DOT', cleanName));
 				return [];
 			}
 		}
 
 		if (!/^[a-zA-Z_][a-zA-Z0-9_\.]*$/.test(name)) {
-			addError(lineNo, `FOUT: '${name}' is geen geldige variabele. Ben je een puntkomma (;) vergeten op de vorige regel?`);
+			addError(lineNo, t('ERR_INVALID_VAR_NAME_MISSING_SEMI', name));
 			return [];
 		}
-		validateExpression(value, lineNo, "Assignment-waarde", name);
+		validateExpression(value, lineNo, t('CTX_ASSIGNMENT_VALUE'), name);
 		return [{ type: NodeTypes.Assignment, name, value, line: lineNo }];
 	}
 
 	if (/^\.?[a-zA-Z_][a-zA-Z0-9_\.]*\s*\(/.test(masked.replace(/\s+/g, ''))) {
 		hasExecutableStatement = true;
 		if (!trimmed.endsWith(";")) {
-			addError(lineNo, "FOUT: Statement moet eindigen met ';'.");
+			addError(lineNo, t('ERR_MISSING_SEMICOLON'));
 		}
-		validateExpression(trimmed, lineNo, "Functie-aanroep");
+		validateExpression(trimmed, lineNo, t('CTX_FUNCTION_CALL'));
 		return [{ type: NodeTypes.GenericStatement, text: trimmed, line: lineNo }];
 	}
 
-	addError(lineNo, `FOUT: Onbekend statement of onjuiste syntax: '${trimmed}'.`);
+	addError(lineNo, t('ERR_UNKNOWN_STATEMENT', trimmed));
 	return [];
 }
 
@@ -1478,20 +1528,20 @@ function parseMISPL(rawCode) {
 	}
 
 	if (code.length > 31984) {
-		addWarning(0, `LET OP: De MISPL code is te lang (${code.length} karakters). De limiet van GLIMS is ca. 31.984 karakters.`);
+		addWarning(0, t('WARN_CODE_TOO_LONG', code.length));
 	}
 
 	function closeBlock(expectedType, line, closeText) {
 		const top = blockStack[blockStack.length - 1];
 		if (!top) {
-			addError(line, `FOUT: ${closeText} zonder ${expectedType}.`);
+			addError(line, t('ERR_BLOCK_CLOSE_WITHOUT_OPEN', closeText, expectedType));
 			return false;
 		}
 		if (top.type === expectedType) {
 			blockStack.pop();
 			return true;
 		} else {
-			addError(top.line - 1, `FOUT: ${top.type}-blok (gestart op regel ${top.line}) is niet afgesloten.`);
+			addError(top.line - 1, t('ERR_BLOCK_NOT_CLOSED', top.type, top.line));
 			blockStack.pop();
 			return closeBlock(expectedType, line, closeText);
 		}
@@ -1508,7 +1558,7 @@ function parseMISPL(rawCode) {
 		}
 
 		if (!work) {
-			addError(lineNo, `FOUT: ${context} mag niet leeg zijn.`);
+			addError(lineNo, t('ERR_CONTEXT_EMPTY', context));
 			return;
 		}
 
@@ -1520,11 +1570,11 @@ function parseMISPL(rawCode) {
 			});
 
 		if (/\(\s*,|,\s*,|,\s*\)/.test(singleQuoteCheck)) {
-			addError(lineNo, `❌ SYNTAX-FOUT: Lege parameter of overtollige komma gevonden (bijv. '(,', ',)' of ',,').`);
+			addError(lineNo, t('ERR_SYNTAX_EMPTY_PARAM_COMMA'));
 		}
 
 		if (hasSingleQuoteError || singleQuoteCheck.includes("'")) {
-			addError(lineNo, "FOUT: Tekst moet tussen dubbele aanhalingstekens (\"). Enkele aanhalingstekens (') zijn niet toegestaan.");
+			addError(lineNo, t('ERR_SINGLE_QUOTES_NOT_ALLOWED'));
 		}
 
 		let clean = singleQuoteCheck;
@@ -1534,7 +1584,7 @@ function parseMISPL(rawCode) {
 
 		const illegalCharMatch = clean.match(/[{}]/);
 		if (illegalCharMatch) {
-			addError(lineNo, `FOUT: Ongeldig karakter '${illegalCharMatch[0]}' gevonden. Accolades ('{', '}') worden niet ondersteund in MISPL.`);
+			addError(lineNo, t('ERR_ILLEGAL_CHAR_BRACES', illegalCharMatch[0]));
 			return;
 		}
 
@@ -1547,27 +1597,27 @@ function parseMISPL(rawCode) {
 			else if (clean[i] === ']') squareCount--;
 
 			if (parenCount < 0) {
-				addWarning(lineNo, `⚠️ WAARSCHUWING: Onverwacht sluitend haakje ')' gevonden in ${context}. Mogelijk is de regel afgekapt of staan haakjes verkeerd.`);
+				addWarning(lineNo, t('WARN_UNEXPECTED_CLOSE_PAREN', context));
 				parenCount = 0;
 			}
 			if (squareCount < 0) {
-				addWarning(lineNo, `⚠️ WAARSCHUWING: Onverwacht sluitend haakje ']' gevonden in ${context}. Mogelijk is de regel afgekapt of staan haakjes verkeerd.`);
+				addWarning(lineNo, t('WARN_UNEXPECTED_CLOSE_SQUARE', context));
 				squareCount = 0;
 			}
 		}
 		if (parenCount > 0) {
-			addWarning(lineNo, `⚠️ WAARSCHUWING: Ontbrekend sluitend haakje ')' in ${context}. Er openen meer haakjes dan er sluiten.`);
+			addWarning(lineNo, t('WARN_MISSING_CLOSE_PAREN', context));
 		}
 		if (squareCount > 0) {
-			addWarning(lineNo, `⚠️ WAARSCHUWING: Ontbrekend sluitend haakje ']' in ${context}. Er openen meer haakjes dan er sluiten.`);
+			addWarning(lineNo, t('WARN_MISSING_CLOSE_SQUARE', context));
 		}
 
 		if (clean.includes(":=")) {
-			addError(lineNo, "FOUT: Syntax error. Regel moet eindigen met ';'. (Onverwachte ':=' gevonden in expressie)");
+			addError(lineNo, t('ERR_UNEXPECTED_ASSIGNMENT_IN_EXPR'));
 		}
 
 		if (/\b(RETURN|WHILE|REPEAT|FOR|ENDIF|DONE|UNTIL)\b/i.test(clean)) {
-			addError(lineNo, "FOUT: Syntax error. Regel moet eindigen met ';'. (Gereserveerd woord in expressie gevonden)");
+			addError(lineNo, t('ERR_RESERVED_WORD_IN_EXPR'));
 		}
 
 		const localPropRegex = /\.([a-zA-Z_][a-zA-Z0-9_]*)/g;
@@ -1579,7 +1629,7 @@ function parseMISPL(rawCode) {
 			const isHungarian = /^(s|sl|stl|i|l|b|f|d|dt|tm|obj|ordr|rslt|prsn|spmn|crsp|actn|mat|rqst)[A-Z_]/.test(originalName);
 
 			if (declaredVars.has(propName) && isHungarian) {
-				addError(lineNo, `FOUT: Lokale variabele '${originalName}' mag niet voorafgegaan worden door een punt. Een punt is alleen voor object-eigenschappen.`);
+				addError(lineNo, t('ERR_LOCAL_VAR_DOT_PROPERTY', originalName));
 			}
 		}
 
@@ -1587,14 +1637,14 @@ function parseMISPL(rawCode) {
 		if (leadingOpMatch) {
 			const op = leadingOpMatch[0].trim().toUpperCase();
 			if (op === '+') {
-				addInfo(lineNo, `💡 Stijl-tip: ${context} begint met een operator ('+'). Dit is toegestaan in GLIMS voor tekstsamenvoeging.`);
+				addInfo(lineNo, t('INFO_OP_PLUS_START', context));
 			} else {
-				addError(lineNo, `FOUT: ${context} mag niet beginnen met een operator ('${op}').`);
+				addError(lineNo, t('ERR_OP_START_INVALID', context, op));
 			}
 		}
 
 		const danglingOpMatch = clean.match(/(?:[\+\-\*\/=!&|\.%]|\bAND\b|\bOR\b|\bLT\b|\bLE\b|\bGT\b|\bGE\b|\bEQ\b|\bNE\b)\s*$/i);
-		if (danglingOpMatch) addError(lineNo, `FOUT: ${context} mag niet eindigen op operator ('${danglingOpMatch[0].trim()}').`);
+		if (danglingOpMatch) addError(lineNo, t('ERR_OP_END_INVALID', context, danglingOpMatch[0].trim()));
 	}
 
 	function processChunk(chunk, hasSemi, lineNo) {
@@ -1606,20 +1656,20 @@ function parseMISPL(rawCode) {
 		if (/^ENDIF\b/i.test(maskedTrimmed)) {
 			hasExecutableStatement = true;
 			const rest = trimmed.substring(5).trim();
-			if (rest.length > 0 && !rest.startsWith(';')) addError(lineNo, `FOUT: Ongeldige syntax '${rest}' na ENDIF.`);
+			if (rest.length > 0 && !rest.startsWith(';')) addError(lineNo, t('ERR_INVALID_SYNTAX_AFTER_ENDIF', rest));
 			closeBlock("IF", lineNo, "ENDIF");
 			body.push({ type: "EndIf", line: lineNo });
-			if (!hasSemi) addError(lineNo, "FOUT: na een ENDIF moet altijd een \";\"");
+			if (!hasSemi) addError(lineNo, t('ERR_MISSING_SEMI_AFTER_ENDIF'));
 			return;
 		}
 
 		if (/^DONE\b/i.test(maskedTrimmed)) {
 			hasExecutableStatement = true;
 			const rest = trimmed.substring(4).trim();
-			if (rest.length > 0 && !rest.startsWith(';')) addError(lineNo, `FOUT: Ongeldige syntax '${rest}' na DONE.`);
+			if (rest.length > 0 && !rest.startsWith(';')) addError(lineNo, t('ERR_INVALID_SYNTAX_AFTER_DONE', rest));
 			closeBlock("WHILE", lineNo, "DONE");
 			body.push({ type: "Done", line: lineNo });
-			if (!hasSemi) addError(lineNo, "FOUT: na een DONE moet altijd een \";\"");
+			if (!hasSemi) addError(lineNo, t('ERR_MISSING_SEMI_AFTER_DONE'));
 			return;
 		}
 
@@ -1637,7 +1687,7 @@ function parseMISPL(rawCode) {
 				const condition = trimmed.substring(5).trim();
 				validateExpression(condition, lineNo, "UNTIL-conditie");
 				body.push({ type: NodeTypes.GenericStatement, text: "UNTIL " + condition, condition: condition, isUntil: true, line: lineNo });
-				if (!hasSemi) addError(lineNo, "FOUT: na een UNTIL moet altijd een \";\"");
+				if (!hasSemi) addError(lineNo, t('ERR_MISSING_SEMI_AFTER_UNTIL'));
 			}
 			return;
 		}
@@ -1645,7 +1695,7 @@ function parseMISPL(rawCode) {
 		if (/^IF\b/i.test(maskedTrimmed)) {
 			hasExecutableStatement = true;
 			const thenMatch = /\bTHEN\b/i.exec(maskedTrimmed);
-			if (!thenMatch) { addError(lineNo, "FOUT: IF zonder THEN."); return; }
+			if (!thenMatch) { addError(lineNo, t('ERR_IF_WITHOUT_THEN')); return; }
 			const condition = trimmed.substring(2, thenMatch.index).trim();
 			validateExpression(condition, lineNo, "IF-conditie");
 			blockStack.push({ type: "IF", line: lineNo });
@@ -1658,7 +1708,7 @@ function parseMISPL(rawCode) {
 		if (/^WHILE\b/i.test(maskedTrimmed)) {
 			hasExecutableStatement = true;
 			const doMatch = /\bDO\b/i.exec(maskedTrimmed);
-			if (!doMatch) { addError(lineNo, "FOUT: WHILE zonder DO."); return; }
+			if (!doMatch) { addError(lineNo, t('ERR_WHILE_WITHOUT_DO')); return; }
 			const condition = trimmed.substring(5, doMatch.index).trim();
 			validateExpression(condition, lineNo, "WHILE-conditie");
 			blockStack.push({ type: "WHILE", line: lineNo });
@@ -1853,7 +1903,7 @@ function parseMISPL(rawCode) {
 		if (m1Regex.test(clean)) {
 			m1Regex.lastIndex = 0;
 			clean = clean.replace(m1Regex, (match, p1, p2) => {
-				addWarning(i, `⚠️ WAARSCHUWING: Geen spatie tussen getal en keyword ('${match.trim()}'). GLIMS accepteert dit, maar voeg een spatie toe voor de leesbaarheid.`);
+				addWarning(i, t('WARN_NO_SPACE_NUM_KW', match.trim()));
 				return `${p1} ${p2}`;
 			});
 		}
@@ -1862,13 +1912,13 @@ function parseMISPL(rawCode) {
 		if (m2Regex.test(clean)) {
 			m2Regex.lastIndex = 0;
 			clean = clean.replace(m2Regex, (match, p1, p2) => {
-				addWarning(i, `⚠️ WAARSCHUWING: Geen spatie tussen keyword en getal ('${match.trim()}').`);
+				addWarning(i, t('WARN_NO_SPACE_KW_NUM', match.trim()));
 				return `${p1} ${p2}`;
 			});
 		}
 
 		if (/^IF\b.*\;\s*THEN/i.test(clean)) {
-			addError(i, "FOUT: Puntkomma ';' mag niet tussen IF en THEN staan.");
+			addError(i, t('ERR_SEMI_BETWEEN_IF_THEN'));
 		}
 
 		return { originalLineNo: i, text: clean };
@@ -1897,8 +1947,8 @@ function parseMISPL(rawCode) {
 	}
 
 	blockStack.forEach(open => {
-		if (open.type === "REPEAT") addError(Math.max(0, open.line - 1), "FOUT: REPEAT..UNTIL; wordt niet afgesloten");
-		else addError(Math.max(0, open.line - 1), `FOUT: ${open.type}-blok is niet afgesloten.`);
+		if (open.type === "REPEAT") addError(Math.max(0, open.line - 1), t('ERR_REPEAT_NOT_CLOSED'));
+		else addError(Math.max(0, open.line - 1), t('ERR_BLOCK_NOT_CLOSED_VAR', open.type));
 	});
 
 	const variableTypes = new Map();
@@ -1927,13 +1977,13 @@ function analyze(astOrResult, rawText = "") {
 
 	const safeText = typeof rawText === "string" ? rawText : "";
 
-	if (safeText.trim() !== "" && !safeText.includes("/*")) context.addInfo(0, `💡 Stijl-tip: Een MISPL hoort te beginnen met een /* commentaarblok */.`);
+	if (safeText.trim() !== "" && !safeText.includes("/*")) context.addInfo(0, t('INFO_START_WITH_COMMENT'));
 
 	const codeZonderCommentaar = removeCommentsDepthAware(safeText);
 	const upperTextClean = codeZonderCommentaar.toUpperCase();
 
 	if ((upperTextClean.includes("IF ") || upperTextClean.includes("THEN") || codeZonderCommentaar.includes(":=") || upperTextClean.includes("STRING")) && !upperTextClean.includes("RETURN")) {
-		context.addError(0, "FOUT: Ontbrekend RETURN statement. Een GLIMS script moet een waarde retourneren.");
+		context.addError(0, t('ERR_MISSING_RETURN'));
 	}
 
 	try {
@@ -1962,15 +2012,15 @@ function analyze(astOrResult, rawText = "") {
 			Validators.analyzeIfStatements(ast.body, context);
 
 			context.usedVars.forEach((info, key) => {
-				if (!context.declaredVars.has(key)) context.addError(info.lines[0] || 0, `❌ FOUT: Variabele '${info.originalName}' gebruikt maar niet gedeclareerd.`);
+				if (!context.declaredVars.has(key)) context.addError(info.lines[0] || 0, t('ERR_VAR_USED_NOT_DECLARED', info.originalName));
 			});
 
 			context.declaredVars.forEach((info, key) => {
-				if (!context.usedVars.has(key)) context.addWarning(info.line, `Variabele '${info.originalName}' wordt nooit gebruikt.`);
+				if (!context.usedVars.has(key)) context.addWarning(info.line, t('WARN_VAR_DECLARED_NOT_USED', info.originalName));
 			});
 
 			context.assignedVars.forEach((info, key) => {
-				if (!context.readVars.has(key)) info.lines.forEach(lineNo => context.addWarning(lineNo, `⚠️ WAARSCHUWING: Waarde van '${info.originalName}' wordt hierna nooit meer uitgelezen (Mogelijke dode code of overbodige query).`));
+				if (!context.readVars.has(key)) info.lines.forEach(lineNo => context.addWarning(lineNo, t('WARN_VAR_ASSIGNED_NOT_READ', info.originalName)));
 			});
 
 			// ▶️ DE FIX: Controleer of een database veld meerdere keren wordt opgevraagd
@@ -2035,19 +2085,20 @@ function analyze(astOrResult, rawText = "") {
 					// Genereer de suggestie (b.v. iOrdrID)
 					let varSuggestie = prefix + cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
 
-					context.addInfo(info.lines[0], `💡 Stijl-tip: Maak van '${info.originalName}' een variabele: b.v. ${varSuggestie} (wordt ${info.count}x aangeroepen).`);
+					context.addInfo(info.lines[0], t('INFO_SUGGEST_VAR_CACHE', info.originalName, varSuggestie, info.count));
 				}
 			});
 
 		}
 	} catch (err) {
-		context.addError(0, `🚨 Linter Fout: ${err.message}`);
+		context.addError(0, t('ERR_LINTER_CRASH', err.message));
 	}
 
-	return {
+return {
 		errors: context.errors,
-		variables: astOrResult.variables || new Map()
+		variables: astOrResult.variables || new Map(),
+		assignedVars: context.assignedVars // 🚀 DEZE REGEL IS NIEUW!
 	};
 }
 
-module.exports = { analyze, parseMISPL, VERSION };
+module.exports = { analyze, parseMISPL, VERSION, loadCustomDictionary };

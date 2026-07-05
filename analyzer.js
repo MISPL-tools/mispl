@@ -1,17 +1,18 @@
 // analyzer.js
 const { analyze: analyzeMISPL } = require("./analyzeMISPL");
+const { t } = require("./i18n"); // 🌍 Importeer de i18n module
 
 function analyze(astOrResult, rawCode) {
     let result;
     try {
         if (typeof analyzeMISPL !== 'function') {
-            throw new Error("De functie 'analyze' kon niet worden gevonden in analyzeMISPL.js.");
+            throw new Error(t('ERR_ANALYZER_NOT_FOUND'));
         }
         result = analyzeMISPL(astOrResult, rawCode);
     } catch (err) {
         return [{
             line: 0,
-            message: "Onverwachte fout in statische analyse: " + (err?.message || String(err)),
+            message: t('ERR_ANALYZER_UNEXPECTED', err?.message || String(err)),
             severity: 8 
         }];
     }

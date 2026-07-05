@@ -1,5 +1,6 @@
 // ./features/completionProvider.js
 const vscode = require('vscode');
+const { t } = require('../i18n'); // 🌍 Importeer de i18n module
 
 function registerCompletionProvider(context) {
     const provider = vscode.languages.registerCompletionItemProvider(
@@ -28,15 +29,15 @@ function registerCompletionProvider(context) {
                 // --- Slimme Snippet 1: De snelle check ---
                 const userCheck = new vscode.CompletionItem('CurrentUser()="MijnNaam"', vscode.CompletionItemKind.Snippet);
                 userCheck.insertText = new vscode.SnippetString(`CurrentUser()="${glimsUser}"`);
-                userCheck.documentation = new vscode.MarkdownString(`Vult direct de veiligheidscontrole in voor jouw inlognaam (**${glimsUser}**).`);
-                userCheck.detail = `Smart Snippet: CurrentUser()="${glimsUser}"`;
+                userCheck.documentation = new vscode.MarkdownString(t('COMPL_USER_DOC', glimsUser));
+                userCheck.detail = t('COMPL_USER_DETAIL', glimsUser);
                 snippets.push(userCheck);
 
                 // --- Slimme Snippet 2: Een heel IF blok ---
-                const debugBlock = new vscode.CompletionItem('IF CurrentUser (Magic Blok)', vscode.CompletionItemKind.Snippet);
+                const debugBlock = new vscode.CompletionItem(t('COMPL_BLOCK_LBL'), vscode.CompletionItemKind.Snippet);
                 debugBlock.insertText = new vscode.SnippetString(`IF CurrentUser()="${glimsUser}" THEN\n\t$1\nENDIF;`);
-                debugBlock.documentation = new vscode.MarkdownString(`Genereert een veilig IF-blok specifiek voor jouw gebruiker.`);
-                debugBlock.detail = `Smart Snippet: IF CurrentUser() blok`;
+                debugBlock.documentation = new vscode.MarkdownString(t('COMPL_BLOCK_DOC'));
+                debugBlock.detail = t('COMPL_BLOCK_DETAIL');
                 snippets.push(debugBlock);
 
                 // --- Context-Awareness voor Assignments ---
@@ -50,16 +51,16 @@ function registerCompletionProvider(context) {
                     // FilterText is een trucje: hierdoor triggert hij op "sCu", "Curr", én "Assign" in het menu
                     assignUser.filterText = 'sCurrUser Assign CurrentUser'; 
                     assignUser.insertText = new vscode.SnippetString(`\${1:sCurrUser}:=CurrentUser();\n$0`);
-                    assignUser.documentation = new vscode.MarkdownString(`Maakt de toewijzing. Je kunt de naam direct aanpassen naar bijv. sUser of sCuser!`);
-                    assignUser.detail = `Smart Snippet: Assignment variabele`;
+                    assignUser.documentation = new vscode.MarkdownString(t('COMPL_ASSIGN_DOC'));
+                    assignUser.detail = t('COMPL_ASSIGN_DETAIL');
                     snippets.push(assignUser);
                 } else {
                     // Situatie B: De gebruiker heeft al iets getypt als 'sUser := '
                     // We geven nu een pure, schone functie terug zonder 'sCurrUser:=' ervoor!
-                    const pureFunction = new vscode.CompletionItem('CurrentUser() (Puur)', vscode.CompletionItemKind.Snippet);
+                    const pureFunction = new vscode.CompletionItem(t('COMPL_PURE_LBL'), vscode.CompletionItemKind.Snippet);
                     pureFunction.insertText = new vscode.SnippetString(`CurrentUser()`);
-                    pureFunction.documentation = new vscode.MarkdownString(`Plaatst alleen de functie. Handig omdat je zelf al een variabele hebt getypt.`);
-                    pureFunction.detail = `Smart Snippet: Enkel de functie`;
+                    pureFunction.documentation = new vscode.MarkdownString(t('COMPL_PURE_DOC'));
+                    pureFunction.detail = t('COMPL_PURE_DETAIL');
                     snippets.push(pureFunction);
                 }
 
