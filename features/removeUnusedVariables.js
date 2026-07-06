@@ -13,11 +13,18 @@ function removeUnusedVariablesText(text) {
 
     const unusedVars = [];
     
-    // 🌍 TAALONAFHANKELIJK ZOEKEN: We pakken het eerste unieke stukje van de vertaalde zin
-    const unusedPrefix = t('WARN_VAR_DECLARED_NOT_USED', '@@@').split('@@@')[0];
+    // 🌍 TAALONAFHANKELIJK ZOEKEN: Robuuste check op begin én eind van de zin
+    const unusedTemplate = t('WARN_VAR_DECLARED_NOT_USED', '@@@');
+    const unusedParts = unusedTemplate.split('@@@');
+    const unusedPrefix = unusedParts[0];
+    const unusedSuffix = unusedParts.length > 1 ? unusedParts[1] : '';
 
     for (const err of errors) {
-        if (err && err.message && err.message.includes(unusedPrefix)) {
+        // Striktere check: Bevat de melding ZOWEL het beginstuk ALS het eindstuk van de unused-waarschuwing?
+        if (err && err.message && 
+            err.message.includes(unusedPrefix) && 
+            (unusedSuffix === '' || err.message.includes(unusedSuffix))) {
+            
             // Haal de variabelenaam simpelweg uit de enkele aanhalingstekens ('variabelenaam')
             const match = err.message.match(/'([^']+)'/);
             if (match) {

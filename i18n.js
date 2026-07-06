@@ -287,7 +287,8 @@ const dictionary = {
         CTX_WHILE_COND: "WHILE-conditie",
         CTX_RETURN_VAL: "RETURN-waarde",
         CTX_ASSIGN_VAL: "Assignment-waarde",
-        CTX_FUNC_CALL: "Functie-aanroep"
+        CTX_FUNC_CALL: "Functie-aanroep",
+		ERR_FIELD_AS_FUNCTION: "Syntaxfout: '{0}' is een database-veld en mag niet als functie (met haakjes) worden aangeroepen. Gebruik .{0} zonder ().",
 	},
 	en: {
 		ERR_DICT_NOT_FOUND: "glimsDictionary.json not found in the 'features' folder.",
@@ -576,7 +577,8 @@ const dictionary = {
         CTX_WHILE_COND: "WHILE condition",
         CTX_RETURN_VAL: "RETURN value",
         CTX_ASSIGN_VAL: "Assignment value",
-        CTX_FUNC_CALL: "Function call"
+        CTX_FUNC_CALL: "Function call",
+		ERR_FIELD_AS_FUNCTION: "Syntax error: '{0}' is a database field and cannot be called as a function (with parentheses). Use .{0} without ().",
 	},
 	fr: {
 		ERR_DICT_NOT_FOUND: "glimsDictionary.json introuvable dans le dossier 'features'.",
@@ -864,7 +866,8 @@ const dictionary = {
         CTX_WHILE_COND: "condition WHILE",
         CTX_RETURN_VAL: "valeur RETURN",
         CTX_ASSIGN_VAL: "valeur d'assignation",
-        CTX_FUNC_CALL: "appel de fonction"
+        CTX_FUNC_CALL: "appel de fonction",
+		ERR_FIELD_AS_FUNCTION: "Erreur de syntaxe : '{0}' est un champ de base de données et ne peut pas être appelé comme une fonction (avec des parenthèses). Utilisez .{0} sans ().",
 	},
 	de: {
 		ERR_DICT_NOT_FOUND: "glimsDictionary.json wurde nicht im Ordner 'features' gefunden.",
@@ -1153,7 +1156,8 @@ const dictionary = {
         CTX_WHILE_COND: "WHILE-Bedingung",
         CTX_RETURN_VAL: "RETURN-Wert",
         CTX_ASSIGN_VAL: "Zuweisungswert",
-        CTX_FUNC_CALL: "Funktionsaufruf"
+        CTX_FUNC_CALL: "Funktionsaufruf",
+		ERR_FIELD_AS_FUNCTION: "Syntaxfehler: '{0}' ist ein Datenbankfeld und darf nicht als Funktion (mit Klammern) aufgerufen werden. Verwenden Sie .{0} ohne ().",
 	}
 };
 

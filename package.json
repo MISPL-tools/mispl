@@ -2,7 +2,7 @@
 	"name": "mispl",
 	"displayName": "MISPL Toolkit",
 	"description": "Language support, formatting, static debug, flowcharts and tools for MISPL / GLIMS",
-	"version": "3.0.2",
+	"version": "3.1.0",
 	"icon": "icon.png",
 	"publisher": "dirkkoppenaal",
 	"repository": {

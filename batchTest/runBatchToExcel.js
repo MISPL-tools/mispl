@@ -1,12 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-// 🎯 We laden de linter logica in
-const { parseMISPL, analyze, VERSION } = require('./analyzeMISPL');
+// 🎯 1. FIX: Verwijst nu naar de hoofdmap (../) zodat hij automatisch i18n en dictionaries meeneemt!
+const { parseMISPL, analyze, VERSION } = require('../analyzeMISPL');
 
 // ⚙️ CONFIGURATIE
 const INPUT_FILE = path.join(__dirname, 'gp_SiteFunction.csv'); 
-// Tip: We noemen het nu een .txt bestand. Excel snapt tabs veel beter uit een .txt!
 const OUTPUT_CSV = path.join(__dirname, 'MISPL_Corvee_Lijst.csv');
 
 // 🧠 DE SPECIALE GLIMS EXPORT PARSER
@@ -105,7 +104,10 @@ function runBatchToCSV() {
 
         try {
             const astResult = parseMISPL(misplCode);
-            const issues = analyze(astResult, misplCode);
+            const analysisResult = analyze(astResult, misplCode);
+            
+            // 🎯 2. FIX: analyze() geeft nu een object terug, dus we moeten de .errors array hebben!
+            const issues = analysisResult.errors || [];
 
             issues.forEach(issue => {
                 let niveau = "Stijl-tip";

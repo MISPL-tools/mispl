@@ -6,7 +6,7 @@ const PREFIXES = require("./features/glimsPrefixes");
 // 🌍 NIEUW: Importeer de vertaalfunctie
 const { t } = require("./i18n");
 
-const VERSION = "v3.0.2 - Ready for GitHub";
+const VERSION = "v3.1.0 - More Ready for GitHub";
 
 let DICT_LOAD_ERROR = null;
 let GLIMS_DICT = { globals: {}, tables: {} };
@@ -675,6 +675,14 @@ const TypeChecker = {
 
 			let def = STRICT_METHODS[`${callerType}.${fn}`] || STRICT_METHODS[`ANY.${fn}`] || (GLIMS_DICT.tables[callerType] ? GLIMS_DICT.tables[callerType][fn] : null);
 
+			// =========================================================================
+			// 🚀 FIX: Controleer of een database-veld (Field) als functie () wordt aangeroepen
+			// =========================================================================
+			if (def && (def.type === "Field" || def.type === "FIELD")) {
+				context.addError(lineNo, t('ERR_FIELD_AS_FUNCTION', methodName));
+			}
+			// =========================================================================
+
 			let returnType = def && def.returns ? def.returns.toUpperCase() : "UNKNOWN";
 
 			if (def) {
@@ -1191,14 +1199,34 @@ const Validators = {
 				context.addInfo(node.line, t('INFO_STYLE_INDEX_OR'));
 			}
 
+			// =========================================================================
+			// 🚀 FIX: Strenge controle op de 1-based Entry() index valkuil
+			// =========================================================================
+			const entryRegex = /\bEntry\s*\(\s*([a-zA-Z0-9_]+)\s*,/gi;
+			let match;
+			while ((match = entryRegex.exec(safeExpr)) !== null) {
+				const indexArg = match[1];
+
+				// Scenario 1: De programmeur typt letterlijk Entry(0, ...)
+				if (indexArg === "0") {
+					context.addError(node.line, t('ERR_ENTRY_INDEX_ZERO'));
+				}
+				// Scenario 2: Het is een variabele (zoals iX). Wat was de laatste waarde?
+				else if (isNaN(indexArg)) {
+					const varInfo = context.assignedVars.get(indexArg.toLowerCase());
+					if (varInfo && varInfo.history && varInfo.history.length > 0) {
+						const lastVal = String(varInfo.history[varInfo.history.length - 1].value).trim();
+						if (lastVal === "0") {
+							// Gooi een harde error: iX is hier 0!
+							context.addError(node.line, t('ERR_ENTRY_INDEX_VAR_ZERO', indexArg));
+						}
+					}
+				}
+			}
+			// =========================================================================
+
 			ExpressionParser.extractReferences(String(exprToAnalyze), node.line, context);
 			TypeChecker.evaluate(exprToAnalyze, node.line, context, targetVarName);
-		}
-
-		if (node.type === NodeTypes.Assignment) {
-			// 🚀 FIX: node.value doorgegeven als derde parameter
-			context.registerWrite(node.name, node.line, node.value);
-			context.registerAssignment(node.name, node.value);
 		}
 	},
 
@@ -2094,7 +2122,7 @@ function analyze(astOrResult, rawText = "") {
 		context.addError(0, t('ERR_LINTER_CRASH', err.message));
 	}
 
-return {
+	return {
 		errors: context.errors,
 		variables: astOrResult.variables || new Map(),
 		assignedVars: context.assignedVars // 🚀 DEZE REGEL IS NIEUW!

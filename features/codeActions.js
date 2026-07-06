@@ -54,8 +54,17 @@ class MisplCodeActionProvider {
         const diagnostics = context.diagnostics;
         
         // 3.1 - Declaraties opruimen (Massale opschoonactie)
-        const unusedPrefix = t('WARN_VAR_DECLARED_NOT_USED', '@@@').split('@@@')[0];
-        const hasUnusedVar = diagnostics.some(d => d.message.includes(unusedPrefix));
+        const unusedTemplate = t('WARN_VAR_DECLARED_NOT_USED', '@@@');
+        const unusedParts = unusedTemplate.split('@@@');
+        const unusedPrefix = unusedParts[0];
+        const unusedSuffix = unusedParts.length > 1 ? unusedParts[1] : '';
+
+        // Striktere check: Bevat de melding ZOWEL het beginstuk ALS het eindstuk van de unused-waarschuwing?
+        const hasUnusedVar = diagnostics.some(d => 
+            d.message.includes(unusedPrefix) && 
+            (unusedSuffix === '' || d.message.includes(unusedSuffix))
+        );
+
         if (hasUnusedVar) {
             const fixAction = new vscode.CodeAction(t('ACTION_REMOVE_UNUSED_DECL'), vscode.CodeActionKind.QuickFix);
             fixAction.command = { command: 'mispl.removeUnusedVariables', title: 'Opruimen' };

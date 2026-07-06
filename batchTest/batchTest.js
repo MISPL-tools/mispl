@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// 🎯 We laden nu ook het VERSION nummer in vanuit dezelfde map!
-const { parseMISPL, analyze, VERSION } = require('./analyzeMISPL');
+// 🎯 1. FIX: We laden nu ook het VERSION nummer in vanuit de HOOFDMAP!
+const { parseMISPL, analyze, VERSION } = require('../analyzeMISPL');
 
 // ⚙️ CONFIGURATIE
 const INPUT_FILE = path.join(__dirname, 'gp_SiteFunction.csv'); 
@@ -96,9 +96,12 @@ function runBatchTest() {
 
         try {
             const astResult = parseMISPL(misplCode);
-            const errors = analyze(astResult, misplCode);
+            const analysisResult = analyze(astResult, misplCode);
+            
+            // 🎯 2. FIX: haal specifiek de errors array uit het resultaat
+            const rawErrors = analysisResult.errors || [];
 
-            const redErrors = errors.filter(e => e.severity === 8);
+            const redErrors = rawErrors.filter(e => e.severity === 8);
 
             if (redErrors.length > 0) {
                 scriptsWithErrors++;

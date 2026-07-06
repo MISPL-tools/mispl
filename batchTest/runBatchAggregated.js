@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// 🎯 We laden het VERSION nummer in vanuit dezelfde map
-const { parseMISPL, analyze, VERSION } = require('./analyzeMISPL');
+// 🎯 1. FIX: We laden de linter logica in vanuit de hoofdmap (zodat i18n etc. gevonden wordt)
+const { parseMISPL, analyze, VERSION } = require('../analyzeMISPL');
 
 // ⚙️ CONFIGURATIE
 const INPUT_FILE = path.join(__dirname, 'gp_SiteFunction.csv'); 
@@ -106,7 +106,10 @@ function runBatchTest() {
 
         try {
             const astResult = parseMISPL(misplCode);
-            const issues = analyze(astResult, misplCode);
+            const analysisResult = analyze(astResult, misplCode);
+            
+            // 🎯 2. FIX: analyze() geeft nu een object terug, pak de .errors array
+            const issues = analysisResult.errors || [];
 
             if (issues.length > 0) totalScriptsWithAnyIssue++;
 
