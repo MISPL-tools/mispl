@@ -6,7 +6,7 @@ const PREFIXES = require("./features/glimsPrefixes");
 // 🌍 NIEUW: Importeer de vertaalfunctie
 const { t } = require("./i18n");
 
-const VERSION = "v3.1.0 - More Ready for GitHub";
+const VERSION = "v3.1.1 - Less bugs for GitHub";
 
 let DICT_LOAD_ERROR = null;
 let GLIMS_DICT = { globals: {}, tables: {} };
@@ -676,10 +676,46 @@ const TypeChecker = {
 			let def = STRICT_METHODS[`${callerType}.${fn}`] || STRICT_METHODS[`ANY.${fn}`] || (GLIMS_DICT.tables[callerType] ? GLIMS_DICT.tables[callerType][fn] : null);
 
 			// =========================================================================
-			// 🚀 FIX: Controleer of een database-veld (Field) als functie () wordt aangeroepen
+			// 🚀 FIX 1: Controleer of een database-veld (Field) als functie () wordt aangeroepen
 			// =========================================================================
 			if (def && (def.type === "Field" || def.type === "FIELD")) {
 				context.addError(lineNo, t('ERR_FIELD_AS_FUNCTION', methodName));
+			}
+			// =========================================================================
+
+			// =========================================================================
+			// 🚀 FIX 2: Detecteer onbekende methoden/functies op objecten!
+			// =========================================================================
+			// Witte lijst: Bekende GLIMS acties/werkwoorden die vaak missen in de dictionary
+			const KNOWN_UNMAPPED_METHODS = new Set([
+				"CANCEL", "CONFIRM", "VALIDATE", "ISGROUPMEMBER", "DISCONTINUE", "OUTPUTRESULT",
+				"ADDREQUEST", "ADDREQUESTS", "GETMEDICALRECORD", "SPECIMENINPUT", "AUTHORIZE", "APPROVE",
+				"UPDATE", "DELETE", "EXECUTE", "SENDMAIL", "LOCK", "UNLOCK", "PRINT", "ARCHIVE",
+				"PROPERTYLIST", "REPORTLIST", "ACTION", "SPECIMEN", "ORDER", "RESULT", "PERSON",
+				"CORRESPONDENT", "OBJECT"
+			]);
+
+			if (!def && callerType !== "UNKNOWN" && !KNOWN_UNMAPPED_METHODS.has(fn)) {
+				if (callerType !== "ANY") {
+					// Fout: Expliciete aanroep op een bekend type (bijv. <STRING>.Ordr())
+					context.addError(lineNo, t('ERR_METHOD_NOT_FOUND', methodName, callerType));
+				} else {
+					// Fout: Impliciete aanroep (bijv. .abcdefh() of .Ordr())
+					// We checken of het in iig één GLIMS tabel bestaat om valse meldingen te voorkomen.
+					let existsInGlims = false;
+					if (GLIMS_DICT && GLIMS_DICT.tables) {
+						for (const tableKey in GLIMS_DICT.tables) {
+							if (GLIMS_DICT.tables[tableKey][fn]) {
+								existsInGlims = true;
+								break;
+							}
+						}
+					}
+					// Check ook de bestaande safe-list
+					if (!existsInGlims && (!SAFE_UNKNOWN_FUNCS || !SAFE_UNKNOWN_FUNCS.has(fn))) {
+						context.addError(lineNo, t('ERR_UNKNOWN_IMPLICIT_METHOD', methodName));
+					}
+				}
 			}
 			// =========================================================================
 
@@ -1154,7 +1190,6 @@ const Validators = {
 			const valClean = node.value ? String(node.value).trim().toUpperCase() : "";
 
 			if (!context.assignedVars.has(key)) {
-
 				// 🚀 UITZONDERING 2: Als we in een WHILE of REPEAT loop zitten, is dit een functionele RESET voor de volgende iteratie!
 				if (!context.inLoop) {
 					const varInfo = context.declaredVars.get(key);
@@ -1228,6 +1263,14 @@ const Validators = {
 			ExpressionParser.extractReferences(String(exprToAnalyze), node.line, context);
 			TypeChecker.evaluate(exprToAnalyze, node.line, context, targetVarName);
 		}
+
+		// 👇👇👇 DIT STUKJE WAS VERDWENEN 👇👇👇
+		if (node.type === NodeTypes.Assignment) {
+			// 🚀 FIX: node.value doorgegeven als derde parameter
+			context.registerWrite(node.name, node.line, node.value);
+			context.registerAssignment(node.name, node.value);
+		}
+		// 👆👆👆 ============================== 👆👆👆
 	},
 
 	analyzeStructure(node, context) {
@@ -2016,21 +2059,70 @@ function analyze(astOrResult, rawText = "") {
 
 	try {
 		if (ast && ast.type === NodeTypes.Program && Array.isArray(ast.body)) {
-			let loopDepth = 0; // 🚀 NIEUW: Houdt bij of we in een lus zitten
+			let loopDepth = 0; // Houdt bij of we in een lus zitten
+
+			// =========================================================================
+			// 🚀 FIX: Scope-bewuste Dode code (Unreachable Code) detectie
+			// =========================================================================
+			let returnDepth = -1; // -1 betekent: Geen RETURN gezien. Anders: het block-level van de RETURN
+			let returnLine = 0;
+			let currentDepth = 0; // Houdt bij hoe diep we in IF/WHILE/REPEAT blokken zitten
 
 			ast.body.forEach(node => {
-				// 1. Zien we de start van een loop? Teller omhoog!
+				// 1. Houd de algemene blok-diepte bij (zowel IF's als LOOPS)
+				if (node.type === NodeTypes.IfStatement || node.type === NodeTypes.WhileStatement || node.type === NodeTypes.RepeatStatement) {
+					currentDepth++;
+				}
+
+				// 2. Alarm slaan: Hebben we al een RETURN gezien, zitten we in dezelfde (of een minder diepe) scope,
+				// en is dit daadwerkelijk uitvoerbare code?
+				if (returnDepth !== -1 && currentDepth <= returnDepth &&
+					node.type !== NodeTypes.Declaration &&
+					node.type !== "Else" &&
+					node.type !== "EndIf" &&
+					node.type !== "Done") {
+
+					context.addInfo(node.line, t('INFO_OP_RTN_FOLLOWED', returnLine));
+					returnDepth = -1; // Reset alarm
+				}
+
+				// 3. Registreer een RETURN en sla het huidige blok-niveau (depth) op
+				if (node.type === NodeTypes.ReturnStatement) {
+					returnDepth = currentDepth;
+					returnLine = node.line;
+				}
+
+				// 4. Als een blok sluit, resetten we de returnDepth als die in dít gesloten blok zat
+				if (node.type === "Done" || node.type === "EndIf" || node.isUntil) {
+					// Als er een RETURN was binnen het IF-blok dat we nu sluiten, is dat veilig.
+					if (returnDepth === currentDepth) {
+						returnDepth = -1;
+					}
+					currentDepth--;
+					// Safety net voor negatieve diepte (fout in script)
+					if (currentDepth < 0) currentDepth = 0;
+				}
+
+				// 5. De Else: Wisseling van scope binnenin de IF. 
+				// Een return in de THEN-branch, beïnvloedt de ELSE-branch natuurlijk niet.
+				if (node.type === "Else") {
+					if (returnDepth === currentDepth) {
+						returnDepth = -1;
+					}
+				}
+				// =========================================================================
+
+
+				// 6. Beheer specifiek de lus-diepte (voor de oneindige-lus checker)
 				if (node.type === NodeTypes.WhileStatement || node.type === NodeTypes.RepeatStatement) {
 					loopDepth++;
 				}
 
-				// 2. Geef de status door aan de scope validator
 				context.inLoop = loopDepth > 0;
 
 				Validators.analyzeScope(node, context);
 				Validators.analyzeStructure(node, context);
 
-				// 3. Zien we het einde van een loop? Teller omlaag!
 				if (node.type === "Done" || node.isUntil) {
 					loopDepth--;
 				}
@@ -2118,14 +2210,43 @@ function analyze(astOrResult, rawText = "") {
 			});
 
 		}
+
+
 	} catch (err) {
 		context.addError(0, t('ERR_LINTER_CRASH', err.message));
+		return { errors: context.errors, variables: new Map(), assignedVars: new Map() };
 	}
 
+	// =========================================================================
+	// 🚀 FIX: De "mispl-ignore" functionaliteit (NU IN DE JUISTE SCOPE!)
+	// =========================================================================
+	let finalErrors = context.errors;
+
+	if (safeText && context.errors) {
+		const textLines = safeText.split(/\r?\n/);
+
+		finalErrors = context.errors.filter(issue => {
+			if (issue.line === 0) return true; // Globale fouten altijd laten staan
+
+			const idx = Number(issue.line);
+
+			// We checken de regel zélf, de regel erboven, én de regel eronder.
+			// Zo maakt het niet meer uit of de engine 0-based of 1-based telt!
+			const lineStr = (textLines[idx - 2] || "") +
+				(textLines[idx - 1] || "") +
+				(textLines[idx] || "");
+
+			// Zit de tag ergens in deze regio? Dan gooien we de fout weg (return false)
+			return !lineStr.includes("/*Ign@re*/");
+		});
+	}
+	// =========================================================================
+
+	// Geef expliciet de nieuwe, gefilterde lijst terug!
 	return {
-		errors: context.errors,
+		errors: finalErrors,
 		variables: astOrResult.variables || new Map(),
-		assignedVars: context.assignedVars // 🚀 DEZE REGEL IS NIEUW!
+		assignedVars: context.assignedVars
 	};
 }
 

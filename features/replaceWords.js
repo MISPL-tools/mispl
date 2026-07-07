@@ -32,12 +32,20 @@ function replaceWords(context) {
     }
 
     // Sorteer de sleutels op lengte (langste eerst). 
-    // Hierdoor matcht 'TheResultVorig' netjes met 'theresult' en wordt hij niet per ongeluk halverwege afgekapt als 'the' ook in de lijst zou staan.
     sortedKeys.sort((a, b) => b.length - a.length);
+
+    // 🛡️ GLIMS KLASSE BESCHERMING
+    // We willen nooit dat woorden die letterlijk de naam van een GLIMS klasse zijn (zoals 'Order') 
+    // deels worden verminkt omdat ze toevallig beginnen met een afkorting (zoals 'Ord').
+    const protectedClasses = new Set([
+        "string", "integer", "fractional", "logical", "date", "time", "datetime", "mnemonic", "void", "any",
+        "order", "result", "object", "specimen", "correspondent", "person", "bloodbag", "bloodproduct",
+        "ward", "department", "property", "paymentagreement", "policyname"
+    ]);
 
     const fullText = document.getText();
 
-    // 3. De Slimme Regex (ongewijzigd, pakt nog steeds hele woorden)
+    // 3. De Slimme Regex (pakt hele woorden)
     const tokenizer = /("(?:[^"\\]|\\.)*"|\/\*[\s\S]*?\*\/|\/\/.*)|(\b\w+\b)/g;
 
     const newText = fullText.replace(tokenizer, (match, protectedContent, word) => {
@@ -50,30 +58,47 @@ function replaceWords(context) {
         if (word) {
             const lowerWord = word.toLowerCase();
             let matchedKey = null;
+            let isExactMatch = false;
 
-            // Zoek of het woord BEGINT met een term uit onze lijst
-            for (const key of sortedKeys) {
-                if (lowerWord.startsWith(key)) {
-                    matchedKey = key;
-                    break;
+            // STAP 1: Zoek eerst naar een EXACTE 100% match. 
+            // Dit is de veiligste manier (bijv. "Ordr" -> "Ord")
+            if (lookupMap.has(lowerWord)) {
+                matchedKey = lowerWord;
+                isExactMatch = true;
+            } 
+            // STAP 2: Als er geen exacte match is, kijk of we een "starts with" (prefix) match kunnen maken.
+            // Dit is voor constructies zoals "TheResultVorig" -> "rsltVorig".
+            else {
+                // We slaan deze prefix-check over als het huidige woord een basistype of klasse is!
+                // We willen niet dat "Order" (klasse) wordt ge-prefix-matched door "Ord" (variabele).
+                if (!protectedClasses.has(lowerWord)) {
+                    for (const key of sortedKeys) {
+                        if (lowerWord.startsWith(key)) {
+                            matchedKey = key;
+                            break;
+                        }
+                    }
                 }
             }
 
-            // Hebben we een match (bijv. 'theresult' zit in 'theresultvorig')?
+            // Hebben we een bruikbare match gevonden?
             if (matchedKey) {
-                const replacement = lookupMap.get(matchedKey); // bijv. "rslt"
-                let suffix = word.substring(matchedKey.length); // bijv. "vorig" of "Vorig"
+                const replacement = lookupMap.get(matchedKey); 
+                
+                if (isExactMatch) {
+                    return replacement; // Exacte match = exacte vervanging (geen suffix logica nodig)
+                } else {
+                    let suffix = word.substring(matchedKey.length); 
 
-                // Als er een achtervoegsel is, zorg dat het netjes met een hoofdletter begint (CamelCase)
-                if (suffix.length > 0) {
-                    suffix = suffix.charAt(0).toUpperCase() + suffix.slice(1);
+                    // Als er een achtervoegsel is, zorg dat het netjes met een hoofdletter begint (CamelCase)
+                    if (suffix.length > 0) {
+                        suffix = suffix.charAt(0).toUpperCase() + suffix.slice(1);
+                    }
+                    return replacement + suffix;
                 }
-
-                // Plak de nieuwe prefix en de (eventuele) suffix aan elkaar
-                return replacement + suffix;
             }
 
-            // Geen match? Laat het woord intact.
+            // Geen match of beschermd woord? Laat het woord intact.
             return word;
         }
 
