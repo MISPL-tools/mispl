@@ -455,6 +455,8 @@ class MisplCodeActionProvider {
 		}
 		// Binnen je bestaande provideCodeActions(document, range, context, token) functie:
 
+		// Binnen je bestaande provideCodeActions(document, range, context, token) functie:
+
 		// Kijk of er op de huidige regel überhaupt linter-meldingen (diagnostics) staan
 		if (context.diagnostics.length > 0) {
 			const line = document.lineAt(range.start.line);

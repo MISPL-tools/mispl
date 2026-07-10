@@ -6,7 +6,7 @@ const PREFIXES = require("./features/glimsPrefixes");
 // 🌍 NIEUW: Importeer de vertaalfunctie
 const { t } = require("./i18n");
 
-const VERSION = "v3.1.1 - Less bugs for GitHub";
+const VERSION = "v3.2.1 - A MISPL summary in the comments and bug fixes";
 
 let DICT_LOAD_ERROR = null;
 let GLIMS_DICT = { globals: {}, tables: {} };
@@ -60,6 +60,67 @@ function loadCustomDictionary(customPath) {
 	}
 }
 
+// 🤖 100% Lokale "Pseudo-AI" Samenvatter (Multi-language)
+function generateLocalSummary(context, rawText) {
+	let summaryParts = [];
+	const safeText = rawText.toUpperCase();
+
+	// 1. Wat wordt er AANGEVRAAGD? (Kijk expliciet naar inhoud van AddRequest)
+	const addReqRegex = /\.AddRequests?\s*\(\s*["']([^"']+)["']/gi;
+	let requestedItems = [];
+	let match;
+	while ((match = addReqRegex.exec(rawText)) !== null) {
+		// Splits op komma voor het geval er meerdere in 1 string staan (zoals in jouw script!)
+		requestedItems.push(...match[1].split(',').map(s => s.trim()).filter(Boolean));
+	}
+	requestedItems = [...new Set(requestedItems)];
+
+	if (requestedItems.length > 0) {
+		let reqStr = requestedItems.slice(0, 3).join("', '");
+		if (requestedItems.length > 3) {
+			reqStr += t('SUMMARY_AND_MORE', requestedItems.length - 3);
+		}
+		summaryParts.push(t('SUMMARY_EXPLICIT_ADD', reqStr));
+	} else if (safeText.includes(".ADDREQUEST") || safeText.includes("ADDREQUESTS")) {
+		summaryParts.push(t('SUMMARY_ADD_REQUEST'));
+	}
+
+	// 2. Wat wordt er GECONTROLEERD? (Kijk expliciet naar inhoud van Lookup en Result)
+	const checkRegex = /\b(?:Lookup|Result)\s*\(\s*["']([^"']+)["']/gi;
+	let checkedItems = [];
+	while ((match = checkRegex.exec(rawText)) !== null) {
+		checkedItems.push(match[1].trim());
+	}
+	checkedItems = [...new Set(checkedItems)];
+
+	if (checkedItems.length > 0) {
+		let chkStr = checkedItems.slice(0, 3).join("', '");
+		if (checkedItems.length > 3) {
+			chkStr += t('SUMMARY_AND_MORE', checkedItems.length - 3);
+		}
+		summaryParts.push(t('SUMMARY_EXPLICIT_CHECK', chkStr));
+	}
+
+	// 3. Andere GLIMS-acties
+	if (safeText.includes("SETSITEATTRIBUTE")) {
+		summaryParts.push(t('SUMMARY_SET_ATTRIBUTE'));
+	}
+	if (safeText.includes("INTERNALCOMMENT") || safeText.includes("EXTERNALCOMMENT")) {
+		summaryParts.push(t('SUMMARY_COMMENT'));
+	}
+	if (safeText.includes("ASKYESNO") || safeText.includes("ASKCHOICE") || safeText.includes("ASKSTRING") || safeText.includes("HISTORYGRAPH")) {
+		summaryParts.push(t('SUMMARY_INTERACTION'));
+	}
+	if (context.inLoop || safeText.includes("WHILE ") || safeText.includes("REPEAT")) {
+		summaryParts.push(t('SUMMARY_LOOP'));
+	}
+
+	if (summaryParts.length === 0) {
+		return t('SUMMARY_DEFAULT');
+	}
+
+	return summaryParts.join("\n");
+}
 
 
 // 🛡️ HELPER: 100% Depth-Aware Comment Remover
@@ -527,7 +588,18 @@ const TypeChecker = {
 			"GLOBAL.STRINGTOTIME": { params: ["ANY", "STRING|?"], minParams: 1, returns: "TIME" },
 			"GLOBAL.DATEANDTIMETODATETIME": { params: ["ANY", "ANY"], minParams: 2, returns: "DATETIME" },
 			"GLOBAL.DATETIMETODATE": { params: ["ANY"], minParams: 1, returns: "DATE" },
-			"GLOBAL.DATETIMETOTIME": { params: ["ANY"], minParams: 1, returns: "TIME" }
+			"GLOBAL.DATETIMETOTIME": { params: ["ANY"], minParams: 1, returns: "TIME" },
+			"CORRESPONDENT.HCPROVIDER": { params: [], minParams: 0, returns: "HCPROVIDER" },
+			"CORRESPONDENT.WARD": { params: [], minParams: 0, returns: "WARD" },
+			"CORRESPONDENT.COMPANY": { params: [], minParams: 0, returns: "COMPANY" },
+			"CORRESPONDENT.PERSON": { params: [], minParams: 0, returns: "PERSON" },
+			"CORRESPONDENT.LAB": { params: [], minParams: 0, returns: "LAB" },
+			"CORRESPONDENT.FIRM": { params: [], minParams: 0, returns: "FIRM" },
+			"CORRESPONDENT.FUND": { params: [], minParams: 0, returns: "FUND" },
+			"CORRESPONDENT.INSTITUTION": { params: [], minParams: 0, returns: "INSTITUTION" },
+			"CORRESPONDENT.ORGANIZATION": { params: [], minParams: 0, returns: "ORGANIZATION" },
+			"CORRESPONDENT.DEPARTMENT": { params: [], minParams: 0, returns: "DEPARTMENT" },
+			"CORRESPONDENT.CREATENATIONALNUMBER": { params: [], minParams: 0, returns: "STRING" }
 		};
 
 		const SAFE_UNKNOWN_FUNCS = new Set([
@@ -689,10 +761,10 @@ const TypeChecker = {
 			// Witte lijst: Bekende GLIMS acties/werkwoorden die vaak missen in de dictionary
 			const KNOWN_UNMAPPED_METHODS = new Set([
 				"CANCEL", "CONFIRM", "VALIDATE", "ISGROUPMEMBER", "DISCONTINUE", "OUTPUTRESULT",
-				"ADDREQUEST", "ADDREQUESTS", "GETMEDICALRECORD", "SPECIMENINPUT", "AUTHORIZE", "APPROVE",
+				"ADDREQUEST", "GETMEDICALRECORD", "SPECIMENINPUT", "AUTHORIZE", "APPROVE",
 				"UPDATE", "DELETE", "EXECUTE", "SENDMAIL", "LOCK", "UNLOCK", "PRINT", "ARCHIVE",
 				"PROPERTYLIST", "REPORTLIST", "ACTION", "SPECIMEN", "ORDER", "RESULT", "PERSON",
-				"CORRESPONDENT", "OBJECT"
+				"CORRESPONDENT", "OBJECT", "HISTORYGRAPH"
 			]);
 
 			if (!def && callerType !== "UNKNOWN" && !KNOWN_UNMAPPED_METHODS.has(fn)) {
@@ -813,7 +885,7 @@ const TypeChecker = {
 				}
 
 				const p = prop.toUpperCase();
-				if (["INTERNALID", "NAME", "MNEMONIC", "SHORTNAME", "DESCRIPTION", "EXTERNALCOMMENT", "INTERNALCOMMENT", "RAWVALUE", "VALUE", "MESSAGE", "CODE"].includes(p)) retType = "STRING";
+				if (["INTERNALID", "NAME", "MNEMONIC", "SHORTNAME", "DESCRIPTION", "EXTERNALCOMMENT", "INTERNALCOMMENT", "RAWVALUE", "VALUE", "MESSAGE", "CODE", "LASTNAME", "FIRSTNAME"].includes(p)) retType = "STRING";
 				else if (["ID", "STATUS", "TYPE", "SEX"].includes(p)) retType = "INTEGER";
 				else if (["BIRTHDATE", "DETERMINATIONDATE1", "DETERMINATIONDATE2"].includes(p)) retType = "DATE";
 				else if (["OBJECTTIME", "SAMPLINGTIME", "RECEIPTTIME", "CREATIONTIME", "EXPIRATIONTIME", "CHECKOUTTIME", "TRANSFUSIONENDTIME", "UTMOSTTRANSFUSIONTIME", "CHECKTIME"].includes(p)) retType = "DATETIME";
@@ -839,7 +911,7 @@ const TypeChecker = {
 				let retType = "UNKNOWN";
 				const p = prop.toUpperCase();
 
-				if (["INTERNALID", "NAME", "MNEMONIC", "SHORTNAME", "DESCRIPTION", "EXTERNALCOMMENT", "INTERNALCOMMENT", "RAWVALUE", "VALUE", "MESSAGE", "CODE"].includes(p)) retType = "STRING";
+				if (["INTERNALID", "NAME", "MNEMONIC", "SHORTNAME", "DESCRIPTION", "EXTERNALCOMMENT", "INTERNALCOMMENT", "RAWVALUE", "VALUE", "MESSAGE", "CODE", "LASTNAME", "FIRSTNAME"].includes(p)) retType = "STRING";
 				else if (["ID", "STATUS", "TYPE", "SEX"].includes(p)) retType = "INTEGER";
 				else if (["BIRTHDATE", "DETERMINATIONDATE1", "DETERMINATIONDATE2"].includes(p)) retType = "DATE";
 				else if (["OBJECTTIME", "SAMPLINGTIME", "RECEIPTTIME", "CREATIONTIME", "EXPIRATIONTIME", "CHECKOUTTIME", "TRANSFUSIONENDTIME", "UTMOSTTRANSFUSIONTIME", "CHECKTIME"].includes(p)) retType = "DATETIME";
@@ -1138,40 +1210,66 @@ const Validators = {
 		const validPrefixes = PREFIXES[typeKey];
 		if (validPrefixes) {
 			const nameLower = String(node.name).toLowerCase();
+			// Heeft de variabele al een geldige prefix? Dan zijn we klaar.
 			const hasValidStart = validPrefixes.some(prefix => nameLower.startsWith(prefix.toLowerCase()));
 
 			if (!hasValidStart) {
 				let originalName = String(node.name);
+
+				// 1. Maak de eerste letter een hoofdletter (niks weggooien!)
+				let capitalized = originalName.charAt(0).toUpperCase() + originalName.slice(1);
+
+				// 2. Uitzondering A: Haal de onzinnige 'The' weg (TheOrder -> Order)
+				if (capitalized.startsWith("The") && capitalized.length > 3 && /[A-Z]/.test(capitalized.charAt(3))) {
+					capitalized = capitalized.substring(3);
+				}
+
 				let suggestedName = "";
 
-				// 1. Strip 'The' (veel gebruikt in oude GLIMS scripts)
-				let baseName = originalName;
-				if (/^The[A-Z]/i.test(originalName)) {
-					baseName = originalName.substring(3); // Maakt van TheResultVorig -> ResultVorig
-				}
+				// 3. 🚀 UITZONDERING B: Voorkom 'ordOrder' of 'sStringWaarde'
+				// Begint de naam (nu) met het datatype? (bijv "Order" of "OrderRel")
+				if (capitalized.toLowerCase().startsWith(typeKey)) {
+					// Knip het datatype er vanaf
+					let remainder = capitalized.substring(typeKey.length);
 
-				// 2. Kijk of de variabelenaam letterlijk de naam van het datatype bevat (bijv. ResultVorig)
-				const dtRegex = new RegExp(`^${dataType}`, 'i');
-				if (dtRegex.test(baseName)) {
-					// Haal het datatype eraf, houd de suffix (zoals 'Vorig') over
-					let suffix = baseName.replace(dtRegex, '');
-
-					if (suffix.length > 0) {
-						// Zorg voor nette camelCase: prefix + Vorig -> rsltVorig
-						suffix = suffix.charAt(0).toUpperCase() + suffix.slice(1);
-						suggestedName = validPrefixes[0] + suffix;
+					if (remainder.length === 0) {
+						// De naam was letterlijk 'Order' (of TheOrder).
+						// Maak er de prefix van, maar start met een hoofdletter (bijv 'Ord' i.p.v. 'ord')
+						let prefix = validPrefixes[0];
+						suggestedName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
 					} else {
-						// Precies 'TheResult' of 'Result' wordt gewoon 'rslt'
-						suggestedName = validPrefixes[0];
+						// De naam was bijv 'OrderRel'. We hielden 'Rel' over.
+						// Plak de prefix ('ord') en het restant ('Rel') netjes aan elkaar: 'ordRel'
+						remainder = remainder.charAt(0).toUpperCase() + remainder.slice(1);
+						suggestedName = validPrefixes[0] + remainder;
 					}
 				} else {
-					// Het woord is iets anders (bijv 'Issuer' bij type Correspondent)
-					let cleanName = baseName;
-					// Zorg voor nette camelCase: crsp + Issuer -> crspIssuer
-					if (/^[a-z]+[A-Z]/.test(cleanName)) cleanName = cleanName.replace(/^[a-z]+/, '');
-					cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-					suggestedName = validPrefixes[0] + cleanName;
+					// 4. Standaard gedrag: plak de prefix er gewoon voor (bijv. 's' + 'Eiwit' = 'sEiwit')
+					suggestedName = validPrefixes[0] + capitalized;
 				}
+
+				// 5. COLLISION CHECK: Bestaat deze nieuwe naam al ergens in de helikopterview?
+				if (!context.suggestedNamesCache) context.suggestedNamesCache = new Set();
+
+				let baseSuggest = suggestedName;
+				let counter = 2;
+
+				const isCollision = (nameToCheck) => {
+					const lower = nameToCheck.toLowerCase();
+					if (context.suggestedNamesCache.has(lower)) return true;
+					if (context.globalVariables && context.globalVariables.has(lower)) return true;
+					if (context.declaredVars && context.declaredVars.has(lower)) return true;
+					return false;
+				};
+
+				// Botst de naam? Tel er een cijfer bij op (Ord2, Ord3...)
+				while (isCollision(suggestedName)) {
+					suggestedName = baseSuggest + counter;
+					counter++;
+				}
+
+				// Registreer de goedgekeurde, unieke naam
+				context.suggestedNamesCache.add(suggestedName.toLowerCase());
 
 				context.addInfo(node.line, t('INFO_HUNGARIAN_NOTATION', originalName, dataType, validPrefixes[0], suggestedName));
 			}
@@ -1246,14 +1344,32 @@ const Validators = {
 				if (indexArg === "0") {
 					context.addError(node.line, t('ERR_ENTRY_INDEX_ZERO'));
 				}
-				// Scenario 2: Het is een variabele (zoals iX). Wat was de laatste waarde?
+				// Scenario 2 en 3: Het is een variabele (zoals iX of iTeller).
 				else if (isNaN(indexArg)) {
-					const varInfo = context.assignedVars.get(indexArg.toLowerCase());
+					const varKey = indexArg.toLowerCase();
+					const varInfo = context.assignedVars.get(varKey);
+
+					// Scenario 2: Variabele heeft een actieve toewijzing (:=) gekregen en die is expliciet 0
 					if (varInfo && varInfo.history && varInfo.history.length > 0) {
 						const lastVal = String(varInfo.history[varInfo.history.length - 1].value).trim();
 						if (lastVal === "0") {
-							// Gooi een harde error: iX is hier 0!
+							// Gooi een harde error: iX is hier expliciet 0 gemaakt!
 							context.addError(node.line, t('ERR_ENTRY_INDEX_VAR_ZERO', indexArg));
+						}
+					}
+					// 🚀 NIEUW - Scenario 3: Variabele is NOOIT toegewezen (heeft de default GLIMS waarde)
+					else {
+						const declInfo = context.declaredVars.get(varKey);
+						// We controleren of het een integer is (via de declaratie óf we doen een educated guess via de Hongaarse notatie iX, iTeller, etc.)
+						const isNum = (declInfo && declInfo.dataType === "INTEGER") ||
+							/^[i][A-Z_0-9]/i.test(indexArg) ||
+							indexArg.toLowerCase() === "i" ||
+							indexArg.toLowerCase() === "j";
+
+						if (isNum) {
+							// Een ongebruikte/niet-geïnitialiseerde integer is in GLIMS standaard 0. 
+							// Als die in Entry() gaat, crasht GLIMS 100% zeker.
+							context.addError(node.line, t('ERR_ENTRY_INDEX_VAR_UNASSIGNED', indexArg));
 						}
 					}
 				}
@@ -1327,10 +1443,35 @@ const Validators = {
 			}
 
 			if (loopCondition && blockEnd > -1) {
+
+				// =========================================================================
+				// 🚀 FIX: Stijl-tip voor hardcoded loop-limieten bij lijst-iteraties
+				// =========================================================================
+				const hasHardcodedLimit = /(?:<=|<|==|=|>=|>)\s*\d+\b/.test(loopCondition) || /\b\d+\s*(?:<=|<|==|=|>=|>)/.test(loopCondition);
+
+				if (hasHardcodedLimit && !/\bNumEntries\b/i.test(loopCondition)) {
+					let usesEntry = false;
+					for (let m = i + 1; m < blockEnd; m++) {
+						const subNode = nodes[m];
+						let exprToCheck = subNode.value || subNode.condition || subNode.expression || subNode.text;
+						if (exprToCheck && /\bEntry\s*\(/i.test(String(exprToCheck))) {
+							usesEntry = true;
+							break;
+						}
+					}
+					if (usesEntry) {
+						context.addInfo(node.line, t('INFO_HARDCODED_LOOP_ENTRY'));
+					}
+				}
+				// =========================================================================
+
 				const conditionVars = getVarsInExpr(loopCondition).map(v => v.toLowerCase());
+
+				// 👇👇 DEZE REGELS WAREN WAARSCHIJNLIJK PER ONGELUK GEWIST 👇👇
 				const assignedInLoop = new Set();
 				const loopAssignments = [];
 				let hasIterator = false;
+				// 👆👆 ================================================== 👆👆
 
 				for (let m = i + 1; m < blockEnd; m++) {
 					const subNode = nodes[m];
@@ -1345,14 +1486,32 @@ const Validators = {
 					}
 				}
 
-				// FIX: Diepte-bewuste functie argumenten checker ter vervanging van de oude RegEx
+				// FIX: Diepte-bewuste functie argumenten checker en Performance tips
 				for (let m = i + 1; m < blockEnd; m++) {
 					const subNode = nodes[m];
 					let exprToCheck = subNode.value || subNode.condition || subNode.expression || subNode.text;
 					if (exprToCheck) {
 						const safeExpr = String(exprToCheck);
-						if (safeExpr.toLowerCase().includes(".addrequest(")) context.addInfo(subNode.line, t('INFO_PERF_ADDREQUEST'));
 
+						// =========================================================================
+						// 🚀 FIX: Performance tips voor in loops
+						// =========================================================================
+
+						// 1. Inefficiënte AddRequest (vangt bewust enkelvoud én meervoud af voor de tip)
+						if (/\.AddRequests?\s*\(/i.test(safeExpr)) {
+							context.addInfo(subNode.line, t('INFO_PERF_ADDREQUEST'));
+						}
+
+						// 2. Herhaaldelijk ophalen van database-relaties (zoals .Result.Order)
+						// Gebruikt \b (word boundary) zodat hij ook "Ord.Result.Order" feilloos pakt
+						const chainedRefRegex = /\b(Result|Action|Specimen|Person|Order|Object)\.(Order|Person|Object|Specimen|Action|Result)\b/i;
+						const refMatch = safeExpr.match(chainedRefRegex);
+						if (refMatch) {
+							context.addInfo(subNode.line, t('INFO_PERF_CHAINED_REF', refMatch[0]));
+						}
+						// =========================================================================
+
+						// 3. Controle op zware functies (Expand, Lookup, etc.)
 						for (let hFunc of heavyFuncList) {
 							const regexTest = new RegExp(`\\b${hFunc}\\s*\\(`, 'gi');
 							let match;
@@ -1377,7 +1536,6 @@ const Validators = {
 									p++;
 								}
 
-								// Dit is de EXACTE tekst tussen de haakjes van de functie
 								const argsStr = safeExpr.substring(start, p - 1);
 
 								let isDependent = false;
@@ -1393,7 +1551,7 @@ const Validators = {
 				}
 
 				let isProperlyUpdated = false;
-				let staticAssignmentWarningVar = null; // 🚀 Aangepast voor i18n
+				let staticAssignmentWarningVar = null;
 
 				for (let condVar of conditionVars) {
 					if (assignedInLoop.has(condVar)) {
@@ -1429,7 +1587,7 @@ const Validators = {
 							isProperlyUpdated = true;
 							break;
 						} else {
-							staticAssignmentWarningVar = condVar; // 🚀 Aangepast voor i18n
+							staticAssignmentWarningVar = condVar;
 						}
 					}
 				}
@@ -1518,7 +1676,6 @@ function parseSingleStatement(stmt, lineNo, maskedStmt = null, addError, declare
 	if (/^RETURN\b/i.test(masked)) {
 		hasExecutableStatement = true;
 
-		// ▶️ DE FIX: Controleer of het statement wel netjes afsluit met een puntkomma
 		if (!trimmed.endsWith(";")) {
 			addError(lineNo, t('ERR_MISSING_SEMICOLON'));
 		}
@@ -2039,13 +2196,15 @@ function parseMISPL(rawCode) {
 	};
 }
 
+
+
 function analyze(astOrResult, rawText = "") {
 	const errors = [];
 	let ast = astOrResult && typeof astOrResult === "object" ? (astOrResult.ast || astOrResult) : null;
 	if (astOrResult && Array.isArray(astOrResult.errors)) astOrResult.errors.forEach(e => errors.push({ line: e.line || 0, message: String(e.message || e), severity: e.severity || 8 }));
 
 	const context = new AnalysisContext(errors);
-
+	context.globalVariables = (astOrResult && astOrResult.variables) ? astOrResult.variables : new Map();
 	const safeText = typeof rawText === "string" ? rawText : "";
 
 	if (safeText.trim() !== "" && !safeText.includes("/*")) context.addInfo(0, t('INFO_START_WITH_COMMENT'));
@@ -2059,23 +2218,16 @@ function analyze(astOrResult, rawText = "") {
 
 	try {
 		if (ast && ast.type === NodeTypes.Program && Array.isArray(ast.body)) {
-			let loopDepth = 0; // Houdt bij of we in een lus zitten
-
-			// =========================================================================
-			// 🚀 FIX: Scope-bewuste Dode code (Unreachable Code) detectie
-			// =========================================================================
-			let returnDepth = -1; // -1 betekent: Geen RETURN gezien. Anders: het block-level van de RETURN
+			let loopDepth = 0;
+			let returnDepth = -1;
 			let returnLine = 0;
-			let currentDepth = 0; // Houdt bij hoe diep we in IF/WHILE/REPEAT blokken zitten
+			let currentDepth = 0;
 
 			ast.body.forEach(node => {
-				// 1. Houd de algemene blok-diepte bij (zowel IF's als LOOPS)
 				if (node.type === NodeTypes.IfStatement || node.type === NodeTypes.WhileStatement || node.type === NodeTypes.RepeatStatement) {
 					currentDepth++;
 				}
 
-				// 2. Alarm slaan: Hebben we al een RETURN gezien, zitten we in dezelfde (of een minder diepe) scope,
-				// en is dit daadwerkelijk uitvoerbare code?
 				if (returnDepth !== -1 && currentDepth <= returnDepth &&
 					node.type !== NodeTypes.Declaration &&
 					node.type !== "Else" &&
@@ -2083,37 +2235,28 @@ function analyze(astOrResult, rawText = "") {
 					node.type !== "Done") {
 
 					context.addInfo(node.line, t('INFO_OP_RTN_FOLLOWED', returnLine));
-					returnDepth = -1; // Reset alarm
+					returnDepth = -1;
 				}
 
-				// 3. Registreer een RETURN en sla het huidige blok-niveau (depth) op
 				if (node.type === NodeTypes.ReturnStatement) {
 					returnDepth = currentDepth;
 					returnLine = node.line;
 				}
 
-				// 4. Als een blok sluit, resetten we de returnDepth als die in dít gesloten blok zat
 				if (node.type === "Done" || node.type === "EndIf" || node.isUntil) {
-					// Als er een RETURN was binnen het IF-blok dat we nu sluiten, is dat veilig.
 					if (returnDepth === currentDepth) {
 						returnDepth = -1;
 					}
 					currentDepth--;
-					// Safety net voor negatieve diepte (fout in script)
 					if (currentDepth < 0) currentDepth = 0;
 				}
 
-				// 5. De Else: Wisseling van scope binnenin de IF. 
-				// Een return in de THEN-branch, beïnvloedt de ELSE-branch natuurlijk niet.
 				if (node.type === "Else") {
 					if (returnDepth === currentDepth) {
 						returnDepth = -1;
 					}
 				}
-				// =========================================================================
 
-
-				// 6. Beheer specifiek de lus-diepte (voor de oneindige-lus checker)
 				if (node.type === NodeTypes.WhileStatement || node.type === NodeTypes.RepeatStatement) {
 					loopDepth++;
 				}
@@ -2143,48 +2286,31 @@ function analyze(astOrResult, rawText = "") {
 				if (!context.readVars.has(key)) info.lines.forEach(lineNo => context.addWarning(lineNo, t('WARN_VAR_ASSIGNED_NOT_READ', info.originalName)));
 			});
 
-			// ▶️ DE FIX: Controleer of een database veld meerdere keren wordt opgevraagd
 			context.tableRefs.forEach((info, key) => {
-
-				// 1. SLIMME METHOD FILTER (Bestaand): Negeer actie-inducerende functies.
 				if (/\b(Add|Set|Cancel|Create|Ask)[a-zA-Z0-9_]*\s*\(/i.test(info.originalName)) {
 					return;
 				}
 
-				// 2. 🚀 NIEUW: LOOP- EN MUTATIE FILTER
-				// Splits de naam op. Bijv. "rsltRel.Status" -> ["rsltRel", "Status"]
 				const parts = info.originalName.split('.');
 				let baseVar = parts[0];
 
-				// Als het object zelf begint met een functie (bijv. Entry(...).Status), negeren we het direct.
 				if (baseVar.includes('(')) {
 					return;
 				}
 
-				// Controleer of de basis-variabele (bijv. rsltRel) ergens gemuteerd wordt.
-				// Als baseVar leeg is (bijv. ".NumericValue()"), is het veilig.
 				if (baseVar.length > 0) {
-					// Zoek of "baseVar :=" of "baseVar:=" ergens in de code voorkomt (case-insensitive)
 					const assignRegex = new RegExp(`\\b${baseVar}\\s*:=`, "i");
-
-					// 🚀 DE FIX: We gebruiken 'codeZonderCommentaar' in deze scope!
 					if (assignRegex.test(codeZonderCommentaar)) {
-						// Deze variabele krijgt dynamisch een waarde toegewezen (bijv. in een loop).
-						// Het is functioneel fout om eigenschappen van veranderende objecten te cachen!
 						return;
 					}
 				}
 
 				if (info.count > 1) {
-					// Haal vreemde tekens weg (b.v. de punt bij .Mnemonic)
 					let cleanName = info.originalName.replace(/[^a-zA-Z0-9]/g, "");
-
-					// 🚀 SLIMME PREFIX: Bepaal de prefix op basis van het opgevraagde veld
-					let prefix = "s"; // Standaard String
+					let prefix = "s";
 					const parts = info.originalName.split('.');
 
 					if (parts.length > 1) {
-						// Haal de property naam op (b.v. "ID" uit "Ordr.ID") en negeer eventuele haakjes
 						let propName = parts[parts.length - 1].toUpperCase().replace(/\(\)/g, "");
 
 						if (["ID", "STATUS", "TYPE", "SEX"].includes(propName)) prefix = "i";
@@ -2192,8 +2318,6 @@ function analyze(astOrResult, rawText = "") {
 						else if (["OBJECTTIME", "SAMPLINGTIME", "RECEIPTTIME", "CREATIONTIME", "EXPIRATIONTIME", "CHECKOUTTIME", "TRANSFUSIONENDTIME", "UTMOSTTRANSFUSIONTIME", "CHECKTIME"].includes(propName)) prefix = "dt";
 						else if (["UNSOLICITED", "SOLICITED", "ISREQUESTED", "AVAILABLE", "VALIDATED"].includes(propName)) prefix = "l";
 						else if (["NUMERICVALUE"].includes(propName)) prefix = "f";
-
-						// Uitzonderingen voor Klasse-Objecten!
 						else if (propName === "OBJECT") prefix = "obj";
 						else if (propName === "ORDER") prefix = "ord";
 						else if (propName === "PERSON") prefix = "prsn";
@@ -2202,23 +2326,18 @@ function analyze(astOrResult, rawText = "") {
 						else if (propName === "PROPERTY") prefix = "prp";
 					}
 
-					// Genereer de suggestie (b.v. iOrdrID)
 					let varSuggestie = prefix + cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-
 					context.addInfo(info.lines[0], t('INFO_SUGGEST_VAR_CACHE', info.originalName, varSuggestie, info.count));
 				}
 			});
 
 		}
-
-
 	} catch (err) {
 		context.addError(0, t('ERR_LINTER_CRASH', err.message));
-		return { errors: context.errors, variables: new Map(), assignedVars: new Map() };
 	}
 
 	// =========================================================================
-	// 🚀 FIX: De "mispl-ignore" functionaliteit (NU IN DE JUISTE SCOPE!)
+	// 🚀 De "mispl-ignore" functionaliteit
 	// =========================================================================
 	let finalErrors = context.errors;
 
@@ -2226,27 +2345,27 @@ function analyze(astOrResult, rawText = "") {
 		const textLines = safeText.split(/\r?\n/);
 
 		finalErrors = context.errors.filter(issue => {
-			if (issue.line === 0) return true; // Globale fouten altijd laten staan
+			if (issue.line === 0) return true;
 
 			const idx = Number(issue.line);
-
-			// We checken de regel zélf, de regel erboven, én de regel eronder.
-			// Zo maakt het niet meer uit of de engine 0-based of 1-based telt!
 			const lineStr = (textLines[idx - 2] || "") +
 				(textLines[idx - 1] || "") +
 				(textLines[idx] || "");
 
-			// Zit de tag ergens in deze regio? Dan gooien we de fout weg (return false)
 			return !lineStr.includes("/*Ign@re*/");
 		});
 	}
-	// =========================================================================
 
-	// Geef expliciet de nieuwe, gefilterde lijst terug!
+	// =========================================================================
+	// 🤖 Genereer de samenvatting (Nu veilig in de hoofd-scope!)
+	// =========================================================================
+	const autoSummary = generateLocalSummary(context, codeZonderCommentaar);
+
 	return {
 		errors: finalErrors,
 		variables: astOrResult.variables || new Map(),
-		assignedVars: context.assignedVars
+		assignedVars: context.assignedVars,
+		summary: autoSummary
 	};
 }
 

@@ -1,22 +1,21 @@
-// ./features/removeUnusedVariables.js
 const { parseMISPL, analyze } = require("../analyzeMISPL"); 
 const { t } = require("../i18n"); 
 
 function removeUnusedVariablesText(text) {
     if (!text) return "";
 
+    // 1. Vraag de AST (linter) om exact te vertellen wat er ongebruikt is
     const parseResult = parseMISPL(text);
     const analysisResult = analyze(parseResult, text);
     const errors = analysisResult.errors || analysisResult; 
 
     const unusedVars = new Set();
-    
-    // 🌍 TAALONAFHANKELIJK ZOEKEN: Robuuste check op begin én eind van de zin
     const unusedTemplate = t('WARN_VAR_DECLARED_NOT_USED', '@@@');
     const unusedParts = unusedTemplate.split('@@@');
     const unusedPrefix = unusedParts[0];
     const unusedSuffix = unusedParts.length > 1 ? unusedParts[1] : '';
 
+    // Verzamel de namen uit de storingsmeldingen
     for (const err of errors) {
         if (err && err.message && 
             err.message.includes(unusedPrefix) && 
@@ -24,91 +23,44 @@ function removeUnusedVariablesText(text) {
             
             const match = err.message.match(/'([^']+)'/);
             if (match) {
-                unusedVars.add(match[1]); // Sla op in een efficiënte Set
+                unusedVars.add(match[1].toLowerCase());
             }
         }
     }
 
-    if (unusedVars.size === 0) {
-        return text;
-    }
+    if (unusedVars.size === 0) return text; // Niets te doen!
 
-    // ============================================================================
-    // 🚀 DEFINITIEVE FIX: Lijn-voor-lijn verwerking met Depth-Aware Comment Check
-    // ============================================================================
-    
-    const lines = text.split(/\r?\n/);
-    let inBlockComment = false;
-    let inDeclarationZone = true; // We mogen declaraties aanpassen totdat we uitvoerende code zien
-    
+    // 2. Loop door de code en verwijder EXACT deze variabelen
+    let lines = text.split(/\r?\n/);
+    const declRegex = /^(\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s+([a-zA-Z_][a-zA-Z0-9_]*\s*(?:,\s*[a-zA-Z_][a-zA-Z0-9_]*\s*)*);(.*)$/i;
+    const reservedKeywords = new Set(["RETURN", "IF", "WHILE", "REPEAT", "UNTIL", "ELSE", "THEN", "DO", "DONE", "ENDIF"]);
+
     for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-        let originalLine = line;
+        // Gebruik de slimme regex op de hele regel
+        const match = declRegex.exec(lines[i]); 
 
-        // 1. Houd Block Comments Bij (/* ... */)
-        if (!inBlockComment && line.includes('/*')) {
-            // Begint er een commentaarblok?
-            const commentStart = line.indexOf('/*');
-            const commentEnd = line.indexOf('*/', commentStart + 2);
-            
-            if (commentEnd === -1) {
-                inBlockComment = true; // Gaat door op volgende regel
-                continue; // Skip the rest of this line
-            }
-            // Als het opent én sluit op dezelfde regel, doen we even alsof het niet bestaat
-            line = line.substring(0, commentStart) + line.substring(commentEnd + 2);
-        } else if (inBlockComment) {
-            if (line.includes('*/')) {
-                inBlockComment = false;
-                line = line.substring(line.indexOf('*/') + 2); // Pak alles ná de sluiter
+        if (match && !reservedKeywords.has(match[2].toUpperCase())) {
+            const indent = match[1] || "";
+            const dataType = match[2];
+            const varListStr = match[3];
+            const suffix = match[4] || "";
+
+            // Splits op komma (met optionele spaties)
+            const vars = varListStr.split(/\s*,\s*/).map(v => v.trim()).filter(Boolean);
+
+            // Hou alleen de variabelen over die NIET in het unusedVars lijstje van de linter staan
+            const keptVars = vars.filter(v => !unusedVars.has(v.toLowerCase()));
+
+            if (keptVars.length === 0) {
+                // Hele regel is nutteloos geworden
+                lines[i] = null;
             } else {
-                continue; // Skip volledige commentaar-regel
-            }
-        }
-
-        // Als we hier zijn, kijken we naar actieve, niet-commentaar code
-        const trimmedLine = line.trim();
-        if (trimmedLine.length === 0) continue;
-
-        // Zodra we een toewijzing (:=) of instructie zien, stopt de declaratie-zone
-        if (/:=|\b(IF|WHILE|REPEAT|RETURN)\b/i.test(trimmedLine)) {
-            inDeclarationZone = false;
-            break; // Geen declaraties meer te vinden, stop de loop voor snelheid
-        }
-
-        // Zitten we in de declaratie-zone én begint de regel met een data-type?
-        if (inDeclarationZone && /^\b(?:String|Integer|Logical|Fractional|Date|Time|DateTime|Mnemonic|Object|Result|Order|Specimen|Person|Correspondent|Action|ResultStatus)\b/i.test(trimmedLine)) {
-            
-            let modifiedLine = originalLine;
-
-            for (let uv of unusedVars) {
-                // Veilig de variabele verwijderen. We accepteren spaties en komma's
-                const varRegex = new RegExp(`\\b${uv}\\b\\s*,?\\s*`, 'g');
-                modifiedLine = modifiedLine.replace(varRegex, '');
-            }
-
-            // Repareer eventueel achtergebleven komma-rommel
-            modifiedLine = modifiedLine.replace(/,\s*,/g, ',');         // Dubbele komma's: ,, -> ,
-            modifiedLine = modifiedLine.replace(/,\s*;/g, ';');         // Komma direct voor puntkomma: ,; -> ;
-            
-            // Verwijder zwevende komma direct na het datatype (b.v. "String ,")
-            modifiedLine = modifiedLine.replace(/(\b[a-zA-Z_]\w*\s+),\s*/, '$1'); 
-
-            // Als er niets meer over is behalve het datatype en een puntkomma, wis de hele regel
-            if (/^[a-zA-Z_]\w*\s*;$/.test(modifiedLine.trim())) {
-                modifiedLine = "";
-            }
-
-            // Sla de gewijzigde regel op, en verwijder de regel volledig als hij nu leeg is (terwijl hij dat eerst niet was)
-            if (modifiedLine.trim() === "" && originalLine.trim() !== "") {
-                lines[i] = null; 
-            } else {
-                lines[i] = modifiedLine;
+                // Herbouw de regel loepzuiver, met exact 1 spatie na elke komma
+                lines[i] = `${indent}${dataType} ${keptVars.join(", ")};${suffix}`;
             }
         }
     }
 
-    // Voeg alles weer samen, sla de `null` regels over
     return lines.filter(l => l !== null).join('\n');
 }
 

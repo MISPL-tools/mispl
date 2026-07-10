@@ -2,7 +2,7 @@
 	"name": "mispl",
 	"displayName": "MISPL Toolkit",
 	"description": "Language support, formatting, static debug, flowcharts and tools for MISPL / GLIMS",
-	"version": "3.1.1",
+	"version": "3.2.1",
 	"icon": "icon.png",
 	"publisher": "dirkkoppenaal",
 	"repository": {
@@ -114,6 +114,10 @@
 			{
 				"command": "mispl.extractVariable",
 				"title": "MISPL: Extract to Variable"
+			},
+			{
+				"command": "mispl.addSummary",
+				"title": "MISPL: Add Summary to MISPL"
 			}
 		],
 		"keybindings": [
@@ -224,6 +228,11 @@
 					"command": "mispl.printAst",
 					"group": "mispl_4_visualize@3",
 					"when": "editorLangId == 'mispl'"
+				},
+				{
+					"command": "mispl.addSummary",
+					"when": "resourceExtname == '.mispl' || editorLangId == 'mispl'",
+					"group": "mispl_tools@4"
 				},
 				{
 					"command": "mispl.injectValidationFlow",

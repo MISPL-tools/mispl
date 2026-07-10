@@ -43,461 +43,535 @@ const registerCompletionProvider = require("./features/completionProvider");
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-    // 🌍 TAAL INSTELLEN (i18n) - Dit doen we eerst, zodat outputs meteen de juiste taal hebben
-    const config = vscode.workspace.getConfiguration('mispl');
-    const langSetting = config.get('language');
-    if (langSetting === "Auto (Systeemtaal)") {
-        // Pak de eerste twee letters van de VS Code systeemtaal (bijv 'nl' uit 'nl-NL')
-        setLanguage(vscode.env.language.split('-')[0]);
-    } else {
-        // Forceer de gekozen taal ('nl', 'en', 'fr', of 'de')
-        setLanguage(langSetting);
-    }
+	// 🌍 TAAL INSTELLEN (i18n) - Dit doen we eerst, zodat outputs meteen de juiste taal hebben
+	const config = vscode.workspace.getConfiguration('mispl');
+	const langSetting = config.get('language');
+	if (langSetting === "Auto (Systeemtaal)") {
+		// Pak de eerste twee letters van de VS Code systeemtaal (bijv 'nl' uit 'nl-NL')
+		setLanguage(vscode.env.language.split('-')[0]);
+	} else {
+		// Forceer de gekozen taal ('nl', 'en', 'fr', of 'de')
+		setLanguage(langSetting);
+	}
 
-    // --- LINTER STATUS IN OUTPUT CONSOLE ---
-    const outputChannel = vscode.window.createOutputChannel("GLIMS MISPL Linter");
-    const initMessage = t('MSG_LINTER_ACTIVATED', VERSION || 'Unknown');
-    outputChannel.appendLine(initMessage);
-    console.log(`>>> ${initMessage}`);
+	// --- LINTER STATUS IN OUTPUT CONSOLE ---
+	const outputChannel = vscode.window.createOutputChannel("GLIMS MISPL Linter");
+	const initMessage = t('MSG_LINTER_ACTIVATED', VERSION || 'Unknown');
+	outputChannel.appendLine(initMessage);
+	console.log(`>>> ${initMessage}`);
 
-    // 🛡️ NIEUW: Haal de instelling op en laad de custom dictionary
-    const customDictPath = config.get('customDictionary');
-    if (customDictPath) {
-        loadCustomDictionary(customDictPath);
-        outputChannel.appendLine(t('MSG_CUSTOM_DICT_LOADED', customDictPath));
-    }
+	// 🛡️ NIEUW: Haal de instelling op en laad de custom dictionary
+	const customDictPath = config.get('customDictionary');
+	if (customDictPath) {
+		loadCustomDictionary(customDictPath);
+		outputChannel.appendLine(t('MSG_CUSTOM_DICT_LOADED', customDictPath));
+	}
 
-    // ... de rest van jouw bestaande activate code (bijv. context.subscriptions.push...)
-    console.log("Imported formatter");
-    console.log("Imported compactCode");
-    console.log("Imported minifier");
-    console.log("Imported alignAssignments");
-    console.log("Imported removeUnusedVariables");
-    console.log("Imported wrapInBlock");
-    console.log("Imported replaceWords");
-    console.log("Imported validationFlow");
-    console.log("Imported documentSymbolProvider");
-    console.log("Imported CodeActions");
-    console.log("Imported showActionMenu");
-    console.log("Imported misplToMermaid");
-    console.log("Imported getWebviewContent");
-    console.log("Imported parseMISPL");
-    console.log("Imported analyze");
-    console.log("Imported printAst");
+	// ... de rest van jouw bestaande activate code (bijv. context.subscriptions.push...)
+	console.log("Imported formatter");
+	console.log("Imported compactCode");
+	console.log("Imported minifier");
+	console.log("Imported alignAssignments");
+	console.log("Imported removeUnusedVariables");
+	console.log("Imported wrapInBlock");
+	console.log("Imported replaceWords");
+	console.log("Imported validationFlow");
+	console.log("Imported documentSymbolProvider");
+	console.log("Imported CodeActions");
+	console.log("Imported showActionMenu");
+	console.log("Imported misplToMermaid");
+	console.log("Imported getWebviewContent");
+	console.log("Imported parseMISPL");
+	console.log("Imported analyze");
+	console.log("Imported printAst");
 
 
-    // =====================================================================
-    // DIAGNOSTICS
-    // =====================================================================
-    const diagnosticCollection = vscode.languages.createDiagnosticCollection("mispl");
-    context.subscriptions.push(diagnosticCollection);
+	// =====================================================================
+	// DIAGNOSTICS
+	// =====================================================================
+	const diagnosticCollection = vscode.languages.createDiagnosticCollection("mispl");
+	context.subscriptions.push(diagnosticCollection);
 
-    function toVSSeverity(sev) {
-        if (sev === 8 || sev === "error") return vscode.DiagnosticSeverity.Error;
-        if (sev === 4 || sev === "warning") return vscode.DiagnosticSeverity.Warning;
-        if (sev === 2 || sev === "info" || sev === "information")
-            return vscode.DiagnosticSeverity.Information;
-        return vscode.DiagnosticSeverity.Information;
-    }
+	function toVSSeverity(sev) {
+		if (sev === 8 || sev === "error") return vscode.DiagnosticSeverity.Error;
+		if (sev === 4 || sev === "warning") return vscode.DiagnosticSeverity.Warning;
+		if (sev === 2 || sev === "info" || sev === "information")
+			return vscode.DiagnosticSeverity.Information;
+		return vscode.DiagnosticSeverity.Information;
+	}
 
-    function runDiagnostics(document) {
-        if (!document || document.languageId !== "mispl") return;
+	function runDiagnostics(document) {
+		if (!document || document.languageId !== "mispl") return;
 
-        const code = document.getText();
-        let diagnostics = [];
+		const code = document.getText();
+		let diagnostics = [];
 
-        try {
-            const parseResult = parseMISPL(code) || {};
-            const ast = parseResult.ast;
-            const parseErrors = Array.isArray(parseResult.errors) ? parseResult.errors : [];
-            if (parseErrors.length) {
-                diagnostics.push(
-                    ...parseErrors.map(e => {
-                        const line = typeof e.line === "number" ? e.line : 0;
-                        return new vscode.Diagnostic(
-                            new vscode.Range(line, 0, line, 200),
-                            e.message || String(e),
-                            toVSSeverity(e.severity)
-                        );
-                    })
-                );
-            }
+		try {
+			const parseResult = parseMISPL(code) || {};
+			const ast = parseResult.ast;
+			const parseErrors = Array.isArray(parseResult.errors) ? parseResult.errors : [];
+			if (parseErrors.length) {
+				diagnostics.push(
+					...parseErrors.map(e => {
+						const line = typeof e.line === "number" ? e.line : 0;
+						return new vscode.Diagnostic(
+							new vscode.Range(line, 0, line, 200),
+							e.message || String(e),
+							toVSSeverity(e.severity)
+						);
+					})
+				);
+			}
 
-            if (ast && parseErrors.length === 0) {
-                let analysisErrors = [];
-                try {
-                    // Vanaf v2.60.10 geeft dit een Object terug: { errors: [...], variables: Map }
-                    const analysisResult = analyze(parseResult, code);
+			if (ast && parseErrors.length === 0) {
+				let analysisErrors = [];
+				try {
+					// Vanaf v2.60.10 geeft dit een Object terug: { errors: [...], variables: Map }
+					const analysisResult = analyze(parseResult, code);
 
-                    // Haal de lijst met fouten expliciet uit het object!
-                    analysisErrors = analysisResult.errors || [];
-                } catch (inner) {
-                    console.error("UNEXPECTED STATIC ANALYSIS ERROR (analyzer):", inner);
-                    analysisErrors = [
-                        {
-                            line: 0,
-                            message: t('ERR_STATIC_ANALYSIS_UNEXPECTED', String(inner)),
-                            severity: "error"
-                        }
-                    ];
-                }
+					// Haal de lijst met fouten expliciet uit het object!
+					analysisErrors = analysisResult.errors || [];
+				} catch (inner) {
+					console.error("UNEXPECTED STATIC ANALYSIS ERROR (analyzer):", inner);
+					analysisErrors = [
+						{
+							line: 0,
+							message: t('ERR_STATIC_ANALYSIS_UNEXPECTED', String(inner)),
+							severity: "error"
+						}
+					];
+				}
 
-                // Gebruik hier de 'analysisErrors' lijst, NIET het analysisResult object
-                diagnostics.push(
-                    ...analysisErrors.map(r => {
-                        const line = typeof r.line === "number" ? r.line : 0;
-                        return new vscode.Diagnostic(
-                            new vscode.Range(line, 0, line, 200),
-                            r.message || String(r),
-                            toVSSeverity(r.severity)
-                        );
-                    })
-                );
-            }
-        } catch (err) {
-            console.error("UNEXPECTED STATIC ANALYSIS ERROR (wrapper):", err);
-            diagnostics = [
-                new vscode.Diagnostic(
-                    new vscode.Range(0, 0, 0, 1),
-                    t('ERR_STATIC_ANALYSIS_UNEXPECTED', String(err)),
-                    vscode.DiagnosticSeverity.Error
-                )
-            ];
-        }
-        diagnosticCollection.set(document.uri, diagnostics);
-    }
+				// Gebruik hier de 'analysisErrors' lijst, NIET het analysisResult object
+				diagnostics.push(
+					...analysisErrors.map(r => {
+						const line = typeof r.line === "number" ? r.line : 0;
+						return new vscode.Diagnostic(
+							new vscode.Range(line, 0, line, 200),
+							r.message || String(r),
+							toVSSeverity(r.severity)
+						);
+					})
+				);
+			}
+		} catch (err) {
+			console.error("UNEXPECTED STATIC ANALYSIS ERROR (wrapper):", err);
+			diagnostics = [
+				new vscode.Diagnostic(
+					new vscode.Range(0, 0, 0, 1),
+					t('ERR_STATIC_ANALYSIS_UNEXPECTED', String(err)),
+					vscode.DiagnosticSeverity.Error
+				)
+			];
+		}
+		diagnosticCollection.set(document.uri, diagnostics);
+	}
 
-    // --- DE VERNIEUWDE LUISTERVINKEN ---
-    context.subscriptions.push(
-        // 1. Bij openen (of als je de taal van Plain Text naar MISPL verandert)
-        vscode.workspace.onDidOpenTextDocument(doc => runDiagnostics(doc)),
-        // 2. Bij typen
-        vscode.workspace.onDidChangeTextDocument(e => runDiagnostics(e.document)),
-        // 3. Bij opslaan
-        vscode.workspace.onDidSaveTextDocument(doc => runDiagnostics(doc)),
-        // 4. DE FIX: Bij het wisselen van tabblad! (Bijv. naar Untitled-2 klikken)
-        vscode.window.onDidChangeActiveTextEditor(editor => {
-            if (editor) {
-                runDiagnostics(editor.document);
-            }
-        }),
-        // 5. Ruim de foutmeldingen netjes op als we de tab sluiten
-        vscode.workspace.onDidCloseTextDocument(doc => {
-            diagnosticCollection.delete(doc.uri);
-        })
-    );
+	// --- DE VERNIEUWDE LUISTERVINKEN ---
+	context.subscriptions.push(
+		// 1. Bij openen (of als je de taal van Plain Text naar MISPL verandert)
+		vscode.workspace.onDidOpenTextDocument(doc => runDiagnostics(doc)),
+		// 2. Bij typen
+		vscode.workspace.onDidChangeTextDocument(e => runDiagnostics(e.document)),
+		// 3. Bij opslaan
+		vscode.workspace.onDidSaveTextDocument(doc => runDiagnostics(doc)),
+		// 4. DE FIX: Bij het wisselen van tabblad! (Bijv. naar Untitled-2 klikken)
+		vscode.window.onDidChangeActiveTextEditor(editor => {
+			if (editor) {
+				runDiagnostics(editor.document);
+			}
+		}),
+		// 5. Ruim de foutmeldingen netjes op als we de tab sluiten
+		vscode.workspace.onDidCloseTextDocument(doc => {
+			diagnosticCollection.delete(doc.uri);
+		})
+	);
 
-    // 6. DE FIX: Scan direct álle openstaande bestanden als VS Code opstart!
-    if (vscode.window.activeTextEditor) {
-        runDiagnostics(vscode.window.activeTextEditor.document);
-    }
-    vscode.workspace.textDocuments.forEach(doc => {
-        runDiagnostics(doc);
-    });
+	// 6. DE FIX: Scan direct álle openstaande bestanden als VS Code opstart!
+	if (vscode.window.activeTextEditor) {
+		runDiagnostics(vscode.window.activeTextEditor.document);
+	}
+	vscode.workspace.textDocuments.forEach(doc => {
+		runDiagnostics(doc);
+	});
 
-    context.subscriptions.push(
-        vscode.commands.registerCommand("mispl.showStaticAnalysis", () => {
-            const editor = vscode.window.activeTextEditor;
-            if (editor) {
-                runDiagnostics(editor.document);
-                vscode.window.showInformationMessage(t('MSG_STATIC_ANALYSIS_DONE'));
-            }
-        })
-    );
+	context.subscriptions.push(
+		vscode.commands.registerCommand("mispl.showStaticAnalysis", () => {
+			const editor = vscode.window.activeTextEditor;
+			if (editor) {
+				runDiagnostics(editor.document);
+				vscode.window.showInformationMessage(t('MSG_STATIC_ANALYSIS_DONE'));
+			}
+		})
+	);
 
-    // =====================================================================
-    // FORMATTER
-    // =====================================================================
-    context.subscriptions.push(
-        vscode.languages.registerDocumentFormattingEditProvider("mispl", {
-            provideDocumentFormattingEdits(document) {
-                // 🛡️ NIEUW: Haal de gekozen stijl op uit de instellingen
-                const config = vscode.workspace.getConfiguration('mispl');
-                const style = config.get('formattingStyle') || "Standaard (UMC Utrecht)";
+	// =====================================================================
+	// FORMATTER
+	// =====================================================================
+	context.subscriptions.push(
+		vscode.languages.registerDocumentFormattingEditProvider("mispl", {
+			provideDocumentFormattingEdits(document) {
+				// 🛡️ NIEUW: Haal de gekozen stijl op uit de instellingen
+				const config = vscode.workspace.getConfiguration('mispl');
+				const style = config.get('formattingStyle') || "Standaard (UMC Utrecht)";
 
-                // Geef de gekozen stijl door aan de formatter
-                const formatted = formatMISPL(document.getText(), style);
+				// Geef de gekozen stijl door aan de formatter
+				const formatted = formatMISPL(document.getText(), style);
 
-                return [
-                    vscode.TextEdit.replace(
-                        new vscode.Range(
-                            document.lineAt(0).range.start,
-                            document.lineAt(document.lineCount - 1).range.end
-                        ),
-                        formatted
-                    )
-                ];
-            }
-        })
-    );
+				return [
+					vscode.TextEdit.replace(
+						new vscode.Range(
+							document.lineAt(0).range.start,
+							document.lineAt(document.lineCount - 1).range.end
+						),
+						formatted
+					)
+				];
+			}
+		})
+	);
 
-    // =====================================================================
-    // COMMANDS
-    // =====================================================================
+	// =====================================================================
+	// COMMANDS
+	// =====================================================================
 
-    function registerCommand(name, callback) {
-        context.subscriptions.push(vscode.commands.registerCommand(name, callback));
-    }
+	function registerCommand(name, callback) {
+		context.subscriptions.push(vscode.commands.registerCommand(name, callback));
+	}
 
-    registerCommand("mispl.compactCode", () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
-        const doc = editor.document;
-        const newText = compactCode(doc.getText());
-        editor.edit(edit => {
-            edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
-        });
-    });
+	registerCommand("mispl.compactCode", () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) return;
+		const doc = editor.document;
+		const newText = compactCode(doc.getText());
+		editor.edit(edit => {
+			edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
+		});
+	});
 
-    // Start het MISPL Actiemenu (Statusbalk knop)
-    createStatusBarItem(context);
-    registerCommand("mispl.showActionMenu", showActionMenu);
-    // Start de Slimme Autocomplete / Dynamische Snippets
-    registerCompletionProvider(context);
+	// Start het MISPL Actiemenu (Statusbalk knop)
+	createStatusBarItem(context);
+	registerCommand("mispl.showActionMenu", showActionMenu);
+	// Start de Slimme Autocomplete / Dynamische Snippets
+	registerCompletionProvider(context);
 
-    registerCommand("mispl.minifier", () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
-        const doc = editor.document;
-        const newText = minifier(doc.getText());
-        editor.edit(edit => {
-            edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
-        });
-    });
+	registerCommand("mispl.minifier", () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) return;
+		const doc = editor.document;
+		const newText = minifier(doc.getText());
+		editor.edit(edit => {
+			edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
+		});
+	});
 
-    registerCommand("mispl.alignAssignments", () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
-        const sel = editor.selection;
-        const aligned = alignAssignments(editor.document.getText(sel));
-        editor.edit(edit => edit.replace(sel, aligned));
-    });
+	registerCommand("mispl.alignAssignments", () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) return;
+		const sel = editor.selection;
+		const aligned = alignAssignments(editor.document.getText(sel));
+		editor.edit(edit => edit.replace(sel, aligned));
+	});
 
-    registerCommand("mispl.removeUnusedVariables", () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
-        const doc = editor.document;
-        const newText = removeUnusedVariablesText(doc.getText());
-        editor.edit(edit => {
-            edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
-        });
-    });
+	registerCommand("mispl.removeUnusedVariables", () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) return;
+		const doc = editor.document;
+		const newText = removeUnusedVariablesText(doc.getText());
+		editor.edit(edit => {
+			edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
+		});
+	});
 
-    registerCommand("mispl.replaceWords", () => replaceWords(context));
-    // Magic Debugger Commando
-    registerCommand("mispl.magicDebug", insertMagicDebug);
+	registerCommand("mispl.replaceWords", () => replaceWords(context));
+	// Magic Debugger Commando
+	registerCommand("mispl.magicDebug", insertMagicDebug);
 
-    // Start de IntelliSense Hover Provider
-    registerHoverProvider(context);
-    // Start de Outline / Document Symbol Provider (Code-Map)
-    registerDocumentSymbolProvider(context);
-    // Start de Context-Sensitive Help (Gloeilamp / Quick Fixes)
-    registerCodeActions(context);
+	// Start de IntelliSense Hover Provider
+	registerHoverProvider(context);
+	// Start de Outline / Document Symbol Provider (Code-Map)
+	registerDocumentSymbolProvider(context);
+	// Start de Context-Sensitive Help (Gloeilamp / Quick Fixes)
+	registerCodeActions(context);
 
-    // Refactoring Commando
-    registerCommand("mispl.extractVariable", extractToVariable);
+	// Refactoring Commando
+	registerCommand("mispl.extractVariable", extractToVariable);
 
-    // Inpakker Commando (Wrap in IF/WHILE)
-    registerCommand("mispl.wrapInBlock", wrapInBlock);
+	// Inpakker Commando (Wrap in IF/WHILE)
+	registerCommand("mispl.wrapInBlock", wrapInBlock);
 
-    // NIEUW: Commands voor Validation Flow (Altijd vragen om ID)
-    let disposableInject = vscode.commands.registerCommand("mispl.injectValidationFlow", async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
+	// NIEUW: Commands voor Validation Flow (Altijd vragen om ID)
+	let disposableInject = vscode.commands.registerCommand("mispl.injectValidationFlow", async () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) return;
 
-        // Vraag ALTIJD om het MISPL ID met de uitgebreide instructie
-        const logId = await vscode.window.showInputBox({
-            prompt: t('PROMPT_INJECT_FLOW'),
-            placeHolder: t('PLACEHOLDER_INJECT_FLOW'),
-            ignoreFocusOut: true
-        });
+		// Vraag ALTIJD om het MISPL ID met de uitgebreide instructie
+		const logId = await vscode.window.showInputBox({
+			prompt: t('PROMPT_INJECT_FLOW'),
+			placeHolder: t('PLACEHOLDER_INJECT_FLOW'),
+			ignoreFocusOut: true
+		});
 
-        // Als de gebruiker op annuleren klikt of het veld leeg laat
-        if (!logId || logId.trim() === "") {
-            vscode.window.showWarningMessage(t('WARN_INJECT_CANCELLED'));
-            return;
-        }
+		// Als de gebruiker op annuleren klikt of het veld leeg laat
+		if (!logId || logId.trim() === "") {
+			vscode.window.showWarningMessage(t('WARN_INJECT_CANCELLED'));
+			return;
+		}
 
-        const doc = editor.document;
-        // Injecteer de tekst met het zojuist opgegeven logId
-        const newText = injectValidationFlow(doc.getText(), logId.trim());
+		const doc = editor.document;
+		// Injecteer de tekst met het zojuist opgegeven logId
+		const newText = injectValidationFlow(doc.getText(), logId.trim());
 
-        editor.edit(edit => {
-            edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
-        });
-        vscode.window.showInformationMessage(t('MSG_INJECT_SUCCESS', logId.trim()));
-    });
-    context.subscriptions.push(disposableInject);
+		editor.edit(edit => {
+			edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
+		});
+		vscode.window.showInformationMessage(t('MSG_INJECT_SUCCESS', logId.trim()));
+	});
+	context.subscriptions.push(disposableInject);
 
-    registerCommand("mispl.removeValidationFlow", () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
-        const doc = editor.document;
-        const newText = removeValidationFlow(doc.getText());
-        editor.edit(edit => {
-            edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
-        });
-        vscode.window.showInformationMessage(t('MSG_REMOVE_FLOW_SUCCESS'));
-    });
+	registerCommand("mispl.removeValidationFlow", () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) return;
+		const doc = editor.document;
+		const newText = removeValidationFlow(doc.getText());
+		editor.edit(edit => {
+			edit.replace(new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length)), newText);
+		});
+		vscode.window.showInformationMessage(t('MSG_REMOVE_FLOW_SUCCESS'));
+	});
 
-    // Commando: Coverage Analyzer (leest van klembord)
-    let disposableCoverage = vscode.commands.registerCommand('mispl.analyzeCoverage', async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage(t('ERR_COVERAGE_NO_FILE'));
-            return;
-        }
+	// Commando: Coverage Analyzer (leest van klembord)
+	let disposableCoverage = vscode.commands.registerCommand('mispl.analyzeCoverage', async () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			vscode.window.showErrorMessage(t('ERR_COVERAGE_NO_FILE'));
+			return;
+		}
 
-        // 1. Lees het klembord van de gebruiker (waar de GLIMS logs inzitten)
-        const logText = await vscode.env.clipboard.readText();
+		// 1. Lees het klembord van de gebruiker (waar de GLIMS logs inzitten)
+		const logText = await vscode.env.clipboard.readText();
 
-        if (!logText || !logText.includes("|")) {
-            vscode.window.showWarningMessage(t('WARN_COVERAGE_NO_LOGS'));
-            return;
-        }
+		if (!logText || !logText.includes("|")) {
+			vscode.window.showWarningMessage(t('WARN_COVERAGE_NO_LOGS'));
+			return;
+		}
 
-        const misplCode = editor.document.getText();
+		const misplCode = editor.document.getText();
 
-        // 2. Genereer het rapport
-        const reportMd = generateCoverageReport(misplCode, logText, "Huidige MISPL");
+		// 2. Genereer het rapport
+		const reportMd = generateCoverageReport(misplCode, logText, "Huidige MISPL");
 
-        // 3. Open het rapport in een nieuw scherm ernaast
-        const doc = await vscode.workspace.openTextDocument({
-            content: reportMd,
-            language: 'markdown'
-        });
-        vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
-    });
+		// 3. Open het rapport in een nieuw scherm ernaast
+		const doc = await vscode.workspace.openTextDocument({
+			content: reportMd,
+			language: 'markdown'
+		});
+		vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
+	});
 
-    context.subscriptions.push(disposableCoverage);
+	context.subscriptions.push(disposableCoverage);
 
-    // =====================================================================
-    // FLOWCHART WEBVIEW
-    // =====================================================================
-    let flowchartPanel = undefined;
+	// =========================================================================
+	// ✨ NIEUW COMMANDO: Voeg MISPL Samenvatting toe
+	// =========================================================================
+	let addSummaryDisposable = vscode.commands.registerCommand('mispl.addSummary', async () => {
+		try {
+			const editor = vscode.window.activeTextEditor;
+			if (!editor) {
+				vscode.window.showWarningMessage("Geen actief MISPL bestand gevonden.");
+				return;
+			}
 
-    function showFlowchart(text, title) {
-        let mermaid = "";
-        let meta = {};
+			const document = editor.document;
+			const text = document.getText();
 
-        try {
-            const raw = misplToMermaid(text);
-            if (typeof raw === "string") mermaid = raw;
-            else if (raw && typeof raw === "object" && raw.mermaid) {
-                mermaid = raw.mermaid;
-                meta = raw.nodeMeta ?? {};
-            }
-        } catch (e) {
-            vscode.window.showErrorMessage(t('ERR_MERMAID_CONVERT', String(e)));
-            return;
-        }
+			// 1. Haal de samenvatting op via onze linter
+			// We gebruiken de functies 'analyze' en 'parseMISPL' die we bovenaan al hebben geïmporteerd!
+			// DOOR parseMISPL te gebruiken, krijgt de samenvatter écht inzicht in de tabellen en objecten.
+			const parseResult = parseMISPL(text);
+			const analysis = analyze(parseResult, text);
+			const labelActies = t('SUMMARY_LABEL_ACTIES');
 
-        if (!flowchartPanel) {
-            flowchartPanel = vscode.window.createWebviewPanel(
-                "misplFlowchart",
-                title,
-                vscode.ViewColumn.Beside,
-                { enableScripts: true, retainContextWhenHidden: true }
-            );
+			const summaryText = `   ${labelActies}\n   ${analysis.summary.split('\n').join('\n   ')}\n`;
 
-            flowchartPanel.webview.html = getWebviewContent(
-                flowchartPanel.webview,
-                context.extensionUri,
-                { mermaid },
-                meta
-            );
+			// 2. Pas het document veilig aan
+			const success = await editor.edit(editBuilder => {
+				const firstLine = document.lineAt(0);
+				const firstLineText = firstLine.text.trim();
 
-            flowchartPanel.onDidDispose(() => (flowchartPanel = undefined));
+				// 🚀 FIX 1: Is het uitsluitend een leeg (one-line) commentaarblok?
+				if (firstLineText === "/**/" || firstLineText === "/* */") {
+					const fullCommentBlock = `/* =========================================================================\n${summaryText}========================================================================= */`;
+					editBuilder.replace(firstLine.range, fullCommentBlock);
+					return; // Stop hier, we zijn direct klaar.
+				}
 
-            flowchartPanel.webview.onDidReceiveMessage(msg => {
-                if (msg.type === "nodeClicked") {
-                    const editor = vscode.window.activeTextEditor;
-                    if (!editor) return;
+				const hasHeaderComment = firstLineText.startsWith("/*");
 
-                    const line = msg.meta?.line;
-                    if (typeof line === "number") {
-                        const pos = new vscode.Position(line, 0);
-                        editor.selection = new vscode.Selection(pos, pos);
-                        editor.revealRange(new vscode.Range(pos, pos));
-                    }
-                }
-            });
-        } else {
-            flowchartPanel.title = title;
-            flowchartPanel.webview.postMessage({
-                type: "updateDiagram",
-                mermaid,
-                meta
-            });
-        }
-    }
+				if (hasHeaderComment && document.lineCount > 1) {
+					// Er is al een commentaarblok bovenaan
+					const line2 = document.lineAt(1);
+					const line2Clean = line2.text.trim().replace(/^[\/\*\s]+|[\*\/\s]+$/g, '').trim().toUpperCase();
 
-    registerCommand("mispl.showFlowchart", () => {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) showFlowchart(editor.document.getText(), "MISPL Flowchart");
-    });
+					const verouderdeLabels = ["DOEL", "DOEL/WERKING", "DOEL/ WERKING", "SUMMARY", "MISPL-ACTIES", "MISPL ACTIES"];
 
-    registerCommand("mispl.showSelectedFlowchart", () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
+					// 🚀 FIX 2: Check of de tweede regel direct de afsluiter '*/' is
+					if (line2.text.trim() === "*/") {
+						editBuilder.insert(new vscode.Position(1, 0), summaryText);
+					}
+					else if (verouderdeLabels.includes(line2Clean)) {
+						// Overschrijf de oude 'Doel' regel
+						editBuilder.replace(line2.rangeIncludingLineBreak, summaryText);
+					} else {
+						// Schuif het netjes in op regel 2
+						editBuilder.insert(new vscode.Position(1, 0), summaryText);
+					}
+				} else {
+					// Geen (of onbruikbaar) commentaarblok aanwezig? Maak een gloednieuwe header!
+					const fullCommentBlock = `/* =========================================================================\n${summaryText}========================================================================= */\n\n`;
+					editBuilder.insert(new vscode.Position(0, 0), fullCommentBlock);
+				}
+			});
 
-        const selection = editor.document.getText(editor.selection);
-        if (!selection.trim()) {
-            vscode.window.showInformationMessage(t('INFO_NO_MISPL_SELECTED'));
-            return;
-        }
 
-        showFlowchart(selection, "MISPL Flowchart (Selectie)");
-    });
+			if (success) {
+				// Geef een klein pop-upje rechtsonder in beeld ter bevestiging
+				vscode.window.showInformationMessage(t('MSG_SUMMARY_ADDED'));
+			}
+		} catch (err) {
+			console.error("Fout bij genereren samenvatting:", err);
+			vscode.window.showErrorMessage("Mislukt om samenvatting te maken: " + err.message);
+		}
+	});
+	context.subscriptions.push(addSummaryDisposable);
 
-    // =====================================================================
-    // NEW FEATURE: SHOW AST
-    // =====================================================================
-    registerCommand("mispl.printAst", async (uri) => {
-        try {
-            let source = "";
-            const editor = vscode.window.activeTextEditor;
+	// =====================================================================
+	// FLOWCHART WEBVIEW
+	// =====================================================================
+	let flowchartPanel = undefined;
 
-            if (editor && editor.document.languageId === "mispl") {
-                source = editor.document.getText();
-            }
-            else if (uri && uri.fsPath) {
-                const fs = require("fs");
-                if (fs.existsSync(uri.fsPath) && fs.lstatSync(uri.fsPath).isFile()) {
-                    source = fs.readFileSync(uri.fsPath, "utf8");
-                } else {
-                    vscode.window.showWarningMessage(t('WARN_AST_NO_FILE'));
-                    return;
-                }
-            } else {
-                vscode.window.showErrorMessage(t('ERR_AST_NO_FILE'));
-                return;
-            }
+	function showFlowchart(text, title) {
+		let mermaid = "";
+		let meta = {};
 
-            const result = parseMISPL(source);
-            if (!result || !result.ast) {
-                vscode.window.showErrorMessage(t('ERR_AST_NO_GEN'));
-                return;
-            }
+		try {
+			const raw = misplToMermaid(text);
+			if (typeof raw === "string") mermaid = raw;
+			else if (raw && typeof raw === "object" && raw.mermaid) {
+				mermaid = raw.mermaid;
+				meta = raw.nodeMeta ?? {};
+			}
+		} catch (e) {
+			vscode.window.showErrorMessage(t('ERR_MERMAID_CONVERT', String(e)));
+			return;
+		}
 
-            const astText = printAst(result.ast);
+		if (!flowchartPanel) {
+			flowchartPanel = vscode.window.createWebviewPanel(
+				"misplFlowchart",
+				title,
+				vscode.ViewColumn.Beside,
+				{ enableScripts: true, retainContextWhenHidden: true }
+			);
 
-            const doc = await vscode.workspace.openTextDocument({
-                content: astText,
-                language: "plaintext"
-            });
-            await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+			flowchartPanel.webview.html = getWebviewContent(
+				flowchartPanel.webview,
+				context.extensionUri,
+				{ mermaid },
+				meta
+			);
 
-        } catch (err) {
-            console.error("AST Error:", err);
-            vscode.window.showErrorMessage(t('ERR_AST_FAIL', err.message));
-        }
-    });
+			flowchartPanel.onDidDispose(() => (flowchartPanel = undefined));
+
+			flowchartPanel.webview.onDidReceiveMessage(msg => {
+				if (msg.type === "nodeClicked") {
+					const editor = vscode.window.activeTextEditor;
+					if (!editor) return;
+
+					const line = msg.meta?.line;
+					if (typeof line === "number") {
+						const pos = new vscode.Position(line, 0);
+						editor.selection = new vscode.Selection(pos, pos);
+						editor.revealRange(new vscode.Range(pos, pos));
+					}
+				}
+			});
+		} else {
+			flowchartPanel.title = title;
+			flowchartPanel.webview.postMessage({
+				type: "updateDiagram",
+				mermaid,
+				meta
+			});
+		}
+	}
+
+	registerCommand("mispl.showFlowchart", () => {
+		const editor = vscode.window.activeTextEditor;
+		if (editor) showFlowchart(editor.document.getText(), "MISPL Flowchart");
+	});
+
+	registerCommand("mispl.showSelectedFlowchart", () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) return;
+
+		const selection = editor.document.getText(editor.selection);
+		if (!selection.trim()) {
+			vscode.window.showInformationMessage(t('INFO_NO_MISPL_SELECTED'));
+			return;
+		}
+
+		showFlowchart(selection, "MISPL Flowchart (Selectie)");
+	});
+
+	// =====================================================================
+	// NEW FEATURE: SHOW AST
+	// =====================================================================
+	registerCommand("mispl.printAst", async (uri) => {
+		try {
+			let source = "";
+			const editor = vscode.window.activeTextEditor;
+
+			if (editor && editor.document.languageId === "mispl") {
+				source = editor.document.getText();
+			}
+			else if (uri && uri.fsPath) {
+				const fs = require("fs");
+				if (fs.existsSync(uri.fsPath) && fs.lstatSync(uri.fsPath).isFile()) {
+					source = fs.readFileSync(uri.fsPath, "utf8");
+				} else {
+					vscode.window.showWarningMessage(t('WARN_AST_NO_FILE'));
+					return;
+				}
+			} else {
+				vscode.window.showErrorMessage(t('ERR_AST_NO_FILE'));
+				return;
+			}
+
+			const result = parseMISPL(source);
+			if (!result || !result.ast) {
+				vscode.window.showErrorMessage(t('ERR_AST_NO_GEN'));
+				return;
+			}
+
+			const astText = printAst(result.ast);
+
+			const doc = await vscode.workspace.openTextDocument({
+				content: astText,
+				language: "plaintext"
+			});
+			await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+
+		} catch (err) {
+			console.error("AST Error:", err);
+			vscode.window.showErrorMessage(t('ERR_AST_FAIL', err.message));
+		}
+	});
 
 }
 
 function deactivate() {
-    console.log(">>> MISPL EXTENSION DEACTIVATED");
+	console.log(">>> MISPL EXTENSION DEACTIVATED");
 }
 
 module.exports = { activate, deactivate };
