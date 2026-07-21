@@ -2318,11 +2318,11 @@
 				"type": "Field"
 			},
 			"ISSUER": {
-				"returns": "INTEGER",
+				"returns": "CORRESPONDENT",
 				"type": "Field"
 			},
 			"AGENT": {
-				"returns": "INTEGER",
+				"returns": "CORRESPONDENT",
 				"type": "Field"
 			},
 			"EXTERNALID": {
@@ -6200,11 +6200,19 @@
 			}
 		},
 		"CORRESPONDENT": {
-			"ID": {
-				"returns": "INTEGER",
+			"ACCOUNT": {
+				"returns": "ACCOUNT",
 				"type": "Field"
 			},
-			"INTERNALID": {
+			"ACTIVESINCE": {
+				"returns": "DATE",
+				"type": "Field"
+			},
+			"ACTIVEUNTIL": {
+				"returns": "DATE",
+				"type": "Field"
+			},
+			"ADDRESSING": {
 				"returns": "STRING",
 				"type": "Field"
 			},
@@ -6216,155 +6224,7 @@
 				"returns": "STRING",
 				"type": "Field"
 			},
-			"MUNICIPALITY": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"PHONE": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"FAX": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"MODEM": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"EMAIL": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"LANGUAGE": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"TYPE": {
-				"returns": "ENUMERATED",
-				"type": "Field"
-			},
-			"VERSION": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"CREATIONUSER": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"LASTUPDATEUSER": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"CREATIONTIME": {
-				"returns": "DATETIME",
-				"type": "Field"
-			},
-			"LASTUPDATETIME": {
-				"returns": "DATETIME",
-				"type": "Field"
-			},
-			"NAME": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"PHONE2": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"MOBILEPHONE": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"PRINTER": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"IDENTIFICATIONCHECK": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"VATNO": {
-				"returns": "STRING",
-				"type": "Field"
-			},
 			"BANKACCOUNT": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"PAYER": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"INVOICECOPYCOUNT": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"PAYMENTTERM": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"COMPLETEREPORTCOUNT": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"EXCHANGENUMBER": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"INVOICEGROUPINGTYPE": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"ACTIVESINCE": {
-				"returns": "DATE",
-				"type": "Field"
-			},
-			"ACTIVEUNTIL": {
-				"returns": "DATE",
-				"type": "Field"
-			},
-			"FAX2": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"ISSUERINFO": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"SUPPRESSAUTOCOMMENTS": {
-				"returns": "LOGICAL",
-				"type": "Field"
-			},
-			"MANUALVALIDATION": {
-				"returns": "LOGICAL",
-				"type": "Field"
-			},
-			"TRANSLATOR": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"INVOICESUMMARYLAYOUT": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"BILLINGDOCUMENTTEXT": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"CHECKINVOICING": {
-				"returns": "LOGICAL",
-				"type": "Field"
-			},
-			"CLASS": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"ADDRESSING": {
-				"returns": "STRING",
-				"type": "Field"
-			},
-			"NAMEEXTENSION": {
 				"returns": "STRING",
 				"type": "Field"
 			},
@@ -6372,28 +6232,76 @@
 				"returns": "STRING",
 				"type": "Field"
 			},
-			"UNITPREFERENCE": {
-				"returns": "ENUMERATED",
+			"BANKIDENTIFIERCODE": {
+				"returns": "STRING",
 				"type": "Field"
 			},
-			"UNPAIDAMOUNT": {
-				"returns": "FRACTIONAL",
+			"BILLINGCOMMENT": {
+				"returns": "STRING",
 				"type": "Field"
 			},
-			"PROTECTIMPORTEDDATA": {
+			"BILLINGDOCUMENTTEXT": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"BILLINGMARK": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"CHECKINVOICING": {
 				"returns": "LOGICAL",
 				"type": "Field"
 			},
-			"IDENTIFICATIONCODE": {
-				"returns": "INTEGER",
+			"CLASS": {
+				"returns": "CORRESPONDENTCLASS",
 				"type": "Field"
 			},
 			"CODINGSYSTEM": {
+				"returns": "CODINGSYSTEM",
+				"type": "Field"
+			},
+			"COMPLETEREPORTCOUNT": {
 				"returns": "INTEGER",
 				"type": "Field"
 			},
-			"STREET": {
+			"COORDINATOR": {
+				"returns": "USER",
+				"type": "Field"
+			},
+			"CREATIONTIME": {
+				"returns": "DATETIME",
+				"type": "Field"
+			},
+			"CREATIONUSER": {
+				"returns": "USER",
+				"type": "Field"
+			},
+			"DFTIDENTIFICATIONTYPE": {
+				"returns": "IDENTIFICATIONTYPE",
+				"type": "Field"
+			},
+			"DISCOUNTCODE": {
+				"returns": "DISCOUNTCODE",
+				"type": "Field"
+			},
+			"EMAIL": {
 				"returns": "STRING",
+				"type": "Field"
+			},
+			"EXCHANGENUMBER": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"FAX": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"FAX2": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"FEEACCOUNT": {
+				"returns": "ACCOUNT",
 				"type": "Field"
 			},
 			"HOUSENUMBER": {
@@ -6404,24 +6312,120 @@
 				"returns": "STRING",
 				"type": "Field"
 			},
-			"ACCOUNT": {
+			"ID": {
 				"returns": "INTEGER",
 				"type": "Field"
 			},
-			"FEEACCOUNT": {
+			"IDENTIFICATIONCHECK": {
+				"returns": "SITEFUNCTION",
+				"type": "Field"
+			},
+			"IDENTIFICATIONCODE": {
+				"returns": "SITEFUNCTION",
+				"type": "Field"
+			},
+			"INTERIMREPORTCOUNT": {
 				"returns": "INTEGER",
+				"type": "Field"
+			},
+			"INTERNALID": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"INVOICECOPYCOUNT": {
+				"returns": "INTEGER",
+				"type": "Field"
+			},
+			"INVOICEGROUPINGTYPE": {
+				"returns": "INVOICEGROUPINGTYPE",
+				"type": "Field"
+			},
+			"INVOICESUMMARYLAYOUT": {
+				"returns": "BILLINGDOCUMENTTEMPLATE",
+				"type": "Field"
+			},
+			"ISSUERINFO": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"LANGUAGE": {
+				"returns": "LANGUAGE",
+				"type": "Field"
+			},
+			"LASTINSURANCEUPDATE": {
+				"returns": "DATE",
+				"type": "Field"
+			},
+			"LASTUPDATETIME": {
+				"returns": "DATETIME",
+				"type": "Field"
+			},
+			"LASTUPDATEUSER": {
+				"returns": "USER",
+				"type": "Field"
+			},
+			"MANUALVALIDATION": {
+				"returns": "LOGICAL",
+				"type": "Field"
+			},
+			"MAXIMUMINTERIMREPORTS": {
+				"returns": "INTEGER",
+				"type": "Field"
+			},
+			"MOBILEPHONE": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"MODEM": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"MUNICIPALITY": {
+				"returns": "MUNICIPALITY",
+				"type": "Field"
+			},
+			"NAME": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"NAMEEXTENSION": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"PAYER": {
+				"returns": "CORRESPONDENT",
+				"type": "Field"
+			},
+			"PAYMENTTERM": {
+				"returns": "INTEGER",
+				"type": "Field"
+			},
+			"PDFUSERPASSWORD": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"PHONE": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"PHONE2": {
+				"returns": "STRING",
 				"type": "Field"
 			},
 			"PHONECOMMENT": {
 				"returns": "STRING",
 				"type": "Field"
 			},
-			"TOURCOMMENT": {
-				"returns": "STRING",
+			"PRICELIST": {
+				"returns": "PRICELIST",
 				"type": "Field"
 			},
-			"COORDINATOR": {
-				"returns": "INTEGER",
+			"PRINTER": {
+				"returns": "PRINTER",
+				"type": "Field"
+			},
+			"PROTECTIMPORTEDDATA": {
+				"returns": "LOGICAL",
 				"type": "Field"
 			},
 			"SOUNDEX": {
@@ -6429,38 +6433,55 @@
 				"type": "Field"
 			},
 			"SPECTRUM": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"TARIFFINGLAB": {
-				"returns": "INTEGER",
-				"type": "Field"
-			},
-			"PRICELIST": {
-				"returns": "INTEGER",
+				"returns": "BILLINGCODEGROUP",
 				"type": "Field"
 			},
 			"STATUSCOMMENT": {
 				"returns": "STRING",
 				"type": "Field"
 			},
-			"BILLINGCOMMENT": {
+			"STREET": {
 				"returns": "STRING",
 				"type": "Field"
 			},
-			"DISCOUNTCODE": {
-				"returns": "INTEGER",
+			"SUPPRESSAUTOCOMMENTS": {
+				"returns": "LOGICAL",
 				"type": "Field"
 			},
-			"BILLINGMARK": {
+			"TARIFFINGLAB": {
+				"returns": "LAB",
+				"type": "Field"
+			},
+			"TOURCOMMENT": {
 				"returns": "STRING",
 				"type": "Field"
 			},
-			"INTERIMREPORTCOUNT": {
-				"returns": "INTEGER",
+			"TRANSLATOR": {
+				"returns": "TRANSLATOR",
 				"type": "Field"
 			},
-			"MAXIMUMINTERIMREPORTS": {
+			"TYPE": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"UNITPREFERENCE": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"UNPAIDAMOUNT": {
+				"params": [
+					"STRING|?",
+					"DATE|?"
+				],
+				"minParams": 0,
+				"returns": "FRACTIONAL",
+				"type": "Method"
+			},
+			"VATNO": {
+				"returns": "STRING",
+				"type": "Field"
+			},
+			"VERSION": {
 				"returns": "INTEGER",
 				"type": "Field"
 			},
@@ -6468,21 +6489,216 @@
 				"returns": "STRING",
 				"type": "Field"
 			},
-			"BANKIDENTIFIERCODE": {
+			"ATTRIBUTE": {
+				"params": [
+					"STRING|?"
+				],
+				"minParams": 0,
 				"returns": "STRING",
-				"type": "Field"
+				"type": "Method"
 			},
-			"PDFUSERPASSWORD": {
+			"BANK": {
+				"params": [],
+				"minParams": 0,
+				"returns": "BANK",
+				"type": "Method"
+			},
+			"BUDGET": {
+				"params": [
+					"STRING|?",
+					"STRING|?",
+					"DATE|?"
+				],
+				"minParams": 0,
+				"returns": "BUDGET",
+				"type": "Method"
+			},
+			"COMPANY": {
+				"params": [],
+				"minParams": 0,
+				"returns": "COMPANY",
+				"type": "Method"
+			},
+			"CREATEIDENTIFICATION": {
+				"params": [
+					"CORRESPONDENT|?",
+					"STRING|?",
+					"DATE|?",
+					"DATE|?"
+				],
+				"minParams": 0,
+				"returns": "LOGICAL",
+				"type": "Method"
+			},
+			"CREATENATIONALNUMBER": {
+				"params": [
+					"STRING|?",
+					"DATE|?",
+					"DATE|?"
+				],
+				"minParams": 0,
+				"returns": "LOGICAL",
+				"type": "Method"
+			},
+			"CURRENTAGREEMENTS": {
+				"params": [
+					"DATE|?"
+				],
+				"minParams": 0,
 				"returns": "STRING",
-				"type": "Field"
+				"type": "Method"
 			},
-			"LASTINSURANCEUPDATE": {
-				"returns": "DATE",
-				"type": "Field"
+			"DEPARTMENT": {
+				"params": [],
+				"minParams": 0,
+				"returns": "DEPARTMENT",
+				"type": "Method"
 			},
-			"DFTIDENTIFICATIONTYPE": {
-				"returns": "INTEGER",
-				"type": "Field"
+			"FIRM": {
+				"params": [],
+				"minParams": 0,
+				"returns": "FIRM",
+				"type": "Method"
+			},
+			"FUND": {
+				"params": [],
+				"minParams": 0,
+				"returns": "FUND",
+				"type": "Method"
+			},
+			"GROUPMEMBERSHIP": {
+				"params": [
+					"STRING|?",
+					"STRING|?"
+				],
+				"minParams": 0,
+				"returns": "CORRESPONDENTGROUPMEMBER",
+				"type": "Method"
+			},
+			"HCCODE": {
+				"params": [],
+				"minParams": 0,
+				"returns": "STRING",
+				"type": "Method"
+			},
+			"HCPROVIDER": {
+				"params": [],
+				"minParams": 0,
+				"returns": "HCPROVIDER",
+				"type": "Method"
+			},
+			"HEALTHOFFICE": {
+				"params": [],
+				"minParams": 0,
+				"returns": "HEALTHOFFICE",
+				"type": "Method"
+			},
+			"IDENTIFICATION": {
+				"params": [
+					"STRING|?"
+				],
+				"minParams": 0,
+				"returns": "STRING",
+				"type": "Method"
+			},
+			"IDENTIFICATIONLIST": {
+				"params": [
+					"STRING|?",
+					"DATE|?",
+					"STRING|?"
+				],
+				"minParams": 0,
+				"returns": "STRING",
+				"type": "Method"
+			},
+			"INSTITUTION": {
+				"params": [],
+				"minParams": 0,
+				"returns": "INSTITUTION",
+				"type": "Method"
+			},
+			"ISGROUPMEMBER": {
+				"params": [
+					"STRING|?"
+				],
+				"minParams": 0,
+				"returns": "LOGICAL",
+				"type": "Method"
+			},
+			"KNOWNIDENTIFICATION": {
+				"params": [
+					"STRING|?",
+					"DATE|?"
+				],
+				"minParams": 0,
+				"returns": "IDENTIFICATION",
+				"type": "Method"
+			},
+			"LAB": {
+				"params": [],
+				"minParams": 0,
+				"returns": "LAB",
+				"type": "Method"
+			},
+			"ORGANIZATION": {
+				"params": [],
+				"minParams": 0,
+				"returns": "ORGANIZATION",
+				"type": "Method"
+			},
+			"PAYMENTAGREEMENT": {
+				"params": [
+					"INTEGER|?",
+					"DATE|?"
+				],
+				"minParams": 0,
+				"returns": "PAYMENTAGREEMENT",
+				"type": "Method"
+			},
+			"PERSON": {
+				"params": [],
+				"minParams": 0,
+				"returns": "PERSON",
+				"type": "Method"
+			},
+			"PREVIOUSFINANCING": {
+				"params": [
+					"DATE|?"
+				],
+				"minParams": 0,
+				"returns": "STRING",
+				"type": "Method"
+			},
+			"SENDMAIL": {
+				"params": [
+					"STRING|?",
+					"STRING|?",
+					"STRING|?",
+					"STRING|?"
+				],
+				"minParams": 0,
+				"returns": "LOGICAL",
+				"type": "Method"
+			},
+			"STUDY": {
+				"params": [],
+				"minParams": 0,
+				"returns": "STUDY",
+				"type": "Method"
+			},
+			"TOURMNEMONICLIST": {
+				"params": [
+					"STRING|?"
+				],
+				"minParams": 0,
+				"returns": "STRING",
+				"type": "Method"
+			},
+			"WARD": {
+				"params": [],
+				"minParams": 0,
+				"returns": "WARD",
+				"type": "Method"
 			}
 		},
 		"ORGANIZATION": {
@@ -48155,6 +48371,36 @@
 			"PROCEDURE": {
 				"returns": "INTEGER",
 				"type": "Field"
+			},
+			"ATTRIBUTE": {
+				"params": [
+					"STRING|?"
+				],
+				"minParams": 0,
+				"returns": "STRING",
+				"type": "Method"
+			},
+			"GETHLATYPINGRESULTS": {
+				"params": [
+					"STRING|?",
+					"STRING|?",
+					"STRING|?"
+				],
+				"minParams": 0,
+				"returns": "STRING",
+				"type": "Method"
+			},
+			"GETHLASCREENINGRESULTS": {
+				"params": [
+					"STRING|?",
+					"FRACTIONAL|?",
+					"STRING|?",
+					"STRING|?",
+					"INTEGER|?"
+				],
+				"minParams": 0,
+				"returns": "STRING",
+				"type": "Method"
 			}
 		},
 		"ALLELE": {

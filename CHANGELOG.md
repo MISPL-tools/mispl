@@ -1,3 +1,18 @@
+## [3.2.2] - 2026-07-21
+### 🚀 Better Typecasting and Robust Code Cleanup
+
+#### ✨ Documentation Updates
+* **Dynamic Version Badge:** Added a live Shields.io badge to the `README.md` that automatically syncs with the latest VS Code Marketplace version.
+* **Contact Information:** Updated the support and contact email address in the documentation to `d.w.koppenaal@gmail.com`.
+
+#### 🐛 Bug Fixes & Improvements
+* **Intelligent Correspondent Typecasting:** Significantly upgraded the AST linter's type resolution engine. System roles and foreign keys (such as `Agent`, `Issuer`, `Target`, `Payer`, and `Reimburser`) are now intelligently recognized and promoted to full `CORRESPONDENT` objects instead of generic `INTEGER`s. This eliminates false positive syntax errors when chaining complex methods (e.g., `.Order.Agent.Ward()`).
+* **Robust "Remove Dead Assignments":** Fixed a critical bug in the CodeAction cleanup tool where semicolons inside string declarations (e.g., `sList := "1;2;3;4;";`) caused the regex engine to prematurely cut off the line. The removal tool now utilizes a masked text view, guaranteeing that unused assignments are removed cleanly without leaving corrupted code fragments behind.
+* **Method Chaining Validation:** Added a "negative lookbehind" to the method parser to ensure strict left-to-right evaluation. This prevents the linter from isolating and incorrectly flagging chained methods before their parent objects are fully resolved.
+
+
+
+
 ## [3.2.1] - 2026-07-10
 ### 🚀 A MISPL summary in the comments and bug fixes
 

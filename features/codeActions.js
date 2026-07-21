@@ -83,16 +83,23 @@ class MisplCodeActionProvider {
 					action.edit = new vscode.WorkspaceEdit();
 
 					const fullText = document.getText();
+
+					// 🚀 DE FIX: We gebruiken de masked tekst om te zoeken! 
+					// Semicolons IN strings zijn hierdoor tijdelijk spaties geworden en verstoren de regex niet.
+					const maskedText = this.getMaskedCode(fullText);
+
 					const startOffset = document.offsetAt(new vscode.Position(diagnostic.range.start.line, 0));
 					const regex = new RegExp(`\\b${varName}\\b\\s*:=([\\s\\S]*?);`, 'g');
 					regex.lastIndex = startOffset;
-					const execMatch = regex.exec(fullText);
+
+					// Voer de zoekopdracht uit op de GEMASKEERDE tekst
+					const execMatch = regex.exec(maskedText);
 
 					if (execMatch && (execMatch.index - startOffset) < 150) {
 						let matchStart = execMatch.index;
 						let matchEnd = execMatch.index + execMatch[0].length;
 
-						// 🚀 DE FIX: Wis ook inspringing (tabs/spaties) aan het begin van de regel!
+						// Wis ook inspringing (tabs/spaties) aan het begin van de regel
 						const prefix = fullText.substring(startOffset, matchStart);
 						if (prefix.trim() === '') {
 							matchStart = startOffset;
@@ -107,6 +114,7 @@ class MisplCodeActionProvider {
 							if (trailingSpaceMatch) matchEnd += trailingSpaceMatch[0].length;
 						}
 
+						// We verwijderen de range uit de ORIGINELE tekst
 						action.edit.delete(document.uri, new vscode.Range(document.positionAt(matchStart), document.positionAt(matchEnd)));
 						action.diagnostics = [diagnostic];
 						action.isPreferred = true;

@@ -6,7 +6,7 @@ const PREFIXES = require("./features/glimsPrefixes");
 // 🌍 NIEUW: Importeer de vertaalfunctie
 const { t } = require("./i18n");
 
-const VERSION = "v3.2.1 - A MISPL summary in the comments and bug fixes";
+const VERSION = "v3.2.2 - Better Typecasting and Robust Code Cleanup";
 
 let DICT_LOAD_ERROR = null;
 let GLIMS_DICT = { globals: {}, tables: {} };
@@ -871,7 +871,7 @@ const TypeChecker = {
 		do {
 			prevWork = work;
 
-			work = work.replace(/(<[A-Z0-9_]+>|[a-zA-Z_][a-zA-Z0-9_]*)\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\b(?!\s*\()/g, (match, callerRaw, prop) => {
+			work = work.replace(/(<[A-Z0-9_]+>|(?<!\.\s*)\b[a-zA-Z_][a-zA-Z0-9_]*)\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\b(?!\s*\()/g, (match, callerRaw, prop) => {
 				let typeName = callerRaw.startsWith('<') ? callerRaw.replace(/[<>]/g, '').toUpperCase() : callerRaw.toUpperCase();
 				if (typeName === "ORDR" || typeName === "ORD") typeName = "ORDER";
 				if (typeName === "RSLT") typeName = "RESULT";
@@ -883,6 +883,30 @@ const TypeChecker = {
 				if (GLIMS_DICT.tables[typeName] && GLIMS_DICT.tables[typeName][prop.toUpperCase()]) {
 					retType = GLIMS_DICT.tables[typeName][prop.toUpperCase()].returns.toUpperCase();
 				}
+
+				// =========================================================================
+				// 🚀 FIX: Promoveer foute INTEGER foreign-keys uit de dictionary tot Objecten
+				// =========================================================================
+				if (retType === "INTEGER") {
+					const p = prop.toUpperCase();
+
+					// Standaard tabellen die exact matchen met hun veldnaam
+					if (["OBJECT", "ORDER", "PERSON", "SPECIMEN", "BLOODBAG", "WARD", "DEPARTMENT", "ENCOUNTER", "MATERIAL", "PROPERTY", "STAY", "RESULT", "ACTION", "LAB"].includes(p)) {
+						retType = p;
+					}
+					// Specifieke rollen die we promoveren naar Correspondent
+					else if (["AGENT", "ISSUER", "TARGET", "PAYER", "REIMBURSER", "CORRESPONDENT", "FAMILYDOCTOR"].includes(p)) {
+						retType = "CORRESPONDENT";
+					}
+					// Specifieke rollen die we promoveren naar Person of User
+					else if (["MOTHER", "FATHER"].includes(p)) {
+						retType = "PERSON";
+					}
+					else if (["CREATIONUSER", "LASTUPDATEUSER", "USER", "VALIDATOR", "SAMPLER"].includes(p)) {
+						retType = "SC_USER";
+					}
+				}
+				// =========================================================================
 
 				const p = prop.toUpperCase();
 				if (["INTERNALID", "NAME", "MNEMONIC", "SHORTNAME", "DESCRIPTION", "EXTERNALCOMMENT", "INTERNALCOMMENT", "RAWVALUE", "VALUE", "MESSAGE", "CODE", "LASTNAME", "FIRSTNAME"].includes(p)) retType = "STRING";
@@ -898,7 +922,7 @@ const TypeChecker = {
 				else if (p === "BLOODPRODUCT") retType = "BLOODPRODUCT";
 				else if (p === "WARD") retType = "WARD";
 				else if (p === "DEPARTMENT") retType = "DEPARTMENT";
-				else if (p === "AGENT" || p === "ISSUER" || p === "TARGET") retType = "CORRESPONDENT";
+				else if (["AGENT", "ISSUER", "TARGET", "CORRESPONDENT", "PAYER", "REIMBURSER"].includes(p)) retType = "CORRESPONDENT";
 				else if (p === "PROPERTY") retType = "PROPERTY";
 				else if (p === "PAYMENTAGREEMENT") retType = "PAYMENTAGREEMENT";
 				else if (p === "POLICYNAME") retType = "POLICYNAME";
@@ -932,7 +956,7 @@ const TypeChecker = {
 				return `${prefix}<${retType}>`;
 			});
 
-			const explicitMethodRegex = /([a-zA-Z0-9_<>]+)\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^()]*)\)/g;
+			const explicitMethodRegex = /(<[A-Z0-9_]+>|(?<!\.\s*)\b[a-zA-Z_][a-zA-Z0-9_]*)\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^()]*)\)/g;
 			work = work.replace(explicitMethodRegex, (match, callerRaw, methodName, argsStr) => {
 				return processMethod(callerRaw, methodName, argsStr, match, lineNo, context, "");
 			});

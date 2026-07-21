@@ -1,7 +1,7 @@
 # MISPL Language Support for Visual Studio Code
 
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)
-![Version](https://img.shields.io/badge/version-3.0.1-blue.svg)
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/dirkkoppenaal.mispl?color=007acc&label=version)](https://marketplace.visualstudio.com/items?itemName=dirkkoppenaal.mispl)
 
 **MISPL** (*MIPS Scripting Language*) is a powerful scripting language used to customize and extend the **Clinisys GLIMS** Laboratory Information System. This extension brings modern IDE features to VS Code, making MISPL development faster, cleaner, and less prone to errors.
 
@@ -180,6 +180,6 @@ All tools are quickly accessible via the Command Palette (`Ctrl+Shift+P`) or the
 
 ## 🐞 Reporting Issues
 Help improve the engine! If you encounter an incorrect linting error or a specific edge case in GLIMS:
-1. Send an email to: `d.w.koppenaal@umcutrecht.nl`
+1. Send an email to: `d.w.koppenaal@gmail.com`
 2. Include a minimal MISPL code example that reproduces the issue.
 3. Describe the expected behavior versus what the linter actually does.
